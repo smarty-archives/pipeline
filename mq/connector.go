@@ -11,13 +11,13 @@ import (
 	"github.com/streadway/amqp"
 )
 
-type RabbitConnector struct{}
+type Connector struct{}
 
-func NewConnector() *RabbitConnector {
-	return &RabbitConnector{}
+func NewConnector() *Connector {
+	return &Connector{}
 }
 
-func (this *RabbitConnector) Connect(target url.URL) (rabbit.Connection, error) {
+func (this *Connector) Connect(target url.URL) (rabbit.Connection, error) {
 	config := amqp.Config{
 		TLSClientConfig: buildTLS(target.Host),
 		Heartbeat:       time.Second * 15,

@@ -5,15 +5,15 @@ import (
 	"github.com/streadway/amqp"
 )
 
-type RabbitConnection struct {
+type Connection struct {
 	inner *amqp.Connection
 }
 
 func newConnection(inner *amqp.Connection) rabbit.Connection {
-	return &RabbitConnection{inner: inner}
+	return &Connection{inner: inner}
 }
 
-func (this *RabbitConnection) Channel() (rabbit.Channel, error) {
+func (this *Connection) Channel() (rabbit.Channel, error) {
 	if channel, err := this.inner.Channel(); err != nil {
 		return nil, err
 	} else {
@@ -21,6 +21,6 @@ func (this *RabbitConnection) Channel() (rabbit.Channel, error) {
 	}
 }
 
-func (this *RabbitConnection) Close() error {
+func (this *Connection) Close() error {
 	return this.inner.Close()
 }
