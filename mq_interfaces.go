@@ -16,23 +16,34 @@ type Connection interface {
 }
 
 type Channel interface {
-	ConfigureChannelBuffer(int) error
-	ConfigureChannelAsTransactional() error
+	Consumer
+	Publisher
 
+	Close() error
+}
+
+type Consumer interface {
+	Acknowledger
+
+	ConfigureChannelBuffer(int) error
 	DeclareTransientQueue() (string, error)
 	BindExchangeToQueue(string, string) error
 
-	Close() error
-
 	Consume(string, string) (<-chan amqp.Delivery, error)
-	ConsumeWithoutAcknowledgement(string, string) (<-chan amqp.Delivery, error)
 	ExclusiveConsume(string, string) (<-chan amqp.Delivery, error)
-	ExclusiveConsumeWithoutAcknowledgement(string, string) (<-chan amqp.Delivery, error)
+	// ConsumeWithoutAcknowledgement(string, string) (<-chan amqp.Delivery, error)
+	// ExclusiveConsumeWithoutAcknowledgement(string, string) (<-chan amqp.Delivery, error)
 
 	CancelConsumer(string) error
+}
 
+type Acknowledger interface {
 	AcknowledgeSingleMessage(uint64) error
 	AcknowledgeMultipleMessages(uint64) error
+}
+
+type Publisher interface {
+	ConfigureChannelAsTransactional() error
 
 	PublishMessage(string, amqp.Publishing) error
 

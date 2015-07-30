@@ -7,7 +7,7 @@ import (
 	"github.com/streadway/amqp"
 )
 
-func fromAMQPDelivery(delivery amqp.Delivery, channel Channel) Delivery {
+func fromAMQPDelivery(delivery amqp.Delivery, channel Acknowledger) Delivery {
 	return Delivery{
 		SourceID:    parseUint64(delivery.AppId),
 		MessageID:   parseUint64(delivery.MessageId),
