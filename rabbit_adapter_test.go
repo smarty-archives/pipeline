@@ -19,7 +19,7 @@ func (this *RabbitAdapterFixture) Setup() {
 
 /////////////////////////////////////////////////////////////////////////////////
 
-func (this *RabbitAdapterFixture) TestAMQPDispatchConversion() {
+func (this *RabbitAdapterFixture) TestAMQPDeliveryConversion() {
 	upstream := amqp.Delivery{
 		AppId:           "1234",
 		MessageId:       "5678",
@@ -36,6 +36,31 @@ func (this *RabbitAdapterFixture) TestAMQPDispatchConversion() {
 		Encoding:    "content-encoding",
 		Payload:     upstream.Body,
 		Receipt:     DeliveryReceipt{channel: nil, deliveryTag: upstream.DeliveryTag},
+	})
+}
+
+/////////////////////////////////////////////////////////////////////////////////
+
+func (this *RabbitAdapterFixture) TestAMQPDispatchConversion() {
+	dispatch := Dispatch{
+		SourceID:    1234,
+		MessageID:   5678,
+		MessageType: "message-type",
+		Encoding:    "content-encoding",
+		Expiration:  this.now.Add(time.Second),
+		Durable:     true,
+		Payload:     []byte{1, 2, 3, 4, 5, 6, 7, 8, 9},
+	}
+
+	this.So(toAMQPDispatch(dispatch, this.now), should.Resemble, amqp.Publishing{
+		AppId:           "1234",
+		MessageId:       "5678",
+		Type:            "message-type",
+		ContentEncoding: "content-encoding",
+		Timestamp:       this.now,
+		Expiration:      "1",
+		DeliveryMode:    2,
+		Body:            dispatch.Payload,
 	})
 }
 

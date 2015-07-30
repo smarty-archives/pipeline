@@ -17,10 +17,22 @@ func fromAMQPDelivery(delivery amqp.Delivery, channel Channel) Delivery {
 		Receipt:     DeliveryReceipt{channel: channel, deliveryTag: delivery.DeliveryTag},
 	}
 }
-
 func parseUint64(value string) uint64 {
 	parsed, _ := strconv.ParseUint(value, 10, 64)
 	return parsed
+}
+
+func toAMQPDispatch(dispatch Dispatch, now time.Time) amqp.Publishing {
+	return amqp.Publishing{
+		AppId:           strconv.FormatUint(dispatch.SourceID, base10),
+		MessageId:       strconv.FormatUint(dispatch.MessageID, base10),
+		Type:            dispatch.MessageType,
+		ContentEncoding: dispatch.Encoding,
+		Timestamp:       now,
+		Expiration:      computeExpiration(now, dispatch.Expiration),
+		DeliveryMode:    computePersistence(dispatch.Durable),
+		Body:            dispatch.Payload,
+	}
 }
 func computeExpiration(now, expiration time.Time) string {
 	if expiration == noExpiration {
