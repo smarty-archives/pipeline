@@ -1,7 +1,7 @@
 package rabbit
 
 type (
-	Broker interface {
+	MessageBroker interface {
 		Connect() error
 		Disconnect()
 
