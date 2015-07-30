@@ -14,7 +14,7 @@ func fromAMQPDelivery(delivery amqp.Delivery, channel Channel) Delivery {
 		MessageType: delivery.Type,
 		Encoding:    delivery.ContentEncoding,
 		Payload:     delivery.Body,
-		Receipt:     DeliveryReceipt{channel: channel, deliveryTag: delivery.DeliveryTag},
+		Receipt:     newReceipt(channel, delivery.DeliveryTag),
 	}
 }
 func parseUint64(value string) uint64 {
