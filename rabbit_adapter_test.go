@@ -19,6 +19,19 @@ func (this *RabbitAdapterFixture) Setup() {
 
 /////////////////////////////////////////////////////////////////////////////////
 
+func (this *RabbitAdapterFixture) TestParsingNumericString() {
+	this.assertParsedValue("1", 1)
+	this.assertParsedValue("", 0)
+	this.assertParsedValue("-1", 0)
+	this.assertParsedValue("-2", 0)
+	this.assertParsedValue("18446744073709551615", 18446744073709551615)
+}
+func (this *RabbitAdapterFixture) assertParsedValue(value string, expected uint64) {
+	this.So(parseUint64(value), should.Equal, expected)
+}
+
+/////////////////////////////////////////////////////////////////////////////////
+
 func (this *RabbitAdapterFixture) TestExpirationComputation() {
 	this.assertExpiration(time.Time{}, "")
 	this.assertExpiration(this.now.Add(time.Second), "1")

@@ -7,6 +7,10 @@ import (
 	"github.com/streadway/amqp"
 )
 
+func parseUint64(value string) uint64 {
+	parsed, _ := strconv.ParseUint(value, 10, 64)
+	return parsed
+}
 func computeExpiration(now, expiration time.Time) string {
 	if expiration == noExpiration {
 		return ""
