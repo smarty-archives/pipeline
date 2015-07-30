@@ -7,6 +7,17 @@ import (
 	"github.com/streadway/amqp"
 )
 
+func fromAMQPDelivery(delivery amqp.Delivery, channel Channel) Delivery {
+	return Delivery{
+		SourceID:    parseUint64(delivery.AppId),
+		MessageID:   parseUint64(delivery.MessageId),
+		MessageType: delivery.Type,
+		Encoding:    delivery.ContentEncoding,
+		Payload:     delivery.Body,
+		Receipt:     DeliveryReceipt{channel: channel, deliveryTag: delivery.DeliveryTag},
+	}
+}
+
 func parseUint64(value string) uint64 {
 	parsed, _ := strconv.ParseUint(value, 10, 64)
 	return parsed

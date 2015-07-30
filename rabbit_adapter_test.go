@@ -19,6 +19,28 @@ func (this *RabbitAdapterFixture) Setup() {
 
 /////////////////////////////////////////////////////////////////////////////////
 
+func (this *RabbitAdapterFixture) TestAMQPDispatchConversion() {
+	upstream := amqp.Delivery{
+		AppId:           "1234",
+		MessageId:       "5678",
+		Type:            "message-type",
+		ContentEncoding: "content-encoding",
+		Body:            []byte{1, 2, 3, 4, 5, 6},
+		DeliveryTag:     8675309,
+	}
+
+	this.So(fromAMQPDelivery(upstream, nil), should.Resemble, Delivery{
+		SourceID:    1234,
+		MessageID:   5678,
+		MessageType: "message-type",
+		Encoding:    "content-encoding",
+		Payload:     upstream.Body,
+		Receipt:     DeliveryReceipt{channel: nil, deliveryTag: upstream.DeliveryTag},
+	})
+}
+
+/////////////////////////////////////////////////////////////////////////////////
+
 func (this *RabbitAdapterFixture) TestParsingNumericString() {
 	this.assertParsedValue("1", 1)
 	this.assertParsedValue("", 0)
@@ -47,3 +69,5 @@ func (this *RabbitAdapterFixture) TestPersistenceComputation() {
 	this.So(computePersistence(true), should.Equal, amqp.Persistent)
 	this.So(computePersistence(false), should.Equal, amqp.Transient)
 }
+
+/////////////////////////////////////////////////////////////////////////////////
