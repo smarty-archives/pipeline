@@ -53,31 +53,42 @@ func (this *Broker) Disconnect() {
 
 	this.state = disconnecting
 
-	if this.initiateReaderShutdown() {
-		return // readers are busy shutting down
-	}
-
+	this.initiateReaderShutdown()
 	this.initiateWriterShutdown()
+	this.completeShutdown()
 }
-func (this *Broker) initiateReaderShutdown() bool {
+func (this *Broker) initiateReaderShutdown() {
 	for _, reader := range this.readers {
 		reader.Close()
 	}
-
-	return len(this.readers) > 0
 }
 
 func (this *Broker) initiateWriterShutdown() {
+	if len(this.readers) > 0 {
+		return
+	}
+
 	for _, writer := range this.writers {
 		writer.Close()
 	}
 
 	this.writers = this.writers[0:0]
-	this.state = disconnected
+}
+func (this *Broker) completeShutdown() {
+	if this.state != disconnecting {
+		return
+	}
+
+	if len(this.readers) > 0 || len(this.writers) > 0 {
+		return
+	}
+
 	if this.connection != nil {
 		this.connection.Close()
 		this.connection = nil
 	}
+
+	this.state = disconnected
 }
 
 func (this *Broker) removeReader(reader interface{}) {
@@ -97,9 +108,8 @@ func (this *Broker) removeReader(reader interface{}) {
 		return
 	}
 
-	if len(this.readers) == 0 {
-		this.initiateWriterShutdown() // when all readers shutdown processes have been completed
-	}
+	this.initiateWriterShutdown() // when all readers shutdown processes have been completed
+	this.completeShutdown()
 }
 
 const (
