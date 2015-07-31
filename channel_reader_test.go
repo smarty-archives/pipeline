@@ -12,14 +12,14 @@ type ChannelReaderFixture struct {
 	*gunit.Fixture
 
 	reader     *ChannelReader
-	controller *FakeController
+	controller *FakeReaderController
 	queue      string
 	bindings   []string
 }
 
 func (this *ChannelReaderFixture) Setup() {
 	this.queue = "queue"
-	this.controller = newFakeController()
+	this.controller = newFakeReaderController()
 	this.buildReader()
 }
 func (this *ChannelReaderFixture) buildReader() {
@@ -78,28 +78,28 @@ func (this *ChannelReaderFixture) TestCloseShutsdownReaderAfterAllMessagesProces
 
 ///////////////////////////////////////////////////////////////
 
-type FakeController struct {
+type FakeReaderController struct {
 	channel        *FakeReaderChannel
 	removedReaders []Reader
 }
 
-func newFakeController() *FakeController {
-	return &FakeController{channel: newFakeReaderChannel()}
+func newFakeReaderController() *FakeReaderController {
+	return &FakeReaderController{channel: newFakeReaderChannel()}
 }
 
-func (this *FakeController) openChannel() Channel {
+func (this *FakeReaderController) openChannel() Channel {
 	if this.channel == nil {
 		return nil // interface quirks require this hack
 	}
 
 	return this.channel
 }
-func (this *FakeController) removeReader(reader Reader) {
+func (this *FakeReaderController) removeReader(reader Reader) {
 	this.removedReaders = append(this.removedReaders, reader)
 }
-func (this *FakeController) removeWriter(writer Writer) {}
+func (this *FakeReaderController) removeWriter(writer Writer) {}
 
-func (this *FakeController) Dispose() {
+func (this *FakeReaderController) Dispose() {
 	this.channel = nil
 }
 
