@@ -118,13 +118,17 @@ func (this *Broker) OpenReader(queue string) Reader {
 
 func (this *Broker) openChannel() Channel {
 	// don't lock for the duration of the loop
+	// otherwise this can deadlock because we're dependent
+	// upon the broker to be online/active. By avoiding
+	// a lock here, we can try to connect and if that fails
+	// we can still shutdown properly
 
 	for this.isActive() {
 		if channel := this.tryOpenChannel(); channel != nil {
 			return channel
 		}
 
-		// TODO: sleep
+		// TODO: clock.Sleep(time.Second*4)
 	}
 
 	return nil
@@ -142,6 +146,18 @@ func (this *Broker) tryOpenChannel() Channel {
 		return nil
 	}
 
+	return this.openChannelFromExistingConnection()
+}
+func (this *Broker) ensureConnection() bool {
+	if this.connection != nil {
+		return true
+	}
+
+	var err error
+	this.connection, err = this.connector.Connect(this.target)
+	return err == nil
+}
+func (this *Broker) openChannelFromExistingConnection() Channel {
 	// remember to only change the state (this.connection, this.state)
 	// within the protection of this.mutex
 	if channel, err := this.connection.Channel(); err != nil {
@@ -153,15 +169,6 @@ func (this *Broker) tryOpenChannel() Channel {
 		this.state = connected
 		return channel
 	}
-}
-func (this *Broker) ensureConnection() bool {
-	if this.connection != nil {
-		return true
-	}
-
-	var err error
-	this.connection, err = this.connector.Connect(this.target)
-	return err == nil
 }
 
 const (
