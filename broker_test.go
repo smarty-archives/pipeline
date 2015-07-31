@@ -3,8 +3,10 @@ package rabbit
 import (
 	"errors"
 	"net/url"
+	"time"
 
 	"github.com/smartystreets/assertions/should"
+	"github.com/smartystreets/clock"
 	"github.com/smartystreets/gunit"
 	"github.com/streadway/amqp"
 )
@@ -15,6 +17,8 @@ type BrokerFixture struct {
 	target    url.URL
 	connector *FakeConnector
 	broker    *Broker
+
+	sleeper *clock.Sleeper
 }
 
 func (this *BrokerFixture) Setup() {
@@ -22,7 +26,13 @@ func (this *BrokerFixture) Setup() {
 	this.target = *target
 	this.connector = NewFakeConnector(0, 0)
 	this.createBroker()
+
+	this.sleeper = clock.FakeSleep()
 }
+func (this *BrokerFixture) Teardown() {
+	this.sleeper.Restore()
+}
+
 func (this *BrokerFixture) createBroker() {
 	this.broker = NewBroker(this.target, this.connector)
 }
@@ -174,7 +184,9 @@ func (this *BrokerFixture) assertNilReader(initialState uint64) {
 
 func (this *BrokerFixture) TestOpenChannel() {
 	this.broker.state = connecting
+
 	channel := this.broker.openChannel()
+
 	this.So(channel, should.NotBeNil)
 	this.So(this.broker.state, should.Equal, connected)
 }
@@ -191,9 +203,11 @@ func (this *BrokerFixture) TestOpenChannelAfterUnderlyingConnectorFailureRetries
 	this.broker.state = connecting
 
 	channel := this.broker.openChannel()
+
 	this.So(channel, should.NotBeNil)
 	this.So(this.connector.attempts, should.BeGreaterThan, 1)
 	this.So(this.broker.state, should.Equal, connected)
+	this.So(this.sleeper.Naps[0], should.Equal, time.Second*4)
 }
 func (this *BrokerFixture) TestOpenChannelAfterUnderlyingConnectionFailureRetries() {
 	this.connector = NewFakeConnector(0, 1)
@@ -201,11 +215,13 @@ func (this *BrokerFixture) TestOpenChannelAfterUnderlyingConnectionFailureRetrie
 	this.broker.state = connecting
 
 	channel := this.broker.openChannel()
+
 	this.So(channel, should.NotBeNil)
 	this.So(this.connector.attempts, should.Equal, 2)
 	this.So(this.connector.connection.attempts, should.Equal, 2)
 	this.So(this.broker.state, should.Equal, connected)
 	this.So(this.broker.connection, should.NotBeNil)
+	this.So(this.sleeper.Naps[0], should.Equal, time.Second*4)
 }
 func (this *BrokerFixture) TestOpenChannelClosesConnectionOnFailure() {
 	this.connector = NewFakeConnector(0, 2)
@@ -213,12 +229,15 @@ func (this *BrokerFixture) TestOpenChannelClosesConnectionOnFailure() {
 	this.broker.state = connecting
 
 	channel := this.broker.openChannel()
+
 	this.So(channel, should.NotBeNil)
 	this.So(this.connector.attempts, should.Equal, 3)
 	this.So(this.connector.connection.attempts, should.Equal, 3)
 	this.So(this.connector.connection.closed, should.Equal, 2)
 	this.So(this.broker.state, should.Equal, connected)
 	this.So(this.broker.connection, should.NotBeNil)
+	this.So(this.sleeper.Naps[0], should.Equal, time.Second*4)
+	this.So(this.sleeper.Naps[1], should.Equal, time.Second*4)
 }
 
 ////////////////////////////////////////////////////////

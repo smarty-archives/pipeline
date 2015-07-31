@@ -4,6 +4,9 @@ import (
 	"errors"
 	"net/url"
 	"sync"
+	"time"
+
+	"github.com/smartystreets/clock"
 )
 
 type Broker struct {
@@ -128,7 +131,7 @@ func (this *Broker) openChannel() Channel {
 			return channel
 		}
 
-		// TODO: clock.Sleep(time.Second*4)
+		clock.Sleep(time.Second * 4)
 	}
 
 	return nil
