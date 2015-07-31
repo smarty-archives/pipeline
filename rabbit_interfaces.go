@@ -27,6 +27,7 @@ type (
 
 	CommitWriter interface {
 		Writer
+		Commit() error
 	}
 )
 
