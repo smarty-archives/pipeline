@@ -143,10 +143,20 @@ func (this *Broker) openReader(queue string, bindings []string) Reader {
 }
 
 func (this *Broker) OpenWriter() Writer {
-	return nil
+	return this.openWriter(false)
 }
 func (this *Broker) OpenTransactionalWriter() CommitWriter {
-	return nil
+	return this.openWriter(true)
+}
+func (this *Broker) openWriter(transactional bool) CommitWriter {
+	this.mutex.Lock()
+	defer this.mutex.Unlock()
+
+	if this.state == disconnecting || this.state == disconnected {
+		return nil
+	}
+
+	return newWriter(this, transactional)
 }
 
 func (this *Broker) openChannel() Channel {

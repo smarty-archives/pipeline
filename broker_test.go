@@ -214,6 +214,41 @@ func (this *BrokerFixture) TestOpenTransientReader() {
 
 ////////////////////////////////////////////////////////
 
+func (this *BrokerFixture) TestOpenWriterDuringConnection() {
+	this.assertValidWriter(connecting)
+	this.assertValidWriter(connected)
+}
+func (this *BrokerFixture) assertValidWriter(initialState uint64) {
+	this.broker.state = initialState
+	reader := this.broker.OpenWriter()
+	this.So(reader.(*ChannelWriter).transactional, should.BeFalse)
+}
+
+////////////////////////////////////////////////////////
+
+func (this *BrokerFixture) TestOpenWriterDuringDisconnection() {
+	this.assertNilWriter(disconnecting)
+	this.assertNilWriter(disconnected)
+}
+func (this *BrokerFixture) assertNilWriter(initialState uint64) {
+	this.broker.state = initialState
+	writer := this.broker.OpenWriter()
+	this.So(writer, should.BeNil)
+}
+
+////////////////////////////////////////////////////////
+
+func (this *BrokerFixture) TestOpenTransactionalWriter() {
+	this.broker.state = connecting
+
+	writer := this.broker.OpenTransactionalWriter()
+
+	this.So(writer, should.NotBeNil)
+	this.So(writer.(*ChannelWriter).transactional, should.BeTrue)
+}
+
+////////////////////////////////////////////////////////
+
 func (this *BrokerFixture) TestOpenChannel() {
 	this.broker.state = connecting
 
