@@ -22,5 +22,9 @@ func (this *ChannelWriter) Commit() error {
 }
 
 func (this *ChannelWriter) Close() {
-	// WARNING: close can (and will) be called from other threads
+	// this.controller.closeWriter(this)
+	// within mutex mark as closed, but allow existing channel to proceed
+	// another thread, while getting a channel
+	// reference (within the mutex), checks to see
+	// if we're closed
 }
