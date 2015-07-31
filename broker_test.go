@@ -6,6 +6,7 @@ import (
 
 	"github.com/smartystreets/assertions/should"
 	"github.com/smartystreets/gunit"
+	"github.com/streadway/amqp"
 )
 
 type BrokerFixture struct {
@@ -19,6 +20,7 @@ type BrokerFixture struct {
 func (this *BrokerFixture) Setup() {
 	target, _ := url.Parse("amqps://username:password@localhost:5671/")
 	this.target = *target
+	this.connector = NewFakeConnector(0, 0)
 	this.createBroker()
 }
 func (this *BrokerFixture) createBroker() {
@@ -116,7 +118,7 @@ func (this *BrokerFixture) TestLastReaderShutdownComplete() {
 	this.So(writer.closed, should.Equal, 1)
 	this.So(this.broker.State(), should.Equal, disconnected)
 	this.So(this.broker.connection, should.BeNil)
-	this.So(connection.closed, should.BeTrue)
+	this.So(connection.closed, should.Equal, 1)
 }
 
 ////////////////////////////////////////////////////////
@@ -152,27 +154,96 @@ func (this *BrokerFixture) TestIsolatedReaderCloseDoesntAffectBrokerState() {
 
 ////////////////////////////////////////////////////////
 
+func (this *BrokerFixture) TestOpenReaderDuringConnection() {
+	this.assertValidReader(connecting)
+	this.assertValidReader(connected)
+}
+func (this *BrokerFixture) assertValidReader(initialState uint64) {
+}
+
+////////////////////////////////////////////////////////
+
+func (this *BrokerFixture) TestOpenReaderDuringDisconnection() {
+	this.assertNilReader(disconnecting)
+	this.assertNilReader(disconnected)
+}
+func (this *BrokerFixture) assertNilReader(initialState uint64) {
+}
+
+////////////////////////////////////////////////////////
+
+func (this *BrokerFixture) TestOpenChannel() {
+	this.broker.state = connecting
+	channel := this.broker.openChannel()
+	this.So(channel, should.NotBeNil)
+	this.So(this.broker.state, should.Equal, connected)
+}
+func (this *BrokerFixture) TestNoChannelWhileDisconnected() {
+	this.broker.state = disconnected
+	this.So(this.broker.openChannel(), should.BeNil)
+
+	this.broker.state = disconnecting
+	this.So(this.broker.openChannel(), should.BeNil)
+}
+func (this *BrokerFixture) TestOpenChannelAfterUnderlyingConnectorFailureRetries() {
+	this.connector = NewFakeConnector(1, 0)
+	this.createBroker()
+	this.broker.state = connecting
+
+	channel := this.broker.openChannel()
+	this.So(channel, should.NotBeNil)
+	this.So(this.connector.attempts, should.BeGreaterThan, 1)
+	this.So(this.broker.state, should.Equal, connected)
+}
+func (this *BrokerFixture) TestOpenChannelAfterUnderlyingConnectionFailureRetries() {
+	this.connector = NewFakeConnector(0, 1)
+	this.createBroker()
+	this.broker.state = connecting
+
+	channel := this.broker.openChannel()
+	this.So(channel, should.NotBeNil)
+	this.So(this.connector.attempts, should.Equal, 2)
+	this.So(this.connector.connection.attempts, should.Equal, 2)
+	this.So(this.broker.state, should.Equal, connected)
+	this.So(this.broker.connection, should.NotBeNil)
+}
+func (this *BrokerFixture) TestOpenChannelClosesConnectionOnFailure() {
+	this.connector = NewFakeConnector(0, 2)
+	this.createBroker()
+	this.broker.state = connecting
+
+	channel := this.broker.openChannel()
+	this.So(channel, should.NotBeNil)
+	this.So(this.connector.attempts, should.Equal, 3)
+	this.So(this.connector.connection.attempts, should.Equal, 3)
+	this.So(this.connector.connection.closed, should.Equal, 2)
+	this.So(this.broker.state, should.Equal, connected)
+	this.So(this.broker.connection, should.NotBeNil)
+}
+
+////////////////////////////////////////////////////////
+
 type FakeConnector struct {
-	attempts           int
-	target             url.URL
-	connectorFailures  int
-	connectionFailures int
+	attempts   int
+	target     url.URL
+	failures   int
+	connection *FakeConnection
 }
 
 func NewFakeConnector(connectorFailures, connectionFailures int) *FakeConnector {
 	return &FakeConnector{
-		connectorFailures:  connectorFailures,
-		connectionFailures: connectionFailures,
+		failures:   connectorFailures,
+		connection: &FakeConnection{failures: connectionFailures},
 	}
 }
 
 func (this *FakeConnector) Connect(target url.URL) (Connection, error) {
 	this.attempts++
-	if this.connectorFailures > this.attempts {
+	if this.failures >= this.attempts {
 		return nil, errors.New("Fail!")
 	}
 
-	return NewFakeConnection(), nil
+	return this.connection, nil
 }
 
 ////////////////////////////////////////////////////////
@@ -180,26 +251,42 @@ func (this *FakeConnector) Connect(target url.URL) (Connection, error) {
 type FakeConnection struct {
 	attempts int
 	failures int
-	closed   bool
-}
-
-func NewFakeConnection() *FakeConnection {
-	return &FakeConnection{}
+	closed   int
 }
 
 func (this *FakeConnection) Channel() (Channel, error) {
 	this.attempts++
-	if this.failures > this.attempts {
+	if this.failures >= this.attempts {
 		return nil, errors.New("Fail")
 	}
 
-	return nil, nil
+	return &FakeChannel{}, nil
 }
 
 func (this *FakeConnection) Close() error {
-	this.closed = true
+	this.closed++
 	return nil
 }
+
+////////////////////////////////////////////////////////
+
+type FakeChannel struct{}
+
+func (this *FakeChannel) ConfigureChannelBuffer(int) error                     { return nil }
+func (this *FakeChannel) DeclareTransientQueue() (string, error)               { return "", nil }
+func (this *FakeChannel) BindExchangeToQueue(string, string) error             { return nil }
+func (this *FakeChannel) Consume(string, string) (<-chan amqp.Delivery, error) { return nil, nil }
+func (this *FakeChannel) ExclusiveConsume(string, string) (<-chan amqp.Delivery, error) {
+	return nil, nil
+}
+func (this *FakeChannel) CancelConsumer(string) error                  { return nil }
+func (this *FakeChannel) Close() error                                 { return nil }
+func (this *FakeChannel) AcknowledgeSingleMessage(uint64) error        { return nil }
+func (this *FakeChannel) AcknowledgeMultipleMessages(uint64) error     { return nil }
+func (this *FakeChannel) ConfigureChannelAsTransactional() error       { return nil }
+func (this *FakeChannel) PublishMessage(string, amqp.Publishing) error { return nil }
+func (this *FakeChannel) CommitTransaction() error                     { return nil }
+func (this *FakeChannel) RollbackTransaction() error                   { return nil }
 
 ////////////////////////////////////////////////////////
 

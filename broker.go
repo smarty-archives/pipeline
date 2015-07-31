@@ -11,9 +11,9 @@ type Broker struct {
 	target     url.URL
 	connector  Connector
 	connection Connection
-	state      uint64
 	readers    []Reader
 	writers    []Writer
+	state      uint64
 }
 
 func NewBroker(target url.URL, connector Connector) *Broker {
@@ -110,6 +110,58 @@ func (this *Broker) removeReader(reader interface{}) {
 
 	this.initiateWriterShutdown() // when all readers shutdown processes have been completed
 	this.completeShutdown()
+}
+
+func (this *Broker) OpenReader(queue string) Reader {
+	return nil
+}
+
+func (this *Broker) openChannel() Channel {
+	// don't lock for the duration of the loop
+
+	for this.isActive() {
+		if channel := this.tryOpenChannel(); channel != nil {
+			return channel
+		}
+
+		// TODO: sleep
+	}
+
+	return nil
+}
+func (this *Broker) isActive() bool {
+	this.mutex.Lock()
+	defer this.mutex.Unlock()
+	return this.state == connecting || this.state == connected
+}
+func (this *Broker) tryOpenChannel() Channel {
+	this.mutex.Lock()
+	defer this.mutex.Unlock()
+
+	if !this.ensureConnection() {
+		return nil
+	}
+
+	// remember to only change the state (this.connection, this.state)
+	// within the protection of this.mutex
+	if channel, err := this.connection.Channel(); err != nil {
+		this.connection.Close()
+		this.connection = nil
+		this.state = connecting
+		return nil
+	} else {
+		this.state = connected
+		return channel
+	}
+}
+func (this *Broker) ensureConnection() bool {
+	if this.connection != nil {
+		return true
+	}
+
+	var err error
+	this.connection, err = this.connector.Connect(this.target)
+	return err == nil
 }
 
 const (
