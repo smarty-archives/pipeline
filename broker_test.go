@@ -169,6 +169,10 @@ func (this *BrokerFixture) TestOpenReaderDuringConnection() {
 	this.assertValidReader(connected)
 }
 func (this *BrokerFixture) assertValidReader(initialState uint64) {
+	this.broker.state = initialState
+	reader := this.broker.OpenReader("queue")
+	this.So(reader, should.NotBeNil)
+	this.So(reader.(*ChannelReader).queue, should.Equal, "queue")
 }
 
 ////////////////////////////////////////////////////////
@@ -178,6 +182,21 @@ func (this *BrokerFixture) TestOpenReaderDuringDisconnection() {
 	this.assertNilReader(disconnected)
 }
 func (this *BrokerFixture) assertNilReader(initialState uint64) {
+	this.broker.state = initialState
+	reader := this.broker.OpenReader("queue")
+	this.So(reader, should.BeNil)
+}
+
+////////////////////////////////////////////////////////
+
+func (this *BrokerFixture) TestOpenTransientReader() {
+	this.broker.state = connecting
+	bindings := []string{"1", "2"}
+
+	reader := this.broker.OpenTransientReader(bindings)
+
+	this.So(reader, should.NotBeNil)
+	this.So(reader.(*ChannelReader).bindings, should.Resemble, bindings)
 }
 
 ////////////////////////////////////////////////////////

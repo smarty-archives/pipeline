@@ -94,7 +94,7 @@ func (this *Broker) completeShutdown() {
 	this.state = disconnected
 }
 
-func (this *Broker) removeReader(reader interface{}) {
+func (this *Broker) removeReader(reader Reader) {
 	this.mutex.Lock()
 	defer this.mutex.Unlock()
 
@@ -114,12 +114,23 @@ func (this *Broker) removeReader(reader interface{}) {
 	this.initiateWriterShutdown() // when all readers shutdown processes have been completed
 	this.completeShutdown()
 }
+func (this *Broker) removeWriter(writer Writer) {}
 
 func (this *Broker) OpenReader(queue string) Reader {
-	return nil
+	return this.openReader(queue, nil)
 }
-func (this *Broker) OpenTransientReader(queue string) Reader {
-	return nil
+func (this *Broker) OpenTransientReader(bindings []string) Reader {
+	return this.openReader("", bindings)
+}
+func (this *Broker) openReader(queue string, bindings []string) Reader {
+	this.mutex.Lock()
+	defer this.mutex.Unlock()
+
+	if this.state == disconnecting || this.state == disconnected {
+		return nil
+	}
+
+	return newReader(this, queue, bindings)
 }
 
 func (this *Broker) OpenWriter() Writer {
