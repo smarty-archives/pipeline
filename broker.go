@@ -7,12 +7,13 @@ import (
 )
 
 type Broker struct {
-	mutex     *sync.Mutex
-	target    url.URL
-	connector Connector
-	state     uint64
-	readers   []Reader
-	writers   []Writer
+	mutex      *sync.Mutex
+	target     url.URL
+	connector  Connector
+	connection Connection
+	state      uint64
+	readers    []Reader
+	writers    []Writer
 }
 
 func NewBroker(target url.URL, connector Connector) *Broker {
@@ -73,6 +74,10 @@ func (this *Broker) initiateWriterShutdown() {
 
 	this.writers = this.writers[0:0]
 	this.state = disconnected
+	if this.connection != nil {
+		this.connection.Close()
+		this.connection = nil
+	}
 }
 
 func (this *Broker) removeReader(reader interface{}) {

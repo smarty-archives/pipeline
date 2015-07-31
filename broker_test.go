@@ -102,6 +102,8 @@ func (this *BrokerFixture) TestDisconnectWithOnlyReaders() {
 
 func (this *BrokerFixture) TestLastReaderShutdownComplete() {
 	this.broker.state = disconnecting
+	connection := &FakeConnection{}
+	this.broker.connection = connection
 
 	reader, writer := &FakeReader{}, &FakeWriter{}
 	this.broker.readers = append(this.broker.readers, reader)
@@ -113,6 +115,8 @@ func (this *BrokerFixture) TestLastReaderShutdownComplete() {
 	this.So(this.broker.writers, should.BeEmpty)
 	this.So(writer.closed, should.Equal, 1)
 	this.So(this.broker.State(), should.Equal, disconnected)
+	this.So(this.broker.connection, should.BeNil)
+	this.So(connection.closed, should.BeTrue)
 }
 
 ////////////////////////////////////////////////////////
