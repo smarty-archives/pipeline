@@ -118,6 +118,16 @@ func (this *Broker) removeReader(reader interface{}) {
 func (this *Broker) OpenReader(queue string) Reader {
 	return nil
 }
+func (this *Broker) OpenTransientReader(queue string) Reader {
+	return nil
+}
+
+func (this *Broker) OpenWriter() Writer {
+	return nil
+}
+func (this *Broker) OpenTransactionalWriter() CommitWriter {
+	return nil
+}
 
 func (this *Broker) openChannel() Channel {
 	// don't lock for the duration of the loop
