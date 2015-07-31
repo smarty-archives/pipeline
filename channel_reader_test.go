@@ -89,7 +89,7 @@ func newFakeController() *FakeController {
 
 func (this *FakeController) openChannel() Channel {
 	if this.channel == nil {
-		return nil
+		return nil // interface quirks require this hack
 	}
 
 	return this.channel

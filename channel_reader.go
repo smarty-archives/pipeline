@@ -51,9 +51,8 @@ func (this *ChannelReader) listen() bool {
 				this.acknowledgements <- subscriptionClosed{Deliveries: this.deliveryCount}
 				this.deliveryCount = 0
 			} else {
-				// channel.Close() // channel failure; reconnect
-				// // time.Sleep(1second)???
-				// return true
+				channel.Close() // channel failure; reconnect
+				return true
 			}
 		case acknowledgementCompleted:
 			channel.Close() // we don't need the channel anymore
