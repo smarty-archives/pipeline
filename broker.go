@@ -114,7 +114,16 @@ func (this *Broker) removeReader(reader Reader) {
 	this.initiateWriterShutdown() // when all readers shutdown processes have been completed
 	this.completeShutdown()
 }
-func (this *Broker) removeWriter(writer Writer) {}
+func (this *Broker) removeWriter(writer Writer) {
+	for i, item := range this.writers {
+		if writer != item {
+			continue
+		}
+
+		this.writers = append(this.writers[:i], this.writers[i+1:]...)
+		break
+	}
+}
 
 func (this *Broker) OpenReader(queue string) Reader {
 	return this.openReader(queue, nil)

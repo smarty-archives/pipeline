@@ -164,6 +164,19 @@ func (this *BrokerFixture) TestIsolatedReaderCloseDoesntAffectBrokerState() {
 
 ////////////////////////////////////////////////////////
 
+func (this *BrokerFixture) TestIsolatedWriterCloseDoesntAffectBrokerState() {
+	this.broker.state = connected
+	writer := &FakeWriter{}
+	this.broker.writers = append(this.broker.writers, writer)
+
+	this.broker.removeWriter(writer)
+
+	this.So(this.broker.writers, should.BeEmpty)
+	this.So(this.broker.State(), should.Equal, connected)
+}
+
+////////////////////////////////////////////////////////
+
 func (this *BrokerFixture) TestOpenReaderDuringConnection() {
 	this.assertValidReader(connecting)
 	this.assertValidReader(connected)
