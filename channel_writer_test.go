@@ -59,6 +59,15 @@ func (this *ChannelWriterFixture) TestFailedChannelClosed() {
 
 ///////////////////////////////////////////////////////////////
 
+func (this *ChannelWriterFixture) TestCloseWriter() {
+	this.writer.Close()
+
+	this.So(this.writer.closed, should.BeTrue)
+	this.So(this.writer.Write(Dispatch{}), should.Equal, channelFailure)
+}
+
+///////////////////////////////////////////////////////////////
+
 type FakeWriterController struct {
 	channel        *FakeWriterChannel
 	removedWriters []Writer
