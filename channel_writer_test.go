@@ -1,6 +1,9 @@
 package rabbit
 
 import (
+	"errors"
+
+	"github.com/smartystreets/assertions/should"
 	"github.com/smartystreets/gunit"
 	"github.com/streadway/amqp"
 )
@@ -19,6 +22,43 @@ func (this *ChannelWriterFixture) Setup() {
 }
 func (this *ChannelWriterFixture) buildWriter() {
 	this.writer = newWriter(this.controller, this.transactional)
+}
+
+///////////////////////////////////////////////////////////////
+
+func (this *ChannelWriterFixture) TestDispatchIsWrittenToChannel() {
+	dispatch := Dispatch{
+		Destination: "destination",
+		Payload:     []byte{1, 2, 3, 4, 5},
+	}
+
+	err := this.writer.Write(dispatch)
+
+	this.So(err, should.BeNil)
+	this.So(this.controller.channel.exchange, should.Equal, dispatch.Destination)
+	this.So(this.controller.channel.dispatch.Body, should.Resemble, dispatch.Payload)
+}
+
+///////////////////////////////////////////////////////////////
+
+func (this *ChannelWriterFixture) TestChannelCannotBeObtained() {
+	this.controller.channel = nil
+
+	err := this.writer.Write(Dispatch{})
+
+	this.So(err, should.NotBeNil)
+}
+
+///////////////////////////////////////////////////////////////
+
+func (this *ChannelWriterFixture) TestFailedChannelClosed() {
+	this.controller.channel.err = errors.New("channel failed")
+
+	err := this.writer.Write(Dispatch{})
+
+	this.So(err, should.Equal, this.controller.channel.err)
+	this.So(this.controller.channel.closed, should.Equal, 1)
+	this.So(this.writer.channel, should.BeNil)
 }
 
 ///////////////////////////////////////////////////////////////
@@ -51,9 +91,11 @@ func (this *FakeWriterController) Dispose() {
 ///////////////////////////////////////////////////////////////
 
 type FakeWriterChannel struct {
-	closed int
-	writes int
-	err    error
+	closed   int
+	writes   int
+	exchange string
+	dispatch amqp.Publishing
+	err      error
 }
 
 func newFakeWriterChannel() *FakeWriterChannel {
@@ -75,7 +117,9 @@ func (this *FakeWriterChannel) Close() error {
 func (this *FakeWriterChannel) AcknowledgeSingleMessage(uint64) error          { return nil }
 func (this *FakeWriterChannel) AcknowledgeMultipleMessages(value uint64) error { return nil }
 func (this *FakeWriterChannel) ConfigureChannelAsTransactional() error         { return nil }
-func (this *FakeWriterChannel) PublishMessage(string, amqp.Publishing) error {
+func (this *FakeWriterChannel) PublishMessage(destination string, dispatch amqp.Publishing) error {
+	this.exchange = destination
+	this.dispatch = dispatch
 	this.writes++
 	return this.err
 }
