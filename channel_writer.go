@@ -62,4 +62,3 @@ func (this *ChannelWriter) ensureChannel() bool {
 }
 
 var channelFailure = errors.New("Unable to obtain a connection and channel to the broker.")
-var channelUnstable = errors.New("The message cannot be published, the channel is unstable.")

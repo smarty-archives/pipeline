@@ -33,6 +33,7 @@ func (this *ChannelWriterFixture) TestDispatchIsWrittenToChannel() {
 	this.So(err, should.BeNil)
 	this.So(this.controller.channel.exchange, should.Equal, dispatch.Destination)
 	this.So(this.controller.channel.dispatch.Body, should.Resemble, dispatch.Payload)
+	this.So(this.controller.channel.transactional, should.BeFalse)
 }
 
 ///////////////////////////////////////////////////////////////
@@ -96,11 +97,13 @@ func (this *FakeWriterController) Dispose() {
 ///////////////////////////////////////////////////////////////
 
 type FakeWriterChannel struct {
-	closed   int
-	writes   int
-	exchange string
-	dispatch amqp.Publishing
-	err      error
+	closed        int
+	commits       int
+	writes        int
+	exchange      string
+	dispatch      amqp.Publishing
+	transactional bool
+	err           error
 }
 
 func newFakeWriterChannel() *FakeWriterChannel {
@@ -121,7 +124,10 @@ func (this *FakeWriterChannel) Close() error {
 }
 func (this *FakeWriterChannel) AcknowledgeSingleMessage(uint64) error          { return nil }
 func (this *FakeWriterChannel) AcknowledgeMultipleMessages(value uint64) error { return nil }
-func (this *FakeWriterChannel) ConfigureChannelAsTransactional() error         { return nil }
+func (this *FakeWriterChannel) ConfigureChannelAsTransactional() error {
+	this.transactional = true
+	return nil
+}
 func (this *FakeWriterChannel) PublishMessage(destination string, dispatch amqp.Publishing) error {
 	this.exchange = destination
 	this.dispatch = dispatch
@@ -129,6 +135,7 @@ func (this *FakeWriterChannel) PublishMessage(destination string, dispatch amqp.
 	return this.err
 }
 func (this *FakeWriterChannel) CommitTransaction() error {
+	this.commits++
 	return this.err
 }
 func (this *FakeWriterChannel) RollbackTransaction() error { return nil }
