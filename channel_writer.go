@@ -11,17 +11,12 @@ type ChannelWriter struct {
 	mutex           *sync.Mutex
 	controller      Controller
 	channel         Channel
-	transactional   bool
 	closed          bool
 	skipUntilCommit bool
 }
 
-func newWriter(controller Controller, transactional bool) *ChannelWriter {
-	return &ChannelWriter{
-		mutex:         &sync.Mutex{},
-		controller:    controller,
-		transactional: transactional,
-	}
+func newWriter(controller Controller) *ChannelWriter {
+	return &ChannelWriter{mutex: &sync.Mutex{}, controller: controller}
 }
 
 func (this *ChannelWriter) Write(message Dispatch) error {

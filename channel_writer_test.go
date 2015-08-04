@@ -11,17 +11,13 @@ import (
 type ChannelWriterFixture struct {
 	*gunit.Fixture
 
-	writer        *ChannelWriter
-	controller    *FakeWriterController
-	transactional bool
+	writer     *ChannelWriter
+	controller *FakeWriterController
 }
 
 func (this *ChannelWriterFixture) Setup() {
 	this.controller = newFakeWriterController()
-	this.buildWriter()
-}
-func (this *ChannelWriterFixture) buildWriter() {
-	this.writer = newWriter(this.controller, this.transactional)
+	this.writer = newWriter(this.controller)
 }
 
 ///////////////////////////////////////////////////////////////

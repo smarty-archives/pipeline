@@ -146,9 +146,9 @@ func (this *Broker) OpenWriter() Writer {
 	return this.openWriter(false)
 }
 func (this *Broker) OpenTransactionalWriter() CommitWriter {
-	return this.openWriter(true)
+	return this.openWriter(true).(CommitWriter)
 }
-func (this *Broker) openWriter(transactional bool) CommitWriter {
+func (this *Broker) openWriter(transactional bool) Writer {
 	this.mutex.Lock()
 	defer this.mutex.Unlock()
 
@@ -156,7 +156,11 @@ func (this *Broker) openWriter(transactional bool) CommitWriter {
 		return nil
 	}
 
-	return newWriter(this, transactional)
+	if transactional {
+		return newWriter(this) // TODO
+	} else {
+		return newWriter(this)
+	}
 }
 
 func (this *Broker) openChannel() Channel {
