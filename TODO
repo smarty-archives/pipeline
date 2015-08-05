@@ -1,0 +1,24 @@
+json serializer (serialize, deserialize)
+	json.Marshal/Unmarshal (panic, log, etc.)
+
+deserialization_handler
+	Listen to deliveries and pipe them to deserializer
+	Pipe results to the application
+
+RetryWriter
+	Receive dispatches and buffer them locally
+	Retry n times with sleep interval of X
+	(any messages that have expired will not be written)
+	(which means that the work will gradually decrease to zero)
+
+RetryCommitWriter
+	Receive dispatches and buffer them locally
+	If commit fails, retry n times with sleep interval of X
+	(any messages that have expired will not be written)
+	(which means that the work will gradually decrease to zero)
+
+serialization writer
+	Takes "Message" property on Dispatch
+	and serializes it if not already done
+	and then clears out Message property?
+
