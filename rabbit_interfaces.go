@@ -1,5 +1,7 @@
 package messenger
 
+import "errors"
+
 type (
 	MessageBroker interface {
 		Connect() error
@@ -30,3 +32,5 @@ type (
 		Commit() error
 	}
 )
+
+var WriterClosedError error = errors.New("The writer has been closed and can no longer be used.")
