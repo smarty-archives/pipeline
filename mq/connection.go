@@ -18,7 +18,7 @@ func newConnection(inner *amqp.Connection) rabbit.Connection {
 func (this *Connection) Channel() (rabbit.Channel, error) {
 	log.Println("[INFO] Opening channel on existing AMQP connection.")
 	if channel, err := this.inner.Channel(); err != nil {
-		log.Println("[WARN] Unable to open AMQP channel.", err)
+		log.Printf("[WARN] Unable to open AMQP channel [%s]\n", err)
 		return nil, err
 	} else {
 		log.Println("[INFO] AMQP channel opened.")

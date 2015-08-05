@@ -1,6 +1,7 @@
 package rabbit
 
 import (
+	"log"
 	"sync"
 
 	"github.com/smartystreets/clock"
@@ -43,6 +44,7 @@ func (this *TransactionWriter) Commit() error {
 		return nil
 	}
 
+	log.Println("[WARN] Transaction failed, closing channel.")
 	this.channel.Close()
 	this.channel = nil
 	return err
