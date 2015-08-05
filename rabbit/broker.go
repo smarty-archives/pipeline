@@ -1,7 +1,6 @@
 package rabbit
 
 import (
-	"errors"
 	"net/url"
 	"sync"
 	"time"
@@ -38,10 +37,10 @@ func (this *Broker) Connect() error {
 	this.mutex.Lock()
 	defer this.mutex.Unlock()
 
-	if this.state == disconnecting {
-		return ErrorShuttingDown
-	} else if this.state == disconnected {
-		this.state = connecting
+	if this.state == messenger.Disconnecting {
+		return messenger.BrokerShuttingDownError
+	} else if this.state == messenger.Disconnected {
+		this.state = messenger.Connecting
 	}
 
 	return nil
@@ -51,11 +50,11 @@ func (this *Broker) Disconnect() {
 	this.mutex.Lock()
 	defer this.mutex.Unlock()
 
-	if this.state == disconnecting || this.state == disconnected {
+	if this.state == messenger.Disconnecting || this.state == messenger.Disconnected {
 		return
 	}
 
-	this.state = disconnecting
+	this.state = messenger.Disconnecting
 
 	this.initiateReaderShutdown()
 	this.initiateWriterShutdown()
@@ -79,7 +78,7 @@ func (this *Broker) initiateWriterShutdown() {
 	this.writers = this.writers[0:0]
 }
 func (this *Broker) completeShutdown() {
-	if this.state != disconnecting {
+	if this.state != messenger.Disconnecting {
 		return
 	}
 
@@ -92,7 +91,7 @@ func (this *Broker) completeShutdown() {
 		this.connection = nil
 	}
 
-	this.state = disconnected
+	this.state = messenger.Disconnected
 }
 
 func (this *Broker) removeReader(reader messenger.Reader) {
@@ -108,7 +107,7 @@ func (this *Broker) removeReader(reader messenger.Reader) {
 		break
 	}
 
-	if this.state != disconnecting {
+	if this.state != messenger.Disconnecting {
 		return
 	}
 
@@ -136,7 +135,7 @@ func (this *Broker) openReader(queue string, bindings []string) messenger.Reader
 	this.mutex.Lock()
 	defer this.mutex.Unlock()
 
-	if this.state == disconnecting || this.state == disconnected {
+	if this.state == messenger.Disconnecting || this.state == messenger.Disconnected {
 		return nil
 	}
 
@@ -159,7 +158,7 @@ func (this *Broker) openWriter(transactional bool) messenger.Writer {
 	this.mutex.Lock()
 	defer this.mutex.Unlock()
 
-	if this.state == disconnecting || this.state == disconnected {
+	if this.state == messenger.Disconnecting || this.state == messenger.Disconnected {
 		return nil
 	}
 
@@ -190,7 +189,7 @@ func (this *Broker) openChannel() Channel {
 func (this *Broker) isActive() bool {
 	this.mutex.Lock()
 	defer this.mutex.Unlock()
-	return this.state == connecting || this.state == connected
+	return this.state == messenger.Connecting || this.state == messenger.Connected
 }
 func (this *Broker) tryOpenChannel() Channel {
 	this.mutex.Lock()
@@ -217,19 +216,10 @@ func (this *Broker) openChannelFromExistingConnection() Channel {
 	if channel, err := this.connection.Channel(); err != nil {
 		this.connection.Close()
 		this.connection = nil
-		this.state = connecting
+		this.state = messenger.Connecting
 		return nil
 	} else {
-		this.state = connected
+		this.state = messenger.Connected
 		return channel
 	}
 }
-
-const (
-	disconnected = iota
-	connecting
-	connected
-	disconnecting
-)
-
-var ErrorShuttingDown = errors.New("Broker is still shutting down.")

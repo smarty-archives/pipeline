@@ -42,17 +42,17 @@ func (this *BrokerFixture) createBroker() {
 ////////////////////////////////////////////////////////
 
 func (this *BrokerFixture) TestConnect() {
-	this.assertConnectResult(disconnected, connecting, false)
-	this.assertConnectResult(connecting, connecting, false)
-	this.assertConnectResult(connected, connected, false)
-	this.assertConnectResult(disconnecting, disconnecting, true)
+	this.assertConnectResult(messenger.Disconnected, messenger.Connecting, false)
+	this.assertConnectResult(messenger.Connecting, messenger.Connecting, false)
+	this.assertConnectResult(messenger.Connected, messenger.Connected, false)
+	this.assertConnectResult(messenger.Disconnecting, messenger.Disconnecting, true)
 }
 func (this *BrokerFixture) assertConnectResult(initial, updated uint64, hasError bool) {
 	this.broker.state = initial
 
 	err := this.broker.Connect()
 	if hasError {
-		this.So(err, should.NotBeNil)
+		this.So(err, should.Equal, messenger.BrokerShuttingDownError)
 	} else {
 		this.So(err, should.BeNil)
 	}
@@ -63,10 +63,10 @@ func (this *BrokerFixture) assertConnectResult(initial, updated uint64, hasError
 ////////////////////////////////////////////////////////
 
 func (this *BrokerFixture) TestDisconnectWithoutChildren() {
-	this.assertDisconnectResult(disconnected, disconnected)
-	this.assertDisconnectResult(disconnecting, disconnecting) // don't interupt
-	this.assertDisconnectResult(connected, disconnected)
-	this.assertDisconnectResult(connecting, disconnected)
+	this.assertDisconnectResult(messenger.Disconnected, messenger.Disconnected)
+	this.assertDisconnectResult(messenger.Disconnecting, messenger.Disconnecting) // don't interupt
+	this.assertDisconnectResult(messenger.Connected, messenger.Disconnected)
+	this.assertDisconnectResult(messenger.Connecting, messenger.Disconnected)
 }
 func (this *BrokerFixture) assertDisconnectResult(initial, updated uint64) {
 	this.broker.state = initial
@@ -77,7 +77,7 @@ func (this *BrokerFixture) assertDisconnectResult(initial, updated uint64) {
 ////////////////////////////////////////////////////////
 
 func (this *BrokerFixture) TestDisconnectWithOnlyWriters() {
-	this.broker.state = connected
+	this.broker.state = messenger.Connected
 
 	writers := []*FakeWriter{&FakeWriter{}, &FakeWriter{}}
 	for _, writer := range writers {
@@ -89,14 +89,14 @@ func (this *BrokerFixture) TestDisconnectWithOnlyWriters() {
 
 	this.So(writers[0].closed, should.Equal, 1)
 	this.So(writers[1].closed, should.Equal, 1)
-	this.So(this.broker.State(), should.Equal, disconnected)
+	this.So(this.broker.State(), should.Equal, messenger.Disconnected)
 	this.So(this.broker.writers, should.BeEmpty)
 }
 
 ////////////////////////////////////////////////////////
 
 func (this *BrokerFixture) TestDisconnectWithOnlyReaders() {
-	this.broker.state = connected
+	this.broker.state = messenger.Connected
 
 	readers := []*FakeReader{&FakeReader{}, &FakeReader{}}
 	for _, reader := range readers {
@@ -108,14 +108,14 @@ func (this *BrokerFixture) TestDisconnectWithOnlyReaders() {
 
 	this.So(readers[0].closed, should.Equal, 1)
 	this.So(readers[1].closed, should.Equal, 1)
-	this.So(this.broker.State(), should.Equal, disconnecting)
+	this.So(this.broker.State(), should.Equal, messenger.Disconnecting)
 	this.So(len(this.broker.readers), should.Equal, len(readers))
 }
 
 ////////////////////////////////////////////////////////
 
 func (this *BrokerFixture) TestLastReaderShutdownComplete() {
-	this.broker.state = disconnecting
+	this.broker.state = messenger.Disconnecting
 	connection := &FakeConnection{}
 	this.broker.connection = connection
 
@@ -128,7 +128,7 @@ func (this *BrokerFixture) TestLastReaderShutdownComplete() {
 	this.So(this.broker.readers, should.BeEmpty)
 	this.So(this.broker.writers, should.BeEmpty)
 	this.So(writer.closed, should.Equal, 1)
-	this.So(this.broker.State(), should.Equal, disconnected)
+	this.So(this.broker.State(), should.Equal, messenger.Disconnected)
 	this.So(this.broker.connection, should.BeNil)
 	this.So(connection.closed, should.Equal, 1)
 }
@@ -136,7 +136,7 @@ func (this *BrokerFixture) TestLastReaderShutdownComplete() {
 ////////////////////////////////////////////////////////
 
 func (this *BrokerFixture) TestSecondToLastReaderShutdownComplete() {
-	this.broker.state = disconnecting
+	this.broker.state = messenger.Disconnecting
 
 	reader1, reader2, writer := &FakeReader{}, &FakeReader{}, &FakeWriter{}
 	this.broker.readers = append(this.broker.readers, reader1)
@@ -148,40 +148,40 @@ func (this *BrokerFixture) TestSecondToLastReaderShutdownComplete() {
 	this.So(this.broker.readers, should.NotBeEmpty)
 	this.So(this.broker.writers, should.NotBeEmpty)
 	this.So(writer.closed, should.Equal, 0)
-	this.So(this.broker.State(), should.Equal, disconnecting)
+	this.So(this.broker.State(), should.Equal, messenger.Disconnecting)
 }
 
 ////////////////////////////////////////////////////////
 
 func (this *BrokerFixture) TestIsolatedReaderCloseDoesntAffectBrokerState() {
-	this.broker.state = connected
+	this.broker.state = messenger.Connected
 	reader := &FakeReader{}
 	this.broker.readers = append(this.broker.readers, reader)
 
 	this.broker.removeReader(reader)
 
 	this.So(this.broker.readers, should.BeEmpty)
-	this.So(this.broker.State(), should.Equal, connected)
+	this.So(this.broker.State(), should.Equal, messenger.Connected)
 }
 
 ////////////////////////////////////////////////////////
 
 func (this *BrokerFixture) TestIsolatedWriterCloseDoesntAffectBrokerState() {
-	this.broker.state = connected
+	this.broker.state = messenger.Connected
 	writer := &FakeWriter{}
 	this.broker.writers = append(this.broker.writers, writer)
 
 	this.broker.removeWriter(writer)
 
 	this.So(this.broker.writers, should.BeEmpty)
-	this.So(this.broker.State(), should.Equal, connected)
+	this.So(this.broker.State(), should.Equal, messenger.Connected)
 }
 
 ////////////////////////////////////////////////////////
 
 func (this *BrokerFixture) TestOpenReaderDuringConnection() {
-	this.assertValidReader(connecting)
-	this.assertValidReader(connected)
+	this.assertValidReader(messenger.Connecting)
+	this.assertValidReader(messenger.Connected)
 }
 func (this *BrokerFixture) assertValidReader(initialState uint64) {
 	this.broker.state = initialState
@@ -194,8 +194,8 @@ func (this *BrokerFixture) assertValidReader(initialState uint64) {
 ////////////////////////////////////////////////////////
 
 func (this *BrokerFixture) TestOpenReaderDuringDisconnection() {
-	this.assertNilReader(disconnecting)
-	this.assertNilReader(disconnected)
+	this.assertNilReader(messenger.Disconnecting)
+	this.assertNilReader(messenger.Disconnected)
 }
 func (this *BrokerFixture) assertNilReader(initialState uint64) {
 	this.broker.state = initialState
@@ -206,7 +206,7 @@ func (this *BrokerFixture) assertNilReader(initialState uint64) {
 ////////////////////////////////////////////////////////
 
 func (this *BrokerFixture) TestOpenTransientReader() {
-	this.broker.state = connecting
+	this.broker.state = messenger.Connecting
 	bindings := []string{"1", "2"}
 
 	reader := this.broker.OpenTransientReader(bindings)
@@ -219,8 +219,8 @@ func (this *BrokerFixture) TestOpenTransientReader() {
 ////////////////////////////////////////////////////////
 
 func (this *BrokerFixture) TestOpenWriterDuringConnection() {
-	this.assertValidWriter(connecting)
-	this.assertValidWriter(connected)
+	this.assertValidWriter(messenger.Connecting)
+	this.assertValidWriter(messenger.Connected)
 }
 func (this *BrokerFixture) assertValidWriter(initialState uint64) {
 	this.broker.state = initialState
@@ -233,8 +233,8 @@ func (this *BrokerFixture) assertValidWriter(initialState uint64) {
 ////////////////////////////////////////////////////////
 
 func (this *BrokerFixture) TestOpenWriterDuringDisconnection() {
-	this.assertNilWriter(disconnecting)
-	this.assertNilWriter(disconnected)
+	this.assertNilWriter(messenger.Disconnecting)
+	this.assertNilWriter(messenger.Disconnected)
 }
 func (this *BrokerFixture) assertNilWriter(initialState uint64) {
 	this.broker.state = initialState
@@ -245,7 +245,7 @@ func (this *BrokerFixture) assertNilWriter(initialState uint64) {
 ////////////////////////////////////////////////////////
 
 func (this *BrokerFixture) TestOpenTransactionalWriter() {
-	this.broker.state = connecting
+	this.broker.state = messenger.Connecting
 
 	writer := this.broker.OpenTransactionalWriter()
 
@@ -257,50 +257,50 @@ func (this *BrokerFixture) TestOpenTransactionalWriter() {
 ////////////////////////////////////////////////////////
 
 func (this *BrokerFixture) TestOpenChannel() {
-	this.broker.state = connecting
+	this.broker.state = messenger.Connecting
 
 	channel := this.broker.openChannel()
 
 	this.So(channel, should.NotBeNil)
-	this.So(this.broker.state, should.Equal, connected)
+	this.So(this.broker.state, should.Equal, messenger.Connected)
 }
 func (this *BrokerFixture) TestNoChannelWhileDisconnected() {
-	this.broker.state = disconnected
+	this.broker.state = messenger.Disconnected
 	this.So(this.broker.openChannel(), should.BeNil)
 
-	this.broker.state = disconnecting
+	this.broker.state = messenger.Disconnecting
 	this.So(this.broker.openChannel(), should.BeNil)
 }
 func (this *BrokerFixture) TestOpenChannelAfterUnderlyingConnectorFailureRetries() {
 	this.connector = NewFakeConnector(1, 0)
 	this.createBroker()
-	this.broker.state = connecting
+	this.broker.state = messenger.Connecting
 
 	channel := this.broker.openChannel()
 
 	this.So(channel, should.NotBeNil)
 	this.So(this.connector.attempts, should.BeGreaterThan, 1)
-	this.So(this.broker.state, should.Equal, connected)
+	this.So(this.broker.state, should.Equal, messenger.Connected)
 	this.So(this.sleeper.Naps[0], should.Equal, time.Second*4)
 }
 func (this *BrokerFixture) TestOpenChannelAfterUnderlyingConnectionFailureRetries() {
 	this.connector = NewFakeConnector(0, 1)
 	this.createBroker()
-	this.broker.state = connecting
+	this.broker.state = messenger.Connecting
 
 	channel := this.broker.openChannel()
 
 	this.So(channel, should.NotBeNil)
 	this.So(this.connector.attempts, should.Equal, 2)
 	this.So(this.connector.connection.attempts, should.Equal, 2)
-	this.So(this.broker.state, should.Equal, connected)
+	this.So(this.broker.state, should.Equal, messenger.Connected)
 	this.So(this.broker.connection, should.NotBeNil)
 	this.So(this.sleeper.Naps[0], should.Equal, time.Second*4)
 }
 func (this *BrokerFixture) TestOpenChannelClosesConnectionOnFailure() {
 	this.connector = NewFakeConnector(0, 2)
 	this.createBroker()
-	this.broker.state = connecting
+	this.broker.state = messenger.Connecting
 
 	channel := this.broker.openChannel()
 
@@ -308,7 +308,7 @@ func (this *BrokerFixture) TestOpenChannelClosesConnectionOnFailure() {
 	this.So(this.connector.attempts, should.Equal, 3)
 	this.So(this.connector.connection.attempts, should.Equal, 3)
 	this.So(this.connector.connection.closed, should.Equal, 2)
-	this.So(this.broker.state, should.Equal, connected)
+	this.So(this.broker.state, should.Equal, messenger.Connected)
 	this.So(this.broker.connection, should.NotBeNil)
 	this.So(this.sleeper.Naps[0], should.Equal, time.Second*4)
 	this.So(this.sleeper.Naps[1], should.Equal, time.Second*4)
