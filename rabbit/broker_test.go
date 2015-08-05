@@ -316,6 +316,15 @@ func (this *BrokerFixture) TestOpenChannelClosesConnectionOnFailure() {
 
 ////////////////////////////////////////////////////////
 
+func (this *BrokerFixture) TestStateChangesSentToCaller() {
+	var state uint64 = 0
+	this.broker.Notify(func(updated uint64) { state = updated })
+	this.broker.Connect()
+	this.So(state, should.Equal, messenger.Connecting)
+}
+
+////////////////////////////////////////////////////////
+
 type FakeConnector struct {
 	attempts   int
 	target     url.URL

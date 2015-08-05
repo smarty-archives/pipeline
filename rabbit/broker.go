@@ -17,6 +17,7 @@ type Broker struct {
 	readers    []messenger.Reader
 	writers    []messenger.Writer
 	state      uint64
+	updates    func(uint64)
 }
 
 func NewBroker(target url.URL, connector Connector) *Broker {
@@ -27,10 +28,22 @@ func NewBroker(target url.URL, connector Connector) *Broker {
 	}
 }
 
+func (this *Broker) Notify(callback func(uint64)) {
+	this.updates = callback
+}
+
 func (this *Broker) State() uint64 {
 	this.mutex.Lock()
 	defer this.mutex.Unlock()
 	return this.state
+}
+func (this *Broker) updateState(state uint64) {
+	this.state = state
+
+	updates := this.updates
+	if updates != nil {
+		updates(state)
+	}
 }
 
 func (this *Broker) Connect() error {
@@ -40,7 +53,7 @@ func (this *Broker) Connect() error {
 	if this.state == messenger.Disconnecting {
 		return messenger.BrokerShuttingDownError
 	} else if this.state == messenger.Disconnected {
-		this.state = messenger.Connecting
+		this.updateState(messenger.Connecting)
 	}
 
 	return nil
@@ -54,8 +67,7 @@ func (this *Broker) Disconnect() {
 		return
 	}
 
-	this.state = messenger.Disconnecting
-
+	this.updateState(messenger.Disconnecting)
 	this.initiateReaderShutdown()
 	this.initiateWriterShutdown()
 	this.completeShutdown()
@@ -91,7 +103,7 @@ func (this *Broker) completeShutdown() {
 		this.connection = nil
 	}
 
-	this.state = messenger.Disconnected
+	this.updateState(messenger.Disconnected)
 }
 
 func (this *Broker) removeReader(reader messenger.Reader) {
@@ -216,10 +228,10 @@ func (this *Broker) openChannelFromExistingConnection() Channel {
 	if channel, err := this.connection.Channel(); err != nil {
 		this.connection.Close()
 		this.connection = nil
-		this.state = messenger.Connecting
+		this.updateState(messenger.Connecting)
 		return nil
 	} else {
-		this.state = messenger.Connected
+		this.updateState(messenger.Connected)
 		return channel
 	}
 }
