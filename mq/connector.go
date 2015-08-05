@@ -2,6 +2,7 @@ package mq
 
 import (
 	"crypto/tls"
+	"log"
 	"net"
 	"net/url"
 	"strings"
@@ -23,9 +24,13 @@ func (this *Connector) Connect(target url.URL) (rabbit.Connection, error) {
 		Heartbeat:       time.Second * 15,
 		Dial:            dial,
 	}
+
+	log.Println("[INFO] Establishing connection to AMQP broker.")
 	if connection, err := amqp.DialConfig(target.String(), config); err != nil {
+		log.Println("[WARN] Unable to establish connection", err)
 		return nil, err
 	} else {
+		log.Println("[INFO] AMQP connection established.")
 		return newConnection(connection), nil
 	}
 }

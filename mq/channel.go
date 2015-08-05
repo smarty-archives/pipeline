@@ -1,6 +1,10 @@
 package mq
 
-import "github.com/streadway/amqp"
+import (
+	"log"
+
+	"github.com/streadway/amqp"
+)
 
 type Channel struct {
 	inner *amqp.Channel
@@ -63,5 +67,6 @@ func (this *Channel) RollbackTransaction() error {
 }
 
 func (this *Channel) Close() error {
+	log.Println("[INFO] Closing AMQP channel.")
 	return this.inner.Close()
 }
