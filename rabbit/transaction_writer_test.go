@@ -64,7 +64,7 @@ func (this *TransactionWriterFixture) TestCloseWriter() {
 	this.writer.Close()
 
 	this.So(this.writer.closed, should.BeTrue)
-	this.So(this.writer.Write(messenger.Dispatch{}), should.Equal, channelFailure)
+	this.So(this.writer.Write(messenger.Dispatch{}), should.Equal, messenger.WriterClosedError)
 }
 
 ///////////////////////////////////////////////////////////////
@@ -72,7 +72,7 @@ func (this *TransactionWriterFixture) TestCloseWriter() {
 func (this *TransactionWriterFixture) TestCommitWithoutWriteFails() {
 	err := this.writer.Commit()
 
-	this.So(err, should.Equal, channelFailure)
+	this.So(err, should.Equal, commitBeforeWriteError)
 }
 
 func (this *TransactionWriterFixture) TestCommitCallsUnderlyingChannel() {

@@ -1,6 +1,7 @@
 package rabbit
 
 import (
+	"errors"
 	"log"
 	"sync"
 
@@ -25,7 +26,7 @@ func transactionWriter(controller Controller) *TransactionWriter {
 
 func (this *TransactionWriter) Write(message messenger.Dispatch) error {
 	if !this.ensureChannel() {
-		return channelFailure
+		return messenger.WriterClosedError
 	}
 
 	// FUTURE: if error on publish, don't publish anything else
@@ -37,7 +38,7 @@ func (this *TransactionWriter) Write(message messenger.Dispatch) error {
 
 func (this *TransactionWriter) Commit() error {
 	if this.channel == nil {
-		return channelFailure // this never creates a channel
+		return commitBeforeWriteError
 	}
 
 	err := this.channel.CommitTransaction()
@@ -77,3 +78,5 @@ func (this *TransactionWriter) ensureChannel() bool {
 	this.channel.ConfigureChannelAsTransactional()
 	return true
 }
+
+var commitBeforeWriteError = errors.New("Write must be called before Commit.")

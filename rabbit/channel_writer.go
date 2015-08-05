@@ -1,7 +1,6 @@
 package rabbit
 
 import (
-	"errors"
 	"sync"
 
 	"github.com/smartystreets/clock"
@@ -22,7 +21,7 @@ func newWriter(controller Controller) *ChannelWriter {
 
 func (this *ChannelWriter) Write(message messenger.Dispatch) error {
 	if !this.ensureChannel() {
-		return channelFailure
+		return messenger.WriterClosedError
 	}
 
 	dispatch := toAMQPDispatch(message, clock.Now())
@@ -61,5 +60,3 @@ func (this *ChannelWriter) ensureChannel() bool {
 	this.channel = this.controller.openChannel()
 	return this.channel != nil
 }
-
-var channelFailure = errors.New("Unable to obtain a connection and channel to the broker.")
