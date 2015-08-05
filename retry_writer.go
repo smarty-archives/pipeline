@@ -3,10 +3,10 @@ package messenger
 type RetryWriter struct {
 	inner Writer
 	max   uint64
-	sleep func()
+	sleep func(uint64)
 }
 
-func NewRetryWriter(inner Writer, max uint64, sleep func()) *RetryWriter {
+func NewRetryWriter(inner Writer, max uint64, sleep func(uint64)) *RetryWriter {
 	if max == 0 {
 		max = 0xFFFFFFFFFFFFFFFF
 	}
@@ -24,7 +24,7 @@ func (this *RetryWriter) Write(message Dispatch) (err error) {
 		} else if err == WriterClosedError {
 			break
 		} else {
-			this.sleep()
+			this.sleep(i)
 		}
 	}
 

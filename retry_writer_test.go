@@ -10,14 +10,19 @@ import (
 type RetryWriterFixture struct {
 	*gunit.Fixture
 
-	writer *RetryWriter
-	inner  *FakeRetryWriter
-	sleeps int
+	writer     *RetryWriter
+	inner      *FakeRetryWriter
+	sleeps     int
+	sleepInput uint64
 }
 
 func (this *RetryWriterFixture) Setup() {
 	this.inner = &FakeRetryWriter{errorUntil: 42}
-	this.writer = NewRetryWriter(this.inner, 999, func() { this.sleeps++ })
+	this.writer = NewRetryWriter(this.inner, 999, this.sleep)
+}
+func (this *RetryWriterFixture) sleep(value uint64) {
+	this.sleeps++
+	this.sleepInput = value
 }
 
 ///////////////////////////////////////////////////////////////
@@ -27,6 +32,7 @@ func (this *RetryWriterFixture) TestDispatchWorksEventually() {
 
 	this.writer.Write(dispatch)
 
+	this.So(this.sleepInput, should.Equal, 41)
 	this.So(this.sleeps, should.Equal, 42)
 	this.So(this.inner.writes, should.Equal, 43)
 	this.So(this.inner.written, should.Resemble, dispatch)
