@@ -139,7 +139,9 @@ func (this *Broker) openReader(queue string, bindings []string) Reader {
 		return nil
 	}
 
-	return newReader(this, queue, bindings)
+	reader := newReader(this, queue, bindings)
+	this.readers = append(this.readers, reader)
+	return reader
 }
 
 func (this *Broker) OpenWriter() Writer {
