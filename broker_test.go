@@ -3,6 +3,7 @@ package rabbit
 import (
 	"errors"
 	"net/url"
+	"reflect"
 	"time"
 
 	"github.com/smartystreets/assertions/should"
@@ -224,7 +225,8 @@ func (this *BrokerFixture) assertValidWriter(initialState uint64) {
 	this.broker.state = initialState
 	writer := this.broker.OpenWriter()
 	this.So(writer, should.NotBeNil)
-	// this.So(writer.(*ChannelWriter).transactional, should.BeFalse) // TODO
+	this.So(reflect.TypeOf(writer).String(), should.Equal, "*rabbit.ChannelWriter")
+	this.So(this.broker.writers, should.NotBeEmpty)
 }
 
 ////////////////////////////////////////////////////////
@@ -247,7 +249,8 @@ func (this *BrokerFixture) TestOpenTransactionalWriter() {
 	writer := this.broker.OpenTransactionalWriter()
 
 	this.So(writer, should.NotBeNil)
-	// this.So(writer.(*ChannelWriter).transactional, should.BeTrue) // TODO
+	this.So(reflect.TypeOf(writer).String(), should.Equal, "*rabbit.TransactionWriter")
+	this.So(this.broker.writers, should.NotBeEmpty)
 }
 
 ////////////////////////////////////////////////////////

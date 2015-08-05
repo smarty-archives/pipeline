@@ -145,10 +145,14 @@ func (this *Broker) openReader(queue string, bindings []string) Reader {
 }
 
 func (this *Broker) OpenWriter() Writer {
-	return this.openWriter(false)
+	writer := this.openWriter(false)
+	this.writers = append(this.writers, writer)
+	return writer
 }
 func (this *Broker) OpenTransactionalWriter() CommitWriter {
-	return this.openWriter(true).(CommitWriter)
+	writer := this.openWriter(true).(CommitWriter)
+	this.writers = append(this.writers, writer)
+	return writer
 }
 func (this *Broker) openWriter(transactional bool) Writer {
 	this.mutex.Lock()
@@ -159,7 +163,7 @@ func (this *Broker) openWriter(transactional bool) Writer {
 	}
 
 	if transactional {
-		return newWriter(this) // TODO
+		return transactionWriter(this)
 	} else {
 		return newWriter(this)
 	}
