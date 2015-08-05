@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/smartystreets/assertions/should"
+	"github.com/smartystreets/go-messenger"
 	"github.com/smartystreets/gunit"
 	"github.com/streadway/amqp"
 )
@@ -80,7 +81,7 @@ func (this *ChannelReaderFixture) TestCloseShutsdownReaderAfterAllMessagesProces
 
 type FakeReaderController struct {
 	channel        *FakeReaderChannel
-	removedReaders []Reader
+	removedReaders []messenger.Reader
 }
 
 func newFakeReaderController() *FakeReaderController {
@@ -94,10 +95,10 @@ func (this *FakeReaderController) openChannel() Channel {
 
 	return this.channel
 }
-func (this *FakeReaderController) removeReader(reader Reader) {
+func (this *FakeReaderController) removeReader(reader messenger.Reader) {
 	this.removedReaders = append(this.removedReaders, reader)
 }
-func (this *FakeReaderController) removeWriter(writer Writer) {}
+func (this *FakeReaderController) removeWriter(writer messenger.Writer) {}
 
 func (this *FakeReaderController) Dispose() {
 	this.channel = nil

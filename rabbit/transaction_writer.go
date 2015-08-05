@@ -5,6 +5,7 @@ import (
 	"sync"
 
 	"github.com/smartystreets/clock"
+	"github.com/smartystreets/go-messenger"
 )
 
 type TransactionWriter struct {
@@ -22,7 +23,7 @@ func transactionWriter(controller Controller) *TransactionWriter {
 	}
 }
 
-func (this *TransactionWriter) Write(message Dispatch) error {
+func (this *TransactionWriter) Write(message messenger.Dispatch) error {
 	if !this.ensureChannel() {
 		return channelFailure
 	}

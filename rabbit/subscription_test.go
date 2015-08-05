@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/smartystreets/assertions/should"
+	"github.com/smartystreets/go-messenger"
 	"github.com/smartystreets/gunit"
 	"github.com/streadway/amqp"
 )
@@ -18,13 +19,13 @@ type SubscriptionFixture struct {
 	subscription *Subscription
 
 	control chan interface{}
-	output  chan Delivery
+	output  chan messenger.Delivery
 }
 
 func (this *SubscriptionFixture) Setup() {
 	this.channel = newFakeSubscriptionChannel()
 	this.control = make(chan interface{}, 4)
-	this.output = make(chan Delivery, 8)
+	this.output = make(chan messenger.Delivery, 8)
 }
 func (this *SubscriptionFixture) createSubscription() {
 	this.subscription = newSubscription(
@@ -82,12 +83,12 @@ func (this *SubscriptionFixture) TestDeliveriesArePushedToTheApplication() {
 	this.createSubscription()
 	go this.subscription.Listen()
 
-	this.So((<-this.output), should.Resemble, Delivery{
+	this.So((<-this.output), should.Resemble, messenger.Delivery{
 		MessageType: "test-message",
 		Payload:     []byte{1, 2, 3, 4, 5},
 		Receipt:     newReceipt(this.channel, 0),
 	})
-	this.So((<-this.output), should.Resemble, Delivery{
+	this.So((<-this.output), should.Resemble, messenger.Delivery{
 		MessageType: "test-message2",
 		Payload:     []byte{6, 7, 8, 9, 10},
 		Receipt:     newReceipt(this.channel, 0),

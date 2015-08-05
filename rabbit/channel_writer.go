@@ -5,6 +5,7 @@ import (
 	"sync"
 
 	"github.com/smartystreets/clock"
+	"github.com/smartystreets/go-messenger"
 )
 
 type ChannelWriter struct {
@@ -19,7 +20,7 @@ func newWriter(controller Controller) *ChannelWriter {
 	return &ChannelWriter{mutex: &sync.Mutex{}, controller: controller}
 }
 
-func (this *ChannelWriter) Write(message Dispatch) error {
+func (this *ChannelWriter) Write(message messenger.Dispatch) error {
 	if !this.ensureChannel() {
 		return channelFailure
 	}

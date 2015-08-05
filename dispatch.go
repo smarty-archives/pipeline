@@ -1,4 +1,4 @@
-package rabbit
+package messenger
 
 import "time"
 

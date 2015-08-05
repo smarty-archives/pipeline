@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/smartystreets/clock"
+	"github.com/smartystreets/go-messenger"
 )
 
 type Broker struct {
@@ -14,8 +15,8 @@ type Broker struct {
 	target     url.URL
 	connector  Connector
 	connection Connection
-	readers    []Reader
-	writers    []Writer
+	readers    []messenger.Reader
+	writers    []messenger.Writer
 	state      uint64
 }
 
@@ -94,7 +95,7 @@ func (this *Broker) completeShutdown() {
 	this.state = disconnected
 }
 
-func (this *Broker) removeReader(reader Reader) {
+func (this *Broker) removeReader(reader messenger.Reader) {
 	this.mutex.Lock()
 	defer this.mutex.Unlock()
 
@@ -114,7 +115,7 @@ func (this *Broker) removeReader(reader Reader) {
 	this.initiateWriterShutdown() // when all readers shutdown processes have been completed
 	this.completeShutdown()
 }
-func (this *Broker) removeWriter(writer Writer) {
+func (this *Broker) removeWriter(writer messenger.Writer) {
 	for i, item := range this.writers {
 		if writer != item {
 			continue
@@ -125,13 +126,13 @@ func (this *Broker) removeWriter(writer Writer) {
 	}
 }
 
-func (this *Broker) OpenReader(queue string) Reader {
+func (this *Broker) OpenReader(queue string) messenger.Reader {
 	return this.openReader(queue, nil)
 }
-func (this *Broker) OpenTransientReader(bindings []string) Reader {
+func (this *Broker) OpenTransientReader(bindings []string) messenger.Reader {
 	return this.openReader("", bindings)
 }
-func (this *Broker) openReader(queue string, bindings []string) Reader {
+func (this *Broker) openReader(queue string, bindings []string) messenger.Reader {
 	this.mutex.Lock()
 	defer this.mutex.Unlock()
 
@@ -144,17 +145,17 @@ func (this *Broker) openReader(queue string, bindings []string) Reader {
 	return reader
 }
 
-func (this *Broker) OpenWriter() Writer {
+func (this *Broker) OpenWriter() messenger.Writer {
 	writer := this.openWriter(false)
 	this.writers = append(this.writers, writer)
 	return writer
 }
-func (this *Broker) OpenTransactionalWriter() CommitWriter {
-	writer := this.openWriter(true).(CommitWriter)
+func (this *Broker) OpenTransactionalWriter() messenger.CommitWriter {
+	writer := this.openWriter(true).(messenger.CommitWriter)
 	this.writers = append(this.writers, writer)
 	return writer
 }
-func (this *Broker) openWriter(transactional bool) Writer {
+func (this *Broker) openWriter(transactional bool) messenger.Writer {
 	this.mutex.Lock()
 	defer this.mutex.Unlock()
 

@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/smartystreets/assertions/should"
+	"github.com/smartystreets/go-messenger"
 	"github.com/smartystreets/gunit"
 	"github.com/streadway/amqp"
 )
@@ -29,7 +30,7 @@ func (this *RabbitAdapterFixture) TestAMQPDeliveryConversion() {
 		DeliveryTag:     8675309,
 	}
 
-	this.So(fromAMQPDelivery(upstream, nil), should.Resemble, Delivery{
+	this.So(fromAMQPDelivery(upstream, nil), should.Resemble, messenger.Delivery{
 		SourceID:    1234,
 		MessageID:   5678,
 		MessageType: "message-type",
@@ -42,7 +43,7 @@ func (this *RabbitAdapterFixture) TestAMQPDeliveryConversion() {
 /////////////////////////////////////////////////////////////////////////////////
 
 func (this *RabbitAdapterFixture) TestAMQPDispatchConversion() {
-	dispatch := Dispatch{
+	dispatch := messenger.Dispatch{
 		SourceID:    1234,
 		MessageID:   5678,
 		MessageType: "message-type",

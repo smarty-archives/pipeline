@@ -4,11 +4,12 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/smartystreets/go-messenger"
 	"github.com/streadway/amqp"
 )
 
-func fromAMQPDelivery(delivery amqp.Delivery, channel Acknowledger) Delivery {
-	return Delivery{
+func fromAMQPDelivery(delivery amqp.Delivery, channel Acknowledger) messenger.Delivery {
+	return messenger.Delivery{
 		SourceID:    parseUint64(delivery.AppId),
 		MessageID:   parseUint64(delivery.MessageId),
 		MessageType: delivery.Type,
@@ -22,7 +23,7 @@ func parseUint64(value string) uint64 {
 	return parsed
 }
 
-func toAMQPDispatch(dispatch Dispatch, now time.Time) amqp.Publishing {
+func toAMQPDispatch(dispatch messenger.Dispatch, now time.Time) amqp.Publishing {
 	return amqp.Publishing{
 		AppId:           strconv.FormatUint(dispatch.SourceID, base10),
 		MessageId:       strconv.FormatUint(dispatch.MessageID, base10),

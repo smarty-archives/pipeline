@@ -1,12 +1,14 @@
 package rabbit
 
+import "github.com/smartystreets/go-messenger"
+
 type ChannelReader struct {
 	controller       Controller
 	queue            string
 	bindings         []string
 	control          chan interface{}
 	acknowledgements chan interface{}
-	deliveries       chan Delivery
+	deliveries       chan messenger.Delivery
 	shutdown         bool
 	deliveryCount    uint64
 }
@@ -18,7 +20,7 @@ func newReader(controller Controller, queue string, bindings []string) *ChannelR
 		bindings:         bindings,
 		control:          make(chan interface{}, 32),
 		acknowledgements: make(chan interface{}, 1024),
-		deliveries:       make(chan Delivery, 1024),
+		deliveries:       make(chan messenger.Delivery, 1024),
 	}
 }
 
@@ -72,7 +74,7 @@ func (this *ChannelReader) Close() {
 	this.control <- shutdownRequested{}
 }
 
-func (this *ChannelReader) Deliveries() <-chan Delivery {
+func (this *ChannelReader) Deliveries() <-chan messenger.Delivery {
 	return this.deliveries
 }
 func (this *ChannelReader) Acknowledgements() chan<- interface{} {

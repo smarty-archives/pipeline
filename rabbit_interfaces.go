@@ -1,4 +1,4 @@
-package rabbit
+package messenger
 
 type (
 	MessageBroker interface {
@@ -30,9 +30,3 @@ type (
 		Commit() error
 	}
 )
-
-type Controller interface {
-	openChannel() Channel
-	removeReader(Reader)
-	removeWriter(Writer)
-}

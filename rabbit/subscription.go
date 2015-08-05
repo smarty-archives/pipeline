@@ -4,6 +4,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/smartystreets/go-messenger"
 	"github.com/streadway/amqp"
 )
 
@@ -13,12 +14,12 @@ type Subscription struct {
 	consumer string
 	bindings []string
 	control  chan<- interface{}
-	output   chan<- Delivery
+	output   chan<- messenger.Delivery
 }
 
 func newSubscription(
 	channel Consumer, queue string, bindings []string,
-	control chan<- interface{}, output chan<- Delivery,
+	control chan<- interface{}, output chan<- messenger.Delivery,
 ) *Subscription {
 	return &Subscription{
 		channel:  channel,

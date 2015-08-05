@@ -8,6 +8,7 @@ import (
 
 	"github.com/smartystreets/assertions/should"
 	"github.com/smartystreets/clock"
+	"github.com/smartystreets/go-messenger"
 	"github.com/smartystreets/gunit"
 	"github.com/streadway/amqp"
 )
@@ -384,14 +385,14 @@ func (this *FakeChannel) RollbackTransaction() error                   { return 
 
 type FakeWriter struct{ closed int }
 
-func (this *FakeWriter) Close()               { this.closed++ }
-func (this *FakeWriter) Write(Dispatch) error { return nil }
+func (this *FakeWriter) Close()                         { this.closed++ }
+func (this *FakeWriter) Write(messenger.Dispatch) error { return nil }
 
 ////////////////////////////////////////////////////////
 
 type FakeReader struct{ closed int }
 
-func (this *FakeReader) Close()                               { this.closed++ }
-func (this *FakeReader) Listen()                              {}
-func (this *FakeReader) Deliveries() <-chan Delivery          { return nil }
-func (this *FakeReader) Acknowledgements() chan<- interface{} { return nil }
+func (this *FakeReader) Close()                                { this.closed++ }
+func (this *FakeReader) Listen()                               {}
+func (this *FakeReader) Deliveries() <-chan messenger.Delivery { return nil }
+func (this *FakeReader) Acknowledgements() chan<- interface{}  { return nil }

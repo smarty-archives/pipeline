@@ -4,6 +4,7 @@ import (
 	"errors"
 
 	"github.com/smartystreets/assertions/should"
+	"github.com/smartystreets/go-messenger"
 	"github.com/smartystreets/gunit"
 )
 
@@ -22,7 +23,7 @@ func (this *TransactionWriterFixture) Setup() {
 ///////////////////////////////////////////////////////////////
 
 func (this *TransactionWriterFixture) TestDispatchIsWrittenToChannel() {
-	dispatch := Dispatch{
+	dispatch := messenger.Dispatch{
 		Destination: "destination",
 		Payload:     []byte{1, 2, 3, 4, 5},
 	}
@@ -40,7 +41,7 @@ func (this *TransactionWriterFixture) TestDispatchIsWrittenToChannel() {
 func (this *TransactionWriterFixture) TestChannelCannotBeObtained() {
 	this.controller.channel = nil
 
-	err := this.writer.Write(Dispatch{})
+	err := this.writer.Write(messenger.Dispatch{})
 
 	this.So(err, should.NotBeNil)
 }
@@ -50,7 +51,7 @@ func (this *TransactionWriterFixture) TestChannelCannotBeObtained() {
 func (this *TransactionWriterFixture) TestFailedChannelNOTClosedOnFailedWrites() {
 	this.controller.channel.err = errors.New("channel failed")
 
-	err := this.writer.Write(Dispatch{})
+	err := this.writer.Write(messenger.Dispatch{})
 
 	this.So(err, should.Equal, this.controller.channel.err)
 	this.So(this.controller.channel.closed, should.Equal, 0)
@@ -63,7 +64,7 @@ func (this *TransactionWriterFixture) TestCloseWriter() {
 	this.writer.Close()
 
 	this.So(this.writer.closed, should.BeTrue)
-	this.So(this.writer.Write(Dispatch{}), should.Equal, channelFailure)
+	this.So(this.writer.Write(messenger.Dispatch{}), should.Equal, channelFailure)
 }
 
 ///////////////////////////////////////////////////////////////
@@ -75,7 +76,7 @@ func (this *TransactionWriterFixture) TestCommitWithoutWriteFails() {
 }
 
 func (this *TransactionWriterFixture) TestCommitCallsUnderlyingChannel() {
-	this.writer.Write(Dispatch{})
+	this.writer.Write(messenger.Dispatch{})
 
 	err := this.writer.Commit()
 	this.So(err, should.BeNil)
@@ -83,7 +84,7 @@ func (this *TransactionWriterFixture) TestCommitCallsUnderlyingChannel() {
 }
 
 func (this *TransactionWriterFixture) TestFailedCommitsReturnError() {
-	this.writer.Write(Dispatch{})
+	this.writer.Write(messenger.Dispatch{})
 	this.controller.channel.err = errors.New("Commit failure")
 
 	err := this.writer.Commit()

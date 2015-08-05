@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/smartystreets/go-rabbit"
+	"github.com/smartystreets/go-messenger/rabbit"
 	"github.com/streadway/amqp"
 )
 

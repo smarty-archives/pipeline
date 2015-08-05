@@ -1,4 +1,4 @@
-package rabbit
+package messenger
 
 type Delivery struct {
 	SourceID    uint64
