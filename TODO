@@ -10,3 +10,10 @@ serialization writer
 	and serializes it if not already done
 	and then clears out Message property?
 
+
+
+interface for Writer and CommitWriter should be *TOTALLY* different
+for the Write() method, e.g. return the error and not
+
+this prevents a Writer from being used place of a commit writer
+and then commit never gets called
