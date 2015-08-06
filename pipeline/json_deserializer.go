@@ -32,6 +32,7 @@ func (this *JSONDeserializer) Deserialize(delivery *messenger.Delivery) {
 	if !found && this.panicMissingType {
 		log.Panicf("MessageType not found: '%s'", delivery.MessageType)
 	} else if !found {
+		log.Printf("[WARN] MessageType not found: '%s'", delivery.MessageType)
 		return
 	}
 
@@ -40,6 +41,7 @@ func (this *JSONDeserializer) Deserialize(delivery *messenger.Delivery) {
 	if err != nil && this.panicUnmarshal {
 		log.Panicf("Could not deserialize message of type '%s': %s", delivery.MessageType, err.Error())
 	} else if err != nil {
+		log.Printf("[WARN] Could not deserialize message of type '%s': %s", delivery.MessageType, err.Error())
 		return
 	}
 	delivery.Message = message
