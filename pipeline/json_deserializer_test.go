@@ -43,7 +43,7 @@ func (this *JSONDeserializerFixture) TestDeserializeUnknownMessageType() {
 }
 
 func (this *JSONDeserializerFixture) TestDeserializeUnkonwnMessageTypeIsCriticalFailure() {
-	this.deserializer.PanicWhenMessageTypeIsUnkonwn()
+	this.deserializer.PanicWhenMessageTypeIsUnknown()
 
 	delivery := &messenger.Delivery{
 		MessageType: "What Am I?",

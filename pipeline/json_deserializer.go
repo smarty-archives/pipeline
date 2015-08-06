@@ -19,7 +19,7 @@ func NewJSONDeserializer(types map[string]reflect.Type) *JSONDeserializer {
 	return &JSONDeserializer{types: types}
 }
 
-func (this *JSONDeserializer) PanicWhenMessageTypeIsUnkonwn() {
+func (this *JSONDeserializer) PanicWhenMessageTypeIsUnknown() {
 	this.panicMissingType = true
 }
 
