@@ -15,6 +15,7 @@ func fromAMQPDelivery(delivery amqp.Delivery, channel Acknowledger) messenger.De
 		MessageType: delivery.Type,
 		Encoding:    delivery.ContentEncoding,
 		Payload:     delivery.Body,
+		Upstream:    delivery,
 		Receipt:     newReceipt(channel, delivery.DeliveryTag),
 	}
 }

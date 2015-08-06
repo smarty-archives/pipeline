@@ -76,8 +76,11 @@ func (this *SubscriptionFixture) assertListen() {
 
 func (this *SubscriptionFixture) TestDeliveriesArePushedToTheApplication() {
 	this.queue = "test-queue"
-	this.channel.incoming <- amqp.Delivery{Type: "test-message", Body: []byte{1, 2, 3, 4, 5}}
-	this.channel.incoming <- amqp.Delivery{Type: "test-message2", Body: []byte{6, 7, 8, 9, 10}}
+	delivery1 := amqp.Delivery{Type: "test-message", Body: []byte{1, 2, 3, 4, 5}}
+	delivery2 := amqp.Delivery{Type: "test-message2", Body: []byte{6, 7, 8, 9, 10}}
+
+	this.channel.incoming <- delivery1
+	this.channel.incoming <- delivery2
 	close(this.channel.incoming)
 
 	this.createSubscription()
@@ -87,11 +90,13 @@ func (this *SubscriptionFixture) TestDeliveriesArePushedToTheApplication() {
 		MessageType: "test-message",
 		Payload:     []byte{1, 2, 3, 4, 5},
 		Receipt:     newReceipt(this.channel, 0),
+		Upstream:    delivery1,
 	})
 	this.So((<-this.output), should.Resemble, messenger.Delivery{
 		MessageType: "test-message2",
 		Payload:     []byte{6, 7, 8, 9, 10},
 		Receipt:     newReceipt(this.channel, 0),
+		Upstream:    delivery2,
 	})
 	this.So((<-this.control).(subscriptionClosed).Deliveries, should.Equal, 2)
 }

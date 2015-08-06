@@ -6,6 +6,7 @@ type Delivery struct {
 	MessageType string
 	Encoding    string
 	Payload     []byte
+	Upstream    interface{}
 	Receipt     interface{}
 	Message     interface{}
 }

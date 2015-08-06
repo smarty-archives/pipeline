@@ -36,6 +36,7 @@ func (this *RabbitAdapterFixture) TestAMQPDeliveryConversion() {
 		MessageType: "message-type",
 		Encoding:    "content-encoding",
 		Payload:     upstream.Body,
+		Upstream:    upstream,
 		Receipt:     DeliveryReceipt{channel: nil, deliveryTag: upstream.DeliveryTag},
 	})
 }
