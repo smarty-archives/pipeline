@@ -2,6 +2,7 @@ package mq
 
 import (
 	"log"
+	"strings"
 
 	"github.com/streadway/amqp"
 )
@@ -56,7 +57,11 @@ func (this *Channel) AcknowledgeMultipleMessages(deliveryTag uint64) error {
 }
 
 func (this *Channel) PublishMessage(destination string, message amqp.Publishing) error {
-	return this.inner.Publish(destination, "", false, false, message)
+	if strings.HasPrefix(destination, "@") {
+		return this.inner.Publish("", destination[1:], false, false, message)
+	} else {
+		return this.inner.Publish(destination, "", false, false, message)
+	}
 }
 
 func (this *Channel) CommitTransaction() error {
