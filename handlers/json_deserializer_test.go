@@ -1,6 +1,9 @@
 package pipeline
 
 import (
+	"io/ioutil"
+	"log"
+	"os"
 	"reflect"
 
 	"github.com/smartystreets/assertions/should"
@@ -15,9 +18,15 @@ type JSONDeserializerFixture struct {
 }
 
 func (this *JSONDeserializerFixture) Setup() {
+	log.SetOutput(ioutil.Discard)
+
 	this.deserializer = NewJSONDeserializer(map[string]reflect.Type{
 		"ApplicationEvent": reflect.TypeOf(ApplicationEvent{}),
 	})
+}
+
+func (this *JSONDeserializerFixture) Teardown() {
+	log.SetOutput(os.Stdout)
 }
 
 func (this *JSONDeserializerFixture) TestDeserializeKnownMessageType() {
