@@ -25,6 +25,9 @@ func parseUint64(value string) uint64 {
 }
 
 func toAMQPDispatch(dispatch messaging.Dispatch, now time.Time) amqp.Publishing {
+	// FUTURE: add timestamp field to dispatch
+	// if value is empty, use now
+
 	return amqp.Publishing{
 		AppId:           strconv.FormatUint(dispatch.SourceID, base10),
 		MessageId:       strconv.FormatUint(dispatch.MessageID, base10),
