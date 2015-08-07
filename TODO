@@ -1,7 +1,8 @@
 json serializer (serialize, deserialize)
-	json.Marshal/Unmarshal (panic, log, etc.)
+	json.Marshal (panic, log, etc.)
+	[X] json.Unmarshal (panic, log, etc.)
 
-deserialization_handler
+[X] deserialization_handler
 	Listen to deliveries and pipe them to deserializer
 	Pipe results to the application
 
