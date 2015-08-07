@@ -8,8 +8,6 @@ type WaitGroupListener struct {
 }
 
 func NewWaitGroupListener(listener Listener, waiter *sync.WaitGroup) Listener {
-	waiter.Add(1)
-
 	return &WaitGroupListener{
 		inner:  listener,
 		waiter: waiter,
@@ -17,6 +15,7 @@ func NewWaitGroupListener(listener Listener, waiter *sync.WaitGroup) Listener {
 }
 
 func (this *WaitGroupListener) Listen() {
+	this.waiter.Add(1)
 	this.inner.Listen()
 	this.waiter.Done()
 }
