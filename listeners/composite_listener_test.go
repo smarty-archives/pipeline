@@ -29,6 +29,24 @@ func (this *CompositeListenerFixture) TestCompositeListenerCallsInnerListenersCo
 
 ////////////////////////////////////////////////////////////////////////////////
 
+func (this *CompositeListenerFixture) TestCompositeListenerDoesntFailWithNoListeners() {
+	this.listeners = nil
+	this.composite = NewCompositeListener(this.listeners)
+	this.So(this.composite.Listen, should.NotPanic)
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+func (this *CompositeListenerFixture) TestCompositeListenerSkipNilListeners() {
+	this.listeners = append(this.listeners, &FakeForCompositeListener{})
+	this.listeners = append(this.listeners, nil)
+	this.listeners = append(this.listeners, nil)
+	this.composite = NewCompositeListener(this.listeners)
+	this.So(this.composite.Listen, should.NotPanic)
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
 var nap = time.Millisecond
 
 type FakeForCompositeListener struct{}

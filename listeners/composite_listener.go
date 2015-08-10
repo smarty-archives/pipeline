@@ -5,9 +5,14 @@ type CompositeListener struct {
 }
 
 func NewCompositeListener(listeners []Listener) Listener {
-	return &CompositeListener{
-		listeners: listeners,
+	filtered := make([]Listener, 0, len(listeners))
+	for _, listener := range listeners {
+		if listener != nil {
+			filtered = append(filtered, listener)
+		}
 	}
+
+	return &CompositeListener{listeners: filtered}
 }
 
 func (this *CompositeListener) Listen() {
