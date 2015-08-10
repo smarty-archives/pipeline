@@ -1,4 +1,4 @@
-package web
+package listeners
 
 import (
 	"crypto/tls"
@@ -8,13 +8,13 @@ import (
 	"time"
 )
 
-type Listener struct {
+type HTTPListener struct {
 	certificatePEM string
 	inner          http.Server
 }
 
-func NewListener(listenAddress string, handler http.Handler) *Listener {
-	return &Listener{
+func NewHTTPListener(listenAddress string, handler http.Handler) *HTTPListener {
+	return &HTTPListener{
 		inner: http.Server{
 			Addr:           listenAddress,
 			Handler:        handler,
@@ -25,7 +25,7 @@ func NewListener(listenAddress string, handler http.Handler) *Listener {
 		},
 	}
 }
-func (this *Listener) WithTLS(certificatePEM string, tlsConfig *tls.Config) {
+func (this *HTTPListener) WithTLS(certificatePEM string, tlsConfig *tls.Config) {
 	if tlsConfig == nil {
 		tlsConfig = &tls.Config{
 			MinVersion:               tls.VersionTLS12,
@@ -43,13 +43,13 @@ func (this *Listener) WithTLS(certificatePEM string, tlsConfig *tls.Config) {
 	this.inner.TLSConfig = tlsConfig
 }
 
-func (this *Listener) Listen() {
+func (this *HTTPListener) Listen() {
 	log.Printf("[INFO] Listening for web traffic on %s.\n", this.inner.Addr)
 	if err := this.listen(); err != nil {
 		log.Fatal("[ERROR] Unable to listen to web traffic: ", err)
 	}
 }
-func (this *Listener) listen() error {
+func (this *HTTPListener) listen() error {
 	if len(this.certificatePEM) == 0 {
 		return this.inner.ListenAndServe()
 	}
