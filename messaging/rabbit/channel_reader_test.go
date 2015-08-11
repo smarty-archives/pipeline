@@ -74,6 +74,10 @@ func (this *ChannelReaderFixture) TestCloseShutsdownReaderAfterAllMessagesProces
 
 	this.reader.Listen()
 
+	for range this.reader.Deliveries() {
+	}
+
+	this.So(true, should.BeTrue) // we only get here when the golang channel is closed
 	this.So(channel.closed, should.Equal, 1)
 }
 
