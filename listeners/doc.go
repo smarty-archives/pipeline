@@ -9,3 +9,8 @@ type Listener interface {
 	// its own goroutine so that other Listeners may run concurrently.
 	Listen()
 }
+
+type WaitGroup interface {
+	Add(delta int)
+	Done()
+}

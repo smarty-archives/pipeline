@@ -1,13 +1,11 @@
 package listeners
 
-import "sync"
-
 type WaitGroupListener struct {
 	inner  Listener
-	waiter *sync.WaitGroup
+	waiter WaitGroup
 }
 
-func NewWaitGroupListener(listener Listener, waiter *sync.WaitGroup) Listener {
+func NewWaitGroupListener(listener Listener, waiter WaitGroup) Listener {
 	return &WaitGroupListener{
 		inner:  listener,
 		waiter: waiter,

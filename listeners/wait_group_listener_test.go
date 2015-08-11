@@ -1,8 +1,6 @@
 package listeners
 
 import (
-	"fmt"
-	"strings"
 	"sync"
 
 	"github.com/smartystreets/assertions/should"
@@ -13,20 +11,22 @@ type WaitGroupListenerFixture struct {
 	*gunit.Fixture
 
 	inner    *FakeForWaitGroupListener
-	waiter   *sync.WaitGroup
+	waiter   *WrappedWaitGroup
 	listener Listener
 }
 
 func (this *WaitGroupListenerFixture) Setup() {
-	this.waiter = &sync.WaitGroup{}
-	this.inner = &FakeForWaitGroupListener{waiter: this.waiter}
+	this.waiter = NewWrappedWaitGroup()
+	this.inner = &FakeForWaitGroupListener{}
 	this.listener = NewWaitGroupListener(this.inner, this.waiter)
 }
 
 func (this *WaitGroupListenerFixture) TestWaitGroupListenerCallsDone() {
 	this.listener.Listen()
-	this.waiter.Wait() // ensures Done() is called
-	this.So(this.inner.working, should.BeTrue)
+	this.waiter.Wait() // This ensures that .Add(1) and .Done() were called.
+	this.So(this.waiter.added, should.BeTrue)
+	this.So(this.waiter.done, should.BeTrue)
+	this.So(this.inner.called, should.Equal, 1)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -40,13 +40,37 @@ func (this *WaitGroupListenerFixture) TestNilInnerListener() {
 ////////////////////////////////////////////////////////////////////////////////
 
 type FakeForWaitGroupListener struct {
-	working bool
-	waiter  *sync.WaitGroup
+	called int
 }
 
 func (this *FakeForWaitGroupListener) Listen() {
-	value := fmt.Sprintf("%+v", this.waiter)
-	this.working = strings.Contains(value, "counter:1") // ensures .Add(1) is called
+	this.called++
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+type WrappedWaitGroup struct {
+	inner *sync.WaitGroup
+	added bool
+	done  bool
+}
+
+func NewWrappedWaitGroup() *WrappedWaitGroup {
+	return &WrappedWaitGroup{inner: new(sync.WaitGroup)}
+}
+
+func (this *WrappedWaitGroup) Add(delta int) {
+	this.added = true
+	this.inner.Add(delta)
+}
+
+func (this *WrappedWaitGroup) Done() {
+	this.done = true
+	this.inner.Done()
+}
+
+func (this *WrappedWaitGroup) Wait() {
+	this.inner.Wait()
 }
 
 ////////////////////////////////////////////////////////////////////////////////
