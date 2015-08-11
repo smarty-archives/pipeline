@@ -29,7 +29,7 @@ func (this *DeserializationHandlerFixture) TestHandler() {
 	this.input <- in2
 	close(this.input)
 
-	this.handler.Handle()
+	this.handler.Listen()
 
 	out1 := <-this.output
 	out2 := <-this.output

@@ -16,10 +16,11 @@ func NewDeserializationHandler(input, output chan messaging.Delivery, deserializ
 	}
 }
 
-func (this *DeserializationHandler) Handle() {
+func (this *DeserializationHandler) Listen() {
 	for delivery := range this.input {
 		this.deserializer.Deserialize(&delivery)
 		this.output <- delivery
 	}
+
 	close(this.output)
 }
