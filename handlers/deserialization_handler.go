@@ -1,4 +1,4 @@
-package pipeline
+package handlers
 
 import "github.com/smartystreets/pipeline/messaging"
 
