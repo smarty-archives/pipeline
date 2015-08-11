@@ -31,6 +31,14 @@ func (this *WaitGroupListenerFixture) TestWaitGroupListenerCallsDone() {
 
 ////////////////////////////////////////////////////////////////////////////////
 
+func (this *WaitGroupListenerFixture) TestNilInnerListener() {
+	this.listener = NewWaitGroupListener(nil, this.waiter)
+
+	this.So(this.listener.Listen, should.NotPanic)
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
 type FakeForWaitGroupListener struct {
 	working bool
 	waiter  *sync.WaitGroup

@@ -15,6 +15,10 @@ func NewWaitGroupListener(listener Listener, waiter *sync.WaitGroup) Listener {
 }
 
 func (this *WaitGroupListener) Listen() {
+	if this.inner == nil {
+		return
+	}
+
 	this.waiter.Add(1)
 	this.inner.Listen()
 	this.waiter.Done()
