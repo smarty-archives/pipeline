@@ -4,7 +4,6 @@ package listeners
 // one or more input channels (received in it's constructor) and
 // optionally sends other items on one or more output channels.
 type Listener interface {
-
 	// Listen is generally a long-running method, and should be executed within
 	// its own goroutine so that other Listeners may run concurrently.
 	Listen()
