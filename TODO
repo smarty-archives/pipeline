@@ -1,20 +1,13 @@
-json serializer (serialize, deserialize)
-	json.Marshal (panic, log, etc.)
-	[X] json.Unmarshal (panic, log, etc.)
-
-[X] deserialization_handler
-	Listen to deliveries and pipe them to deserializer
-	Pipe results to the application
-
 serialization writer
 	Takes "Message" property on Dispatch
 	and serializes it if not already done
 	and then clears out Message property?
-
-
 
 interface for Writer and CommitWriter should be *TOTALLY* different
 for the Write() method, e.g. return the error and not
 
 this prevents a Writer from being used place of a commit writer
 and then commit never gets called
+
+web/ResponseWriter helper methods, e.g. status codes with message, etc. etc.
+web/constants with mime types, e.g. application/json application/javascript text/xml, text/plain, etc.
