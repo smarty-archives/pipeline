@@ -21,7 +21,8 @@ func (this *JSONDeserializerFixture) Setup() {
 	log.SetOutput(ioutil.Discard)
 
 	this.deserializer = NewJSONDeserializer(map[string]reflect.Type{
-		"ApplicationEvent": reflect.TypeOf(ApplicationEvent{}),
+		"ApplicationEvent":  reflect.TypeOf(ApplicationEvent{}),
+		"*ApplicationEvent": reflect.TypeOf(&ApplicationEvent{}),
 	})
 }
 
@@ -29,9 +30,20 @@ func (this *JSONDeserializerFixture) Teardown() {
 	log.SetOutput(os.Stdout)
 }
 
-func (this *JSONDeserializerFixture) TestDeserializeKnownMessageType() {
+func (this *JSONDeserializerFixture) TestDeserializeKnownStructMessageType() {
 	delivery := &messaging.Delivery{
 		MessageType: "ApplicationEvent",
+		Payload:     []byte(`{"Message": "Hello, World!"}`),
+	}
+
+	this.deserializer.Deserialize(delivery)
+
+	this.So(delivery.Message, should.Resemble, ApplicationEvent{Message: "Hello, World!"})
+}
+
+func (this *JSONDeserializerFixture) TestDeserializeKnownPointerMessageType() {
+	delivery := &messaging.Delivery{
+		MessageType: "*ApplicationEvent",
 		Payload:     []byte(`{"Message": "Hello, World!"}`),
 	}
 
@@ -51,7 +63,7 @@ func (this *JSONDeserializerFixture) TestDeserializeUnknownMessageType() {
 	this.So(delivery.Message, should.BeNil)
 }
 
-func (this *JSONDeserializerFixture) TestDeserializeUnkonwnMessageTypeIsCriticalFailure() {
+func (this *JSONDeserializerFixture) TestDeserializeUnknownMessageTypeIsCriticalFailure() {
 	this.deserializer.PanicWhenMessageTypeIsUnknown()
 
 	delivery := &messaging.Delivery{

@@ -36,13 +36,14 @@ func (this *JSONDeserializer) Deserialize(delivery *messaging.Delivery) {
 		return
 	}
 
-	message := reflect.New(messageType).Interface()
-	err := json.Unmarshal(delivery.Payload, message)
+	pointer := reflect.New(messageType)
+	err := json.Unmarshal(delivery.Payload, pointer.Interface())
 	if err != nil && this.panicUnmarshal {
 		log.Panicf("Could not deserialize message of type '%s': %s", delivery.MessageType, err.Error())
 	} else if err != nil {
 		log.Printf("[WARN] Could not deserialize message of type '%s': %s", delivery.MessageType, err.Error())
 		return
 	}
-	delivery.Message = message
+
+	delivery.Message = pointer.Elem().Interface()
 }
