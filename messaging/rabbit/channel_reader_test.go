@@ -83,6 +83,29 @@ func (this *ChannelReaderFixture) TestCloseShutsdownReaderAfterAllMessagesProces
 
 ///////////////////////////////////////////////////////////////
 
+func (this *ChannelReaderFixture) TestCloseShutsdownReaderAfterLastMessageProcessed() {
+	channel := this.controller.channel
+	channel.deliveries <- amqp.Delivery{}
+	channel.deliveries <- amqp.Delivery{DeliveryTag: 42}
+
+	go func() {
+		<-this.reader.Deliveries()
+		last := <-this.reader.Deliveries()
+		this.reader.Close()
+		this.reader.Acknowledgements() <- last.Receipt
+	}()
+
+	this.reader.Listen()
+
+	for range this.reader.Deliveries() {
+	}
+
+	this.So(true, should.BeTrue) // we only get here when the golang channel is closed
+	this.So(channel.closed, should.Equal, 1)
+}
+
+///////////////////////////////////////////////////////////////
+
 type FakeReaderController struct {
 	channel        *FakeReaderChannel
 	removedReaders []messaging.Reader

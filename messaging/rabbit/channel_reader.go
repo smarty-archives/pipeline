@@ -49,11 +49,13 @@ func (this *ChannelReader) listen() bool {
 		case subscriptionClosed:
 			this.deliveryCount += item.DeliveryCount
 			if this.shutdown {
-				// keep channel alive and gracefully stop acknowledgement
-				this.acknowledgements <- subscriptionClosed{DeliveryCount: this.deliveryCount}
+				// keep channel alive and gracefully stop acknowledgement listener
+				item.DeliveryCount = this.deliveryCount
+				this.acknowledgements <- item
 				this.deliveryCount = 0
 			} else {
-				channel.Close() // channel failure; reconnect
+				// channel failure; reconnect
+				channel.Close()
 				return true
 			}
 		case acknowledgementCompleted:
