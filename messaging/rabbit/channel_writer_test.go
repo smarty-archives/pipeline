@@ -72,7 +72,7 @@ func (this *ChannelWriterFixture) TestCloseWriter() {
 
 type FakeWriterController struct {
 	channel        *FakeWriterChannel
-	removedWriters []messaging.Writer
+	removedWriters []messaging.Closer
 }
 
 func newFakeWriterController() *FakeWriterController {
@@ -87,7 +87,7 @@ func (this *FakeWriterController) openChannel() Channel {
 	return this.channel
 }
 func (this *FakeWriterController) removeReader(reader messaging.Reader) {}
-func (this *FakeWriterController) removeWriter(writer messaging.Writer) {
+func (this *FakeWriterController) removeWriter(writer messaging.Closer) {
 	this.removedWriters = append(this.removedWriters, writer)
 }
 

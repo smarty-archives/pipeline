@@ -102,7 +102,7 @@ func (this *FakeReaderController) openChannel() Channel {
 func (this *FakeReaderController) removeReader(reader messaging.Reader) {
 	this.removedReaders = append(this.removedReaders, reader)
 }
-func (this *FakeReaderController) removeWriter(writer messaging.Writer) {}
+func (this *FakeReaderController) removeWriter(writer messaging.Closer) {}
 
 func (this *FakeReaderController) Dispose() {
 	this.channel = nil

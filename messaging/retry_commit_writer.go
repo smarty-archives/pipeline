@@ -19,9 +19,8 @@ func NewRetryCommitWriter(inner CommitWriter, max uint64, sleep func(uint64)) *R
 	}
 }
 
-func (this *RetryCommitWriter) Write(message Dispatch) error {
+func (this *RetryCommitWriter) Write(message Dispatch) {
 	this.buffer = append(this.buffer, message)
-	return nil
 }
 
 func (this *RetryCommitWriter) Commit() (err error) {
@@ -40,9 +39,7 @@ func (this *RetryCommitWriter) Commit() (err error) {
 }
 func (this *RetryCommitWriter) try() error {
 	for _, item := range this.buffer {
-		if this.inner.Write(item) == WriterClosedError {
-			return WriterClosedError
-		}
+		this.inner.Write(item)
 	}
 
 	return this.inner.Commit()

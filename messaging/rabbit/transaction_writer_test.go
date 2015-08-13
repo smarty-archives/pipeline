@@ -28,9 +28,8 @@ func (this *TransactionWriterFixture) TestDispatchIsWrittenToChannel() {
 		Payload:     []byte{1, 2, 3, 4, 5},
 	}
 
-	err := this.writer.Write(dispatch)
+	this.writer.Write(dispatch)
 
-	this.So(err, should.BeNil)
 	this.So(this.controller.channel.exchange, should.Equal, dispatch.Destination)
 	this.So(this.controller.channel.dispatch.Body, should.Resemble, dispatch.Payload)
 	this.So(this.controller.channel.transactional, should.BeTrue)
@@ -41,9 +40,7 @@ func (this *TransactionWriterFixture) TestDispatchIsWrittenToChannel() {
 func (this *TransactionWriterFixture) TestChannelCannotBeObtained() {
 	this.controller.channel = nil
 
-	err := this.writer.Write(messaging.Dispatch{})
-
-	this.So(err, should.NotBeNil)
+	this.So(func() { this.writer.Write(messaging.Dispatch{}) }, should.NotPanic)
 }
 
 ///////////////////////////////////////////////////////////////
@@ -51,9 +48,8 @@ func (this *TransactionWriterFixture) TestChannelCannotBeObtained() {
 func (this *TransactionWriterFixture) TestFailedChannelNOTClosedOnFailedWrites() {
 	this.controller.channel.err = errors.New("channel failed")
 
-	err := this.writer.Write(messaging.Dispatch{})
+	this.writer.Write(messaging.Dispatch{})
 
-	this.So(err, should.Equal, this.controller.channel.err)
 	this.So(this.controller.channel.closed, should.Equal, 0)
 	this.So(this.writer.channel, should.NotBeNil)
 }
@@ -62,9 +58,7 @@ func (this *TransactionWriterFixture) TestFailedChannelNOTClosedOnFailedWrites()
 
 func (this *TransactionWriterFixture) TestCloseWriter() {
 	this.writer.Close()
-
 	this.So(this.writer.closed, should.BeTrue)
-	this.So(this.writer.Write(messaging.Dispatch{}), should.Equal, messaging.WriterClosedError)
 }
 
 ///////////////////////////////////////////////////////////////

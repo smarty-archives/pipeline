@@ -14,7 +14,7 @@ type (
 
 	Reader interface {
 		Listen()
-		Close()
+		Closer
 
 		Deliveries() <-chan Delivery
 		Acknowledgements() chan<- interface{}
@@ -22,11 +22,16 @@ type (
 
 	Writer interface {
 		Write(Dispatch) error
-		Close()
+		Closer
 	}
 
 	CommitWriter interface {
-		Writer
+		Write(Dispatch)
 		Commit() error
+		Closer
+	}
+
+	Closer interface {
+		Close()
 	}
 )

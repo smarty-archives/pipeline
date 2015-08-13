@@ -24,16 +24,16 @@ func transactionWriter(controller Controller) *TransactionWriter {
 	}
 }
 
-func (this *TransactionWriter) Write(message messaging.Dispatch) error {
+func (this *TransactionWriter) Write(message messaging.Dispatch) {
 	if !this.ensureChannel() {
-		return messaging.WriterClosedError
+		return
 	}
 
 	// FUTURE: if error on publish, don't publish anything else
 	// until we reset the channel during commit
 	// opening a new channel is what marks it as able to continue
 	dispatch := toAMQPDispatch(message, clock.Now())
-	return this.channel.PublishMessage(message.Destination, dispatch)
+	this.channel.PublishMessage(message.Destination, dispatch)
 }
 
 func (this *TransactionWriter) Commit() error {

@@ -15,7 +15,7 @@ type Broker struct {
 	connector  Connector
 	connection Connection
 	readers    []messaging.Reader
-	writers    []messaging.Writer
+	writers    []messaging.Closer
 	state      uint64
 	updates    func(uint64)
 }
@@ -126,7 +126,7 @@ func (this *Broker) removeReader(reader messaging.Reader) {
 	this.initiateWriterShutdown() // when all readers shutdown processes have been completed
 	this.completeShutdown()
 }
-func (this *Broker) removeWriter(writer messaging.Writer) {
+func (this *Broker) removeWriter(writer messaging.Closer) {
 	for i, item := range this.writers {
 		if writer != item {
 			continue
@@ -158,15 +158,23 @@ func (this *Broker) openReader(queue string, bindings []string) messaging.Reader
 
 func (this *Broker) OpenWriter() messaging.Writer {
 	writer := this.openWriter(false)
+	if writer == nil {
+		return nil
+	}
+
 	this.writers = append(this.writers, writer)
-	return writer
+	return writer.(messaging.Writer)
 }
 func (this *Broker) OpenTransactionalWriter() messaging.CommitWriter {
-	writer := this.openWriter(true).(messaging.CommitWriter)
+	writer := this.openWriter(true)
+	if writer == nil {
+		return nil
+	}
+
 	this.writers = append(this.writers, writer)
-	return writer
+	return writer.(messaging.CommitWriter)
 }
-func (this *Broker) openWriter(transactional bool) messaging.Writer {
+func (this *Broker) openWriter(transactional bool) messaging.Closer {
 	this.mutex.Lock()
 	defer this.mutex.Unlock()
 

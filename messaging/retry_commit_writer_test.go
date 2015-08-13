@@ -97,22 +97,18 @@ type FakeRetryCommitWriter struct {
 	written     []Dispatch
 }
 
-func (this *FakeRetryCommitWriter) Write(message Dispatch) error {
+func (this *FakeRetryCommitWriter) Write(message Dispatch) {
 	this.writes++
 	this.written = append(this.written, message)
+}
+func (this *FakeRetryCommitWriter) Commit() error {
+	this.commits++
 
 	if this.closed > 0 {
 		return WriterClosedError
 	} else if this.errorsUntil >= this.commits {
 		return errors.New("general write failure")
-	}
-
-	return nil
-}
-func (this *FakeRetryCommitWriter) Commit() error {
-	this.commits++
-
-	if this.errorsUntil >= this.commits {
+	} else if this.errorsUntil >= this.commits {
 		return errors.New("Unable to commit")
 	}
 
