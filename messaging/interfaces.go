@@ -30,3 +30,7 @@ type (
 		Commit() error
 	}
 )
+
+type Serializer interface {
+	Serialize(interface{}) ([]byte, error)
+}
