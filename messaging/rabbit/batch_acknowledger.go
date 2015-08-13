@@ -38,7 +38,7 @@ func (this *BatchAcknowledger) processItem(entity interface{}) {
 }
 func (this *BatchAcknowledger) processClosingEvent(item subscriptionClosed) {
 	this.closing = true
-	this.maximum += item.Deliveries
+	this.maximum += item.DeliveryCount
 }
 func (this *BatchAcknowledger) processAcknowledgment(item DeliveryReceipt) {
 	this.count++

@@ -34,7 +34,7 @@ func newSubscription(
 func (this *Subscription) Listen() {
 	input := this.open()
 	count := this.listen(input)
-	this.control <- subscriptionClosed{Deliveries: count}
+	this.control <- subscriptionClosed{DeliveryCount: count}
 }
 func (this *Subscription) listen(input <-chan amqp.Delivery) (count uint64) {
 	if input == nil {

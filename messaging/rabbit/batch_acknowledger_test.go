@@ -82,8 +82,8 @@ func (this *SimpleAcknowledgerFixture) TestLoopExitsAfterAllDeliveriesReceived()
 	this.input <- newReceipt(this.channel, 1)
 	this.input <- newReceipt(this.channel, 2)
 	this.input <- newReceipt(this.channel, 3)
-	this.input <- subscriptionClosed{Deliveries: 1} // realistically, we'd only ever see a single closed event per ack'r lifetime
-	this.input <- subscriptionClosed{Deliveries: 2}
+	this.input <- subscriptionClosed{DeliveryCount: 1} // realistically, we'd only ever see a single closed event per ack'r lifetime
+	this.input <- subscriptionClosed{DeliveryCount: 2}
 
 	this.So((<-this.control).(acknowledgementCompleted).Acknowledgements, should.Equal, 3)
 	this.So(this.channel.callsMulti, should.Equal, 1)
@@ -93,9 +93,9 @@ func (this *SimpleAcknowledgerFixture) TestLoopExitsAfterAllDeliveriesReceived()
 ////////////////////////////////////////////////////////////////
 
 func (this *SimpleAcknowledgerFixture) TestLoopExitsAfterAllDeliveriesReceived2() {
-	this.input <- subscriptionClosed{Deliveries: 1} // realistically, we'd only ever see a single closed event per ack'r lifetime
+	this.input <- subscriptionClosed{DeliveryCount: 1} // realistically, we'd only ever see a single closed event per ack'r lifetime
 	this.input <- newReceipt(this.channel, 1)
-	this.input <- subscriptionClosed{Deliveries: 2}
+	this.input <- subscriptionClosed{DeliveryCount: 2}
 	this.input <- newReceipt(this.channel, 2)
 	this.input <- newReceipt(this.channel, 3)
 

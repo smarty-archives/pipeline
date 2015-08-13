@@ -69,7 +69,7 @@ func (this *SubscriptionFixture) assertListen() {
 	this.So(this.channel.bufferSize, should.Equal, cap(this.output))
 	this.So(this.channel.bindings, should.Resemble, this.bindings)
 	this.So(this.channel.consumer, should.NotBeEmpty)
-	this.So((<-this.control).(subscriptionClosed).Deliveries, should.Equal, 0)
+	this.So((<-this.control).(subscriptionClosed).DeliveryCount, should.Equal, 0)
 }
 
 //////////////////////////////////////////////////////////////////
@@ -98,7 +98,7 @@ func (this *SubscriptionFixture) TestDeliveriesArePushedToTheApplication() {
 		Receipt:     newReceipt(this.channel, 0),
 		Upstream:    delivery2,
 	})
-	this.So((<-this.control).(subscriptionClosed).Deliveries, should.Equal, 2)
+	this.So((<-this.control).(subscriptionClosed).DeliveryCount, should.Equal, 2)
 }
 
 //////////////////////////////////////////////////////////////////
