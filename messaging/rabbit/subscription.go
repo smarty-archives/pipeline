@@ -9,12 +9,14 @@ import (
 )
 
 type Subscription struct {
-	channel  Consumer
-	queue    string
-	consumer string
-	bindings []string
-	control  chan<- interface{}
-	output   chan<- messaging.Delivery
+	channel       Consumer
+	queue         string
+	consumer      string
+	bindings      []string
+	deliveryCount uint64
+	latestTag     uint64
+	control       chan<- interface{}
+	output        chan<- messaging.Delivery
 }
 
 func newSubscription(
@@ -33,21 +35,23 @@ func newSubscription(
 
 func (this *Subscription) Listen() {
 	input := this.open()
-	count := this.listen(input)
-	this.control <- subscriptionClosed{DeliveryCount: count}
+	this.listen(input)
+	this.control <- subscriptionClosed{
+		DeliveryCount:     this.deliveryCount,
+		LatestDeliveryTag: this.latestTag,
+		LatestConsumer:    this.channel,
+	}
 }
-func (this *Subscription) listen(input <-chan amqp.Delivery) (count uint64) {
+func (this *Subscription) listen(input <-chan amqp.Delivery) {
 	if input == nil {
-		return 0
+		return
 	}
 
 	for item := range input {
-		count++
+		this.deliveryCount++
+		this.latestTag = item.DeliveryTag
 		this.output <- fromAMQPDelivery(item, this.channel)
-		item = item
 	}
-
-	return count
 }
 func (this *Subscription) open() <-chan amqp.Delivery {
 	this.channel.ConfigureChannelBuffer(cap(this.output))

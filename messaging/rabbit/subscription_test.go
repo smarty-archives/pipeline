@@ -76,8 +76,8 @@ func (this *SubscriptionFixture) assertListen() {
 
 func (this *SubscriptionFixture) TestDeliveriesArePushedToTheApplication() {
 	this.queue = "test-queue"
-	delivery1 := amqp.Delivery{Type: "test-message", Body: []byte{1, 2, 3, 4, 5}}
-	delivery2 := amqp.Delivery{Type: "test-message2", Body: []byte{6, 7, 8, 9, 10}}
+	delivery1 := amqp.Delivery{Type: "test-message", Body: []byte{1, 2, 3, 4, 5}, DeliveryTag: 17}
+	delivery2 := amqp.Delivery{Type: "test-message2", Body: []byte{6, 7, 8, 9, 10}, DeliveryTag: 18}
 
 	this.channel.incoming <- delivery1
 	this.channel.incoming <- delivery2
@@ -89,16 +89,20 @@ func (this *SubscriptionFixture) TestDeliveriesArePushedToTheApplication() {
 	this.So((<-this.output), should.Resemble, messaging.Delivery{
 		MessageType: "test-message",
 		Payload:     []byte{1, 2, 3, 4, 5},
-		Receipt:     newReceipt(this.channel, 0),
+		Receipt:     newReceipt(this.channel, delivery1.DeliveryTag),
 		Upstream:    delivery1,
 	})
 	this.So((<-this.output), should.Resemble, messaging.Delivery{
 		MessageType: "test-message2",
 		Payload:     []byte{6, 7, 8, 9, 10},
-		Receipt:     newReceipt(this.channel, 0),
+		Receipt:     newReceipt(this.channel, delivery2.DeliveryTag),
 		Upstream:    delivery2,
 	})
-	this.So((<-this.control).(subscriptionClosed).DeliveryCount, should.Equal, 2)
+
+	message := (<-this.control).(subscriptionClosed)
+	this.So(message.DeliveryCount, should.Equal, 2)
+	this.So(message.LatestConsumer, should.Equal, this.channel)
+	this.So(message.LatestDeliveryTag, should.Equal, delivery2.DeliveryTag)
 }
 
 //////////////////////////////////////////////////////////////////
