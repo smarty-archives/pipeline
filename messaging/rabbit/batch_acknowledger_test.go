@@ -92,6 +92,21 @@ func (this *SimpleAcknowledgerFixture) TestLoopExitsAfterAllDeliveriesReceived()
 
 ////////////////////////////////////////////////////////////////
 
+func (this *SimpleAcknowledgerFixture) TestLoopExitsAfterOnlyFinalDeliveryReceived() {
+	this.input <- newReceipt(this.channel, 17)
+	this.input <- subscriptionClosed{
+		LatestConsumer:    this.channel,
+		LatestDeliveryTag: 17,
+		DeliveryCount:     17,
+	}
+
+	this.So((<-this.control).(acknowledgementCompleted).Acknowledgements, should.Equal, 1)
+	this.So(this.channel.callsMulti, should.Equal, 1)
+	this.So(this.channel.latestMulti, should.Equal, 17)
+}
+
+////////////////////////////////////////////////////////////////
+
 func (this *SimpleAcknowledgerFixture) TestLoopExitsAfterAllDeliveriesReceived2() {
 	this.input <- subscriptionClosed{DeliveryCount: 1} // realistically, we'd only ever see a single closed event per ack'r lifetime
 	this.input <- newReceipt(this.channel, 1)

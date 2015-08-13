@@ -1,12 +1,16 @@
 package rabbit
 
 type BatchAcknowledger struct {
-	control chan<- interface{}
-	input   <-chan interface{}
-	count   uint64
-	maximum uint64
-	closing bool
-	pending *DeliveryReceipt
+	control          chan<- interface{}
+	input            <-chan interface{}
+	count            uint64
+	maximum          uint64
+	finalTag         uint64
+	finalConsumer    interface{}
+	receivedTag      uint64
+	receivedConsumer interface{}
+	closing          bool
+	pending          *DeliveryReceipt
 }
 
 func newAcknowledger(control chan<- interface{}, input <-chan interface{}) *BatchAcknowledger {
@@ -39,9 +43,13 @@ func (this *BatchAcknowledger) processItem(entity interface{}) {
 func (this *BatchAcknowledger) processClosingEvent(item subscriptionClosed) {
 	this.closing = true
 	this.maximum += item.DeliveryCount
+	this.finalTag = item.LatestDeliveryTag
+	this.finalConsumer = item.LatestConsumer
 }
 func (this *BatchAcknowledger) processAcknowledgment(item DeliveryReceipt) {
 	this.count++
+	this.receivedTag = item.deliveryTag
+	this.receivedConsumer = item.channel
 
 	if len(this.input) > 0 {
 		this.pending = &item
@@ -62,5 +70,25 @@ func acknowledge(receipt DeliveryReceipt) {
 }
 
 func (this *BatchAcknowledger) isComplete() bool {
-	return this.closing && len(this.input) == 0 && this.maximum <= this.count
+	if !this.closing {
+		return false
+	}
+
+	if len(this.input) > 0 {
+		return false
+	}
+
+	if this.maximum <= this.count {
+		return true
+	}
+
+	if this.finalTag != this.receivedTag {
+		return false
+	}
+
+	if this.finalConsumer != this.receivedConsumer {
+		return false
+	}
+
+	return true
 }

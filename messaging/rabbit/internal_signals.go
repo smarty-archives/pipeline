@@ -4,6 +4,6 @@ type shutdownRequested struct{}
 type subscriptionClosed struct {
 	DeliveryCount     uint64
 	LatestDeliveryTag uint64
-	LatestConsumer    Consumer
+	LatestConsumer    interface{}
 }
 type acknowledgementCompleted struct{ Acknowledgements uint64 }
