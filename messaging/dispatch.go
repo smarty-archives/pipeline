@@ -11,4 +11,5 @@ type Dispatch struct {
 	Durable     bool
 	Expiration  time.Time
 	Payload     []byte
+	Message     interface{}
 }
