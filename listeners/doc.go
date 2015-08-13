@@ -9,6 +9,11 @@ type Listener interface {
 	Listen()
 }
 
+type ListenCloser interface {
+	Listener
+	Close()
+}
+
 type WaitGroup interface {
 	Add(delta int)
 	Done()

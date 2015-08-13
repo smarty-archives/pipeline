@@ -7,6 +7,10 @@ type CompositeWaitListener struct {
 	inner  Listener
 }
 
+func NewCompositeWaitShutdownListener(primary ListenCloser, listeners ...Listener) *CompositeWaitListener {
+	listeners = append(listeners, primary, NewShutdownListener(primary.Close))
+	return NewCompositeWaitListener(listeners...)
+}
 func NewCompositeWaitListener(listeners ...Listener) *CompositeWaitListener {
 	waiter := &sync.WaitGroup{}
 
