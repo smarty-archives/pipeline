@@ -25,8 +25,7 @@ func (this *DispatchHandlerFixture) Setup() {
 /////////////////////////////////////////////////////////////////////////
 
 func (this *DispatchHandlerFixture) TestOutputIsClosed() {
-	close(this.input)
-	this.handler.Listen()
+	this.listen()
 	this.So(<-this.output, should.Equal, nil)
 }
 
@@ -37,8 +36,7 @@ func (this *DispatchHandlerFixture) TestMessagesAreWritten() {
 	this.input <- EventMessage{Message: 2}
 	this.input <- EventMessage{Message: 3, EndOfBatch: true}
 
-	close(this.input)
-	this.handler.Listen()
+	this.listen()
 
 	this.So(this.writer.commits, should.Equal, 1)
 	this.So(this.writer.messages, should.Resemble, []messaging.Dispatch{
@@ -54,8 +52,7 @@ func (this *DispatchHandlerFixture) TestCommitOnlyWhenLastMessageIsTheEndOfABatc
 	this.input <- EventMessage{Message: 1, EndOfBatch: true}
 	this.input <- EventMessage{Message: 2, EndOfBatch: false}
 
-	close(this.input)
-	this.handler.Listen()
+	this.listen()
 
 	this.So(this.writer.commits, should.Equal, 0)
 	this.So(this.writer.messages, should.Resemble, []messaging.Dispatch{
@@ -76,8 +73,7 @@ func (this *DispatchHandlerFixture) TestEndOfBatchRequestContextsAreSendToNextPh
 	this.input <- EventMessage{Message: 5, Context: context2}
 	this.input <- EventMessage{Message: 6, Context: context2, EndOfBatch: true}
 
-	close(this.input)
-	this.handler.Listen()
+	this.listen()
 
 	this.So(len(this.output), should.Equal, 2)
 	this.So(<-this.output, should.Equal, context1)
@@ -91,13 +87,19 @@ func (this *DispatchHandlerFixture) TestNilMessageSendsContextDirectlyToOutput()
 	context1 := &FakeRequestContext{}
 	this.input <- EventMessage{Message: nil, Context: context1}
 
-	close(this.input)
-	this.handler.Listen()
+	this.listen()
 
 	this.So(this.writer.messages, should.BeEmpty)
 	this.So(this.writer.commits, should.Equal, 0)
 	this.So(len(this.output), should.Equal, 1)
 	this.So(<-this.output, should.Equal, context1)
+}
+
+/////////////////////////////////////////////////////////////////////////
+
+func (this *DispatchHandlerFixture) listen() {
+	close(this.input)
+	this.handler.Listen()
 }
 
 /////////////////////////////////////////////////////////////////////////
