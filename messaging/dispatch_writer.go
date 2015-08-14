@@ -28,27 +28,30 @@ func NewDispatchWriter(writer Writer, discovery TypeDiscovery) *DispatchWriter {
 func (this *DispatchWriter) RegisterTemplate(template Dispatch) {
 	this.template = template
 }
-
 func (this *DispatchWriter) RegisterOverride(instanceType reflect.Type, message Dispatch) {
 	this.overrides[instanceType] = message
 }
 
 func (this *DispatchWriter) Write(item Dispatch) error {
-	messageType := reflect.TypeOf(item.Message)
-
-	target, found := this.overrides[messageType]
-	if !found {
-		target = this.template
-		if discovered, err := this.discovery.Discover(item.Message); err != nil {
-			return err
-		} else {
-			target.MessageType = discovered
-		}
-
-		target.Destination = strings.Replace(target.MessageType, ".", "-", -1)
+	if target, found := this.overrides[reflect.TypeOf(item.Message)]; found {
+		target.Message = item.Message
+		return this.writer.Write(target)
 	}
 
-	target.Message = item.Message
+	return this.writeUsingTemplate(item.Message)
+}
+func (this *DispatchWriter) writeUsingTemplate(message interface{}) error {
+	if discovered, err := this.discovery.Discover(message); err != nil {
+		return err
+	} else {
+		return this.writeUsingMessageType(message, discovered)
+	}
+}
+func (this *DispatchWriter) writeUsingMessageType(message interface{}, messageType string) error {
+	target := this.template
+	target.Message = message
+	target.MessageType = messageType
+	target.Destination = strings.Replace(target.MessageType, ".", "-", -1)
 	return this.writer.Write(target)
 }
 
