@@ -44,4 +44,6 @@ func (this *EventHandler) Listen() {
 			this.output <- delivery.Receipt
 		}
 	}
+
+	close(this.output)
 }

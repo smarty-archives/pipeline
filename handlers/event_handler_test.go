@@ -38,6 +38,7 @@ func (this *EventHandlerFixture) TestMessagePassedToDomain() {
 	this.So(this.locker.unlocks, should.Equal, 1)
 	this.So(this.router.received, should.Resemble, []interface{}{1, 2, 3})
 	this.So(<-this.output, should.Equal, 13)
+	this.So(<-this.output, should.BeNil) // outbound channel is closed when Listen exits
 }
 
 ////////////////////////////////////////////////////////////
