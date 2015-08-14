@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/smartystreets/assertions/should"
+	"github.com/smartystreets/clock"
 	"github.com/smartystreets/gunit"
 	"github.com/smartystreets/pipeline/messaging"
 	"github.com/streadway/amqp"
@@ -15,7 +16,7 @@ type RabbitAdapterFixture struct {
 }
 
 func (this *RabbitAdapterFixture) Setup() {
-	this.now = time.Now()
+	this.now = clock.UTCNow()
 }
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -26,6 +27,7 @@ func (this *RabbitAdapterFixture) TestAMQPDeliveryConversion() {
 		MessageId:       "5678",
 		Type:            "message-type",
 		ContentEncoding: "content-encoding",
+		Timestamp:       this.now,
 		Body:            []byte{1, 2, 3, 4, 5, 6},
 		DeliveryTag:     8675309,
 	}
@@ -35,6 +37,7 @@ func (this *RabbitAdapterFixture) TestAMQPDeliveryConversion() {
 		MessageID:   5678,
 		MessageType: "message-type",
 		Encoding:    "content-encoding",
+		Timestamp:   this.now,
 		Payload:     upstream.Body,
 		Upstream:    upstream,
 		Receipt:     DeliveryReceipt{channel: nil, deliveryTag: upstream.DeliveryTag},
