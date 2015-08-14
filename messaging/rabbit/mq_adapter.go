@@ -26,15 +26,16 @@ func parseUint64(value string) uint64 {
 }
 
 func toAMQPDispatch(dispatch messaging.Dispatch, now time.Time) amqp.Publishing {
-	// FUTURE: add timestamp field to dispatch
-	// if value is empty, use now
+	if dispatch.Timestamp == zeroTime {
+		dispatch.Timestamp = now
+	}
 
 	return amqp.Publishing{
 		AppId:           strconv.FormatUint(dispatch.SourceID, base10),
 		MessageId:       strconv.FormatUint(dispatch.MessageID, base10),
 		Type:            dispatch.MessageType,
 		ContentEncoding: dispatch.Encoding,
-		Timestamp:       now,
+		Timestamp:       dispatch.Timestamp,
 		Expiration:      computeExpiration(dispatch.Expiration),
 		DeliveryMode:    computePersistence(dispatch.Durable),
 		Body:            dispatch.Payload,
@@ -57,6 +58,6 @@ func computePersistence(durable bool) uint8 {
 	return amqp.Transient
 }
 
-var noExpiration = time.Time{}
+var zeroTime = time.Time{}
 
 const base10 = 10

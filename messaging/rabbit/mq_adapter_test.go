@@ -52,6 +52,7 @@ func (this *RabbitAdapterFixture) TestAMQPDispatchConversion() {
 		MessageID:   5678,
 		MessageType: "message-type",
 		Encoding:    "content-encoding",
+		Timestamp:   this.now.Add(-time.Second),
 		Expiration:  time.Second,
 		Durable:     true,
 		Payload:     []byte{1, 2, 3, 4, 5, 6, 7, 8, 9},
@@ -62,11 +63,24 @@ func (this *RabbitAdapterFixture) TestAMQPDispatchConversion() {
 		MessageId:       "5678",
 		Type:            "message-type",
 		ContentEncoding: "content-encoding",
-		Timestamp:       this.now,
+		Timestamp:       this.now.Add(-time.Second),
 		Expiration:      "1",
 		DeliveryMode:    2,
 		Body:            dispatch.Payload,
 	})
+}
+
+/////////////////////////////////////////////////////////////////////////////////
+
+func (this *RabbitAdapterFixture) TestAMQPDispatchTimestamp() {
+	actual := toAMQPDispatch(messaging.Dispatch{}, this.now)
+	expected := amqp.Publishing{
+		AppId:        "0",
+		MessageId:    "0",
+		Timestamp:    this.now,
+		DeliveryMode: amqp.Transient,
+	}
+	this.So(actual, should.Resemble, expected)
 }
 
 /////////////////////////////////////////////////////////////////////////////////
