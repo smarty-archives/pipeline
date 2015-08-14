@@ -34,15 +34,15 @@ func toAMQPDispatch(dispatch messaging.Dispatch, now time.Time) amqp.Publishing 
 		Type:            dispatch.MessageType,
 		ContentEncoding: dispatch.Encoding,
 		Timestamp:       now,
-		Expiration:      computeExpiration(now, dispatch.Expiration),
+		Expiration:      computeExpiration(dispatch.Expiration),
 		DeliveryMode:    computePersistence(dispatch.Durable),
 		Body:            dispatch.Payload,
 	}
 }
-func computeExpiration(now, expiration time.Time) string {
-	if expiration == noExpiration {
+func computeExpiration(expiration time.Duration) string {
+	if expiration == 0 {
 		return ""
-	} else if seconds := expiration.Sub(now).Seconds(); seconds <= 0 {
+	} else if seconds := expiration.Seconds(); seconds <= 0 {
 		return "0"
 	} else {
 		return strconv.FormatUint(uint64(seconds), base10)

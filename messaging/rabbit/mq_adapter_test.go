@@ -49,7 +49,7 @@ func (this *RabbitAdapterFixture) TestAMQPDispatchConversion() {
 		MessageID:   5678,
 		MessageType: "message-type",
 		Encoding:    "content-encoding",
-		Expiration:  this.now.Add(time.Second),
+		Expiration:  time.Second,
 		Durable:     true,
 		Payload:     []byte{1, 2, 3, 4, 5, 6, 7, 8, 9},
 	}
@@ -82,12 +82,12 @@ func (this *RabbitAdapterFixture) assertParsedValue(value string, expected uint6
 /////////////////////////////////////////////////////////////////////////////////
 
 func (this *RabbitAdapterFixture) TestExpirationComputation() {
-	this.assertExpiration(time.Time{}, "")
-	this.assertExpiration(this.now.Add(time.Second), "1")
-	this.assertExpiration(this.now.Add(-time.Second), "0")
+	this.assertExpiration(0, "")
+	this.assertExpiration(time.Second, "1")
+	this.assertExpiration(-time.Second, "0")
 }
-func (this *RabbitAdapterFixture) assertExpiration(expiration time.Time, expected string) {
-	this.So(computeExpiration(this.now, expiration), should.Equal, expected)
+func (this *RabbitAdapterFixture) assertExpiration(expiration time.Duration, expected string) {
+	this.So(computeExpiration(expiration), should.Equal, expected)
 }
 
 /////////////////////////////////////////////////////////////////////////////////

@@ -48,7 +48,7 @@ func (this *SerializationWriterFixture) TestWriterAddsSerializedPayloadAndTypeTo
 		MessageType: "", // should be populated
 		Encoding:    "4",
 		Durable:     true,
-		Expiration:  time.Now(),
+		Expiration:  time.Second * 5,
 		Payload:     nil,
 		Message:     TestMessage{},
 	}

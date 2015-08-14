@@ -9,7 +9,7 @@ type Dispatch struct {
 	MessageType string
 	Encoding    string
 	Durable     bool
-	Expiration  time.Time
+	Expiration  time.Duration
 	Payload     []byte
 	Message     interface{}
 }
