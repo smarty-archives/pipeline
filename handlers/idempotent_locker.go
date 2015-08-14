@@ -11,7 +11,10 @@ type IdempotentLocker struct {
 	locker sync.Locker
 }
 
-func NewIdempotentLocker(locker sync.Locker) *IdempotentLocker {
+func NewIdempotentLocker(locker sync.Locker) sync.Locker {
+	if locker == nil {
+		return NoopLocker{}
+	}
 	return &IdempotentLocker{locked: false, locker: locker}
 }
 

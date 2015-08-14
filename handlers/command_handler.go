@@ -19,14 +19,11 @@ func NewCommandHandler(
 	router domain.Handler,
 	locker sync.Locker) *CommandHandler {
 
-	// TODO: if locker == nil, use NoopLocker instead
-	locker = NewIdempotentLocker(locker)
-
 	return &CommandHandler{
 		input:  input,
 		output: output,
 		router: router,
-		locker: locker,
+		locker: NewIdempotentLocker(locker),
 	}
 }
 

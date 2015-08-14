@@ -14,7 +14,12 @@ type IdempotentLockerFixture struct {
 
 func (this *IdempotentLockerFixture) Setup() {
 	this.inner = &FakeLocker{}
-	this.locker = NewIdempotentLocker(this.inner)
+	this.locker = NewIdempotentLocker(this.inner).(*IdempotentLocker)
+}
+
+func (this *IdempotentLockerFixture) TestNilProducesANoopLookup() {
+	locker := NewIdempotentLocker(nil)
+	this.So(locker, should.HaveSameTypeAs, NoopLocker{})
 }
 
 func (this *IdempotentLockerFixture) TestMultipleLocksOnlyCallsInnerOnce() {
