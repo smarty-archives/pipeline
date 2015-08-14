@@ -14,10 +14,10 @@ import (
 type SerializationWriterFixture struct {
 	*gunit.Fixture
 
-	writer            *SerializationWriter
-	inner             *FakeCommitWriter
-	serializer        *FakeSerializer
-	messageTypePrefix string
+	writer     *SerializationWriter
+	inner      *FakeCommitWriter
+	serializer *FakeSerializer
+	discovery  *FakeDiscovery
 }
 
 func (this *SerializationWriterFixture) Setup() {
@@ -25,7 +25,7 @@ func (this *SerializationWriterFixture) Setup() {
 
 	this.inner = &FakeCommitWriter{}
 	this.serializer = &FakeSerializer{}
-	this.messageTypePrefix = "message.type.prefix."
+	this.discovery = &FakeDiscovery{}
 	this.buildWriter()
 }
 func (this *SerializationWriterFixture) Teardown() {
@@ -33,7 +33,7 @@ func (this *SerializationWriterFixture) Teardown() {
 }
 
 func (this *SerializationWriterFixture) buildWriter() {
-	this.writer = NewSerializationWriter(this.inner, this.serializer, this.messageTypePrefix)
+	this.writer = NewSerializationWriter(this.inner, this.serializer, this.discovery)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -61,7 +61,7 @@ func (this *SerializationWriterFixture) TestWriterAddsSerializedPayloadAndTypeTo
 		SourceID:    1,
 		MessageID:   2,
 		Destination: "3",
-		MessageType: this.messageTypePrefix + "testmessage",
+		MessageType: "message.type.discovered",
 		Encoding:    "4",
 		Durable:     true,
 		Expiration:  original.Expiration,
@@ -111,16 +111,12 @@ func (this *SerializationWriterFixture) TestDispatchAlreadyContainsMessageType()
 
 ////////////////////////////////////////////////////////////////////////////////
 
-func (this *SerializationWriterFixture) TestDispatchToMessagePointer() {
-	message := Dispatch{
-		Message: &TestMessage{},
-	}
-	this.writer.Write(message)
-	this.So(this.inner.written, should.Resemble, []Dispatch{Dispatch{
-		MessageType: "*" + this.messageTypePrefix + "testmessage",
-		Payload:     testSerializedPayload,
-		Message:     &TestMessage{},
-	}})
+func (this *SerializationWriterFixture) TestMessageTypeDiscoveryErrorsReturned() {
+	this.discovery.discoveryError = errors.New("discovery error")
+	message := Dispatch{Message: TestMessage{}}
+	err := this.writer.Write(message)
+	this.So(err, should.Equal, this.discovery.discoveryError)
+	this.So(this.inner.written, should.BeEmpty)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -150,7 +146,7 @@ func (this *SerializationWriterFixture) TestCommitInvokesUnderlyingWriter() {
 ////////////////////////////////////////////////////////////////////////////////
 
 func (this *SerializationWriterFixture) TestCommitOnRegularWriterPanics() {
-	this.writer = NewSerializationWriter(&FakeWriter{}, this.serializer, this.messageTypePrefix)
+	this.writer = NewSerializationWriter(&FakeWriter{}, this.serializer, this.discovery)
 	err := this.writer.Commit()
 	this.So(err, should.BeNil)
 }
@@ -210,6 +206,20 @@ func (this *FakeSerializer) Serialize(interface{}) ([]byte, error) {
 }
 
 var testSerializedPayload = []byte("serializer called successfully")
+
+////////////////////////////////////////////////////////////////////////////////
+
+type FakeDiscovery struct {
+	discoveryError error
+}
+
+func (this *FakeDiscovery) Discover(instance interface{}) (string, error) {
+	if this.discoveryError == nil {
+		return "message.type.discovered", nil
+	} else {
+		return "", this.discoveryError
+	}
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 

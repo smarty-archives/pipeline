@@ -1,24 +1,19 @@
 package messaging
 
-import (
-	"reflect"
-	"strings"
-)
-
 type SerializationWriter struct {
-	writer            Writer
-	commitWriter      CommitWriter
-	serializer        Serializer
-	messageTypePrefix string
+	writer       Writer
+	commitWriter CommitWriter
+	serializer   Serializer
+	discovery    TypeDiscovery
 }
 
-func NewSerializationWriter(inner Writer, serializer Serializer, messageTypePrefix string) *SerializationWriter {
+func NewSerializationWriter(inner Writer, serializer Serializer, discovery TypeDiscovery) *SerializationWriter {
 	commitWriter, _ := inner.(CommitWriter)
 	return &SerializationWriter{
-		writer:            inner,
-		commitWriter:      commitWriter,
-		serializer:        serializer,
-		messageTypePrefix: messageTypePrefix,
+		writer:       inner,
+		commitWriter: commitWriter,
+		serializer:   serializer,
+		discovery:    discovery,
 	}
 }
 
@@ -41,39 +36,17 @@ func (this *SerializationWriter) Write(dispatch Dispatch) error {
 		dispatch.Payload = payload
 	}
 
-	if len(dispatch.MessageType) == 0 {
-		dispatch.MessageType = discoverType(this.messageTypePrefix, dispatch.Message)
+	if len(dispatch.MessageType) > 0 {
+		return this.writer.Write(dispatch) // message type already exists, no need to discover
 	}
 
-	// TODO
-	// if len(dispatch.MessageType) == 0 {
-	// 	return errors.New("Unable to write message, the type cannot be discovered.")
-	// }
+	messageType, err := this.discovery.Discover(dispatch.Message)
+	if err != nil {
+		return err
+	}
 
+	dispatch.MessageType = messageType
 	return this.writer.Write(dispatch)
-}
-
-// TODO: should this be pulled out into its own stucture?
-// that would allow different behaviors to be invoked
-func discoverType(prefix string, message interface{}) string {
-	reflectType := reflect.TypeOf(message)
-	if name := reflectType.Name(); len(name) > 0 {
-		return prefix + strings.ToLower(name)
-	}
-
-	name := reflectType.String()
-	index := strings.LastIndex(name, ".")
-
-	if index == -1 {
-		return ""
-	}
-
-	suffix := strings.ToLower(name[index+1:])
-	if strings.HasPrefix(name, "*") {
-		return "*" + prefix + suffix
-	} else {
-		return prefix + suffix
-	}
 }
 
 func (this *SerializationWriter) Commit() error {

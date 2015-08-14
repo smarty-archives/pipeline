@@ -34,3 +34,7 @@ type (
 type Serializer interface {
 	Serialize(interface{}) ([]byte, error)
 }
+
+type TypeDiscovery interface {
+	Discover(interface{}) (string, error)
+}
