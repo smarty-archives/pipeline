@@ -15,3 +15,7 @@ type WaitGroup interface {
 	Add(delta int)
 	Done()
 }
+
+type MessageHandler interface {
+	Handle(interface{}) interface{}
+}
