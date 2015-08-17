@@ -20,7 +20,7 @@ type (
 		Receipt   interface{}
 	}
 
-	DeliveryReceipt interface {
+	DeliveryReceipt interface { // TODO: remove
 		Acknowledge()
 	}
 

@@ -29,7 +29,7 @@ func NewHandler(input chan projector.DocumentMessage, output chan<- interface{},
 
 func (this *Handler) Listen() {
 	for message := range this.input {
-		metrics.Measure(depthPersistQueue, int64(len(this.input)))
+		metrics.Measure(DepthPersistQueue, int64(len(this.input)))
 
 		this.addToBatch(message)
 
@@ -55,7 +55,7 @@ func (this *Handler) handleCurrentBatch(receipt interface{}) {
 
 func (this *Handler) persistPendingDocuments() {
 	this.waiter.Add(len(this.pending))
-	metrics.Measure(documentsToSave, int64(len(this.pending)))
+	metrics.Measure(DocumentsToSave, int64(len(this.pending)))
 
 	for _, document := range this.pending {
 		go this.persist(document)
@@ -66,7 +66,7 @@ func (this *Handler) persistPendingDocuments() {
 func (this *Handler) persist(document projector.Document) {
 	started := time.Now()
 	this.writer.Write(document)
-	metrics.Measure(documentWriteLatency, milliseconds(time.Since(started)))
+	metrics.Measure(DocumentWriteLatency, milliseconds(time.Since(started)))
 	this.waiter.Done()
 }
 
@@ -82,7 +82,7 @@ func (this *Handler) prepareForNextBatch() {
 }
 
 var (
-	depthPersistQueue    = metrics.AddGauge("???:persist-phase-backlog-depth", time.Second)         // TODO: application-specific
-	documentsToSave      = metrics.AddGauge("???:documents-to-save", time.Second)                   // TODO: application-specific
-	documentWriteLatency = metrics.AddGauge("???:document-write-latency-milliseconds", time.Second) // TODO: application-specific
+	DepthPersistQueue    = metrics.AddGauge("pipeline:persist-phase-backlog-depth", time.Second)
+	DocumentsToSave      = metrics.AddGauge("pipeline:documents-to-save", time.Second)
+	DocumentWriteLatency = metrics.AddGauge("pipeline:document-write-latency-milliseconds", time.Second)
 )

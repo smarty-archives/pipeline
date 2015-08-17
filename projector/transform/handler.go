@@ -38,4 +38,4 @@ func (this *Handler) Listen() {
 	close(this.output) // TODO: add test
 }
 
-var transformQueueDepth = metrics.AddGauge("???:transform-phase-backlog-depth", time.Second) // TODO: application-specific
+var transformQueueDepth = metrics.AddGauge("pipeline:transform-phase-backlog-depth", time.Second)
