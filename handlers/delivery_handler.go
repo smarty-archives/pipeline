@@ -25,8 +25,8 @@ func NewDeliveryHandler(input <-chan messaging.Delivery,
 func (this *DeliveryHandler) Listen() {
 	for delivery := range this.input {
 		delivery = delivery
-		converted := this.application.Handle(delivery.Message)
-		this.write(converted)
+		results := this.application.Handle(delivery.Message)
+		this.write(results)
 		this.tryCommit(delivery.Receipt)
 	}
 
