@@ -4,37 +4,44 @@ import (
 	"time"
 
 	"github.com/smartystreets/assertions/should"
+	"github.com/smartystreets/clock"
 	"github.com/smartystreets/gunit"
+	"github.com/smartystreets/pipeline/messaging"
 	"github.com/smartystreets/pipeline/projector"
 )
 
 type HandlerFixture struct {
 	*gunit.Fixture
 
-	input       chan projector.TransformationMessage
+	input       chan messaging.Delivery
 	output      chan projector.DocumentMessage
 	transformer *FakeTransformer
 	handler     *Handler
-	firstInput  projector.TransformationMessage
-	secondInput projector.TransformationMessage
+	firstInput  messaging.Delivery
+	secondInput messaging.Delivery
+	now         time.Time
 }
 
 func (this *HandlerFixture) Setup() {
-	this.input = make(chan projector.TransformationMessage, 2)
+	this.input = make(chan messaging.Delivery, 2)
 	this.output = make(chan projector.DocumentMessage, 2)
 	this.transformer = NewFakeTransformer()
 	this.handler = NewHandler(this.input, this.output, this.transformer)
 
-	this.firstInput = projector.TransformationMessage{
-		Message:         1,
-		Now:             time.Now(),
-		Acknowledgement: &FakeAcknowledgement{},
+	this.firstInput = messaging.Delivery{
+		Message: 1,
+		Receipt: &FakeAcknowledgement{},
 	}
-	this.secondInput = projector.TransformationMessage{
-		Message:         2,
-		Now:             time.Now(),
-		Acknowledgement: &FakeAcknowledgement{},
+	this.secondInput = messaging.Delivery{
+		Message: 2,
+		Receipt: &FakeAcknowledgement{},
 	}
+
+	this.now = time.Now()
+	clock.Freeze(this.now)
+}
+func (this *HandlerFixture) Teardown() {
+	clock.Restore()
 }
 
 /////////////////////////////////////////////////////////////////
@@ -47,12 +54,12 @@ func (this *HandlerFixture) TestTransformerInvokedForEveryInputMessage() {
 	this.handler.Listen()
 
 	this.So(this.transformer.received, should.Resemble, map[interface{}]time.Time{
-		this.firstInput.Message:  this.firstInput.Now,
-		this.secondInput.Message: this.secondInput.Now,
+		this.firstInput.Message:  this.now,
+		this.secondInput.Message: this.now,
 	})
 	this.So(<-this.output, should.Resemble, projector.DocumentMessage{
-		Acknowledgement: this.secondInput.Acknowledgement,
-		Documents:       collectedDocuments,
+		Receipt:   this.secondInput.Receipt,
+		Documents: collectedDocuments,
 	})
 }
 

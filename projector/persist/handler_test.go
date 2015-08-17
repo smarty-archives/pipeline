@@ -14,14 +14,14 @@ type HandlerFixture struct {
 	*gunit.Fixture
 
 	input   chan projector.DocumentMessage
-	output  chan projector.DeliveryReceipt
+	output  chan interface{}
 	writer  *FakeWriter
 	handler *Handler
 }
 
 func (this *HandlerFixture) Setup() {
 	this.input = make(chan projector.DocumentMessage, 2)
-	this.output = make(chan projector.DeliveryReceipt, 2)
+	this.output = make(chan interface{}, 2)
 	this.writer = NewFakeWriter()
 	this.handler = NewHandler(this.input, this.output, this.writer)
 }
@@ -97,7 +97,7 @@ func (this *HandlerFixture) TestEachSentBatchIsSeparateFromThePreviousOne() {
 
 func newMessage(documentIndex, ack int) projector.DocumentMessage {
 	return projector.DocumentMessage{
-		Acknowledgement: &FakeReceipt{id: ack},
+		Receipt: &FakeReceipt{id: ack},
 		Documents: []projector.Document{
 			NewFakeDocument(strconv.Itoa(documentIndex)),
 			NewFakeDocument(strconv.Itoa(documentIndex + 1)),
