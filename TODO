@@ -3,3 +3,6 @@ is a no-op transaction.
 
 web/ResponseWriter helper methods, e.g. status codes with message, etc. etc.
 web/constants with mime types, e.g. application/json application/javascript text/xml, text/plain, etc.
+
+Rip out counter logic from messaging/rabit/subscriber+ack'er+reader control;
+  use reference equality to determine last message
