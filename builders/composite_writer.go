@@ -1,6 +1,7 @@
-package wireup
+package builders
 
 import (
+	"reflect"
 	"time"
 
 	"github.com/smartystreets/pipeline/messaging"
@@ -10,6 +11,8 @@ type CompositeWriterBuilder struct {
 	broker     messaging.MessageBroker
 	discovery  messaging.TypeDiscovery
 	retrySleep time.Duration
+	template   messaging.Dispatch
+	overrides  map[reflect.Type]messaging.Dispatch
 	panicFail  bool
 }
 
@@ -18,6 +21,15 @@ func NewCompositeWriter(broker messaging.MessageBroker) *CompositeWriterBuilder 
 		broker:     broker,
 		retrySleep: time.Second * 5,
 	}
+}
+
+func (this *CompositeWriterBuilder) RegisterDispatchTemplate(template messaging.Dispatch) *CompositeWriterBuilder {
+	this.template = template
+	return this
+}
+func (this *CompositeWriterBuilder) RegisterDispatchOverride(instanceType reflect.Type, override messaging.Dispatch) *CompositeWriterBuilder {
+	this.overrides[instanceType] = override
+	return this
 }
 
 func (this *CompositeWriterBuilder) PrefixTypesWith(prefix string) *CompositeWriterBuilder {
@@ -71,6 +83,12 @@ func (this *CompositeWriterBuilder) layerDispatch(inner messaging.CommitWriter) 
 		return inner
 	}
 
-	// TODO: register overwrites and template...
-	return messaging.NewDispatchWriter(inner, this.discovery)
+	writer := messaging.NewDispatchWriter(inner, this.discovery)
+	writer.RegisterTemplate(this.template)
+
+	for instanceType, override := range this.overrides {
+		writer.RegisterOverride(instanceType, override)
+	}
+
+	return writer
 }
