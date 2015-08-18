@@ -1,4 +1,4 @@
-package listeners
+package httpx
 
 import (
 	"crypto/tls"
@@ -8,13 +8,13 @@ import (
 	"time"
 )
 
-type HTTPListener struct {
+type HTTPServer struct {
 	certificatePEM string
 	inner          http.Server
 }
 
-func NewHTTPListener(listenAddress string, handler http.Handler) *HTTPListener {
-	return &HTTPListener{
+func NewHTTPServer(listenAddress string, handler http.Handler) *HTTPServer {
+	return &HTTPServer{
 		inner: http.Server{
 			Addr:           listenAddress,
 			Handler:        handler,
@@ -25,7 +25,7 @@ func NewHTTPListener(listenAddress string, handler http.Handler) *HTTPListener {
 		},
 	}
 }
-func (this *HTTPListener) WithTLS(certificatePEM string, tlsConfig *tls.Config) {
+func (this *HTTPServer) WithTLS(certificatePEM string, tlsConfig *tls.Config) {
 	if tlsConfig == nil {
 		tlsConfig = &tls.Config{
 			MinVersion:               tls.VersionTLS12,
@@ -43,13 +43,13 @@ func (this *HTTPListener) WithTLS(certificatePEM string, tlsConfig *tls.Config) 
 	this.inner.TLSConfig = tlsConfig
 }
 
-func (this *HTTPListener) Listen() {
+func (this *HTTPServer) Listen() {
 	log.Printf("[INFO] Listening for web traffic on %s.\n", this.inner.Addr)
 	if err := this.listen(); err != nil {
 		log.Fatal("[ERROR] Unable to listen to web traffic: ", err)
 	}
 }
-func (this *HTTPListener) listen() error {
+func (this *HTTPServer) listen() error {
 	if len(this.certificatePEM) == 0 {
 		return this.inner.ListenAndServe()
 	}
