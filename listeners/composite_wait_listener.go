@@ -22,7 +22,7 @@ func NewCompositeWaitListener(listeners ...Listener) *CompositeWaitListener {
 
 	return &CompositeWaitListener{
 		waiter: waiter,
-		inner:  NewCompositeListener(items),
+		inner:  NewCompositeListener(items...),
 	}
 }
 

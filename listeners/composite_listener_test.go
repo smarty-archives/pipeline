@@ -18,7 +18,7 @@ func (this *CompositeListenerFixture) Setup() {
 	for x := 0; x < 100; x++ {
 		this.listeners = append(this.listeners, &FakeForCompositeListener{})
 	}
-	this.composite = NewCompositeListener(this.listeners)
+	this.composite = NewCompositeListener(this.listeners...)
 }
 
 func (this *CompositeListenerFixture) TestCompositeListenerCallsInnerListenersConcurrently() {
@@ -31,7 +31,7 @@ func (this *CompositeListenerFixture) TestCompositeListenerCallsInnerListenersCo
 
 func (this *CompositeListenerFixture) TestCompositeListenerDoesntFailWithNoListeners() {
 	this.listeners = nil
-	this.composite = NewCompositeListener(this.listeners)
+	this.composite = NewCompositeListener(this.listeners...)
 	this.So(this.composite.Listen, should.NotPanic)
 }
 
@@ -41,7 +41,7 @@ func (this *CompositeListenerFixture) TestCompositeListenerSkipNilListeners() {
 	this.listeners = append(this.listeners, &FakeForCompositeListener{})
 	this.listeners = append(this.listeners, nil)
 	this.listeners = append(this.listeners, nil)
-	this.composite = NewCompositeListener(this.listeners)
+	this.composite = NewCompositeListener(this.listeners...)
 	this.So(this.composite.Listen, should.NotPanic)
 }
 

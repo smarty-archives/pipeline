@@ -4,7 +4,7 @@ type CompositeListener struct {
 	listeners []Listener
 }
 
-func NewCompositeListener(listeners []Listener) Listener {
+func NewCompositeListener(listeners ...Listener) Listener {
 	filtered := make([]Listener, 0, len(listeners))
 	for _, listener := range listeners {
 		if listener != nil {
