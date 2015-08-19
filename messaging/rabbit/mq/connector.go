@@ -20,7 +20,7 @@ func NewConnector() *Connector {
 
 func (this *Connector) Connect(target url.URL) (rabbit.Connection, error) {
 	config := amqp.Config{
-		TLSClientConfig: buildTLS(target.Host),
+		TLSClientConfig: buildTLS(target),
 		Heartbeat:       time.Second * 15,
 		Dial:            dial,
 	}
@@ -34,10 +34,14 @@ func (this *Connector) Connect(target url.URL) (rabbit.Connection, error) {
 		return newConnection(connection), nil
 	}
 }
-func buildTLS(host string) *tls.Config {
+func buildTLS(target url.URL) *tls.Config {
+	if strings.ToLower(target.Scheme) == "amqp" {
+		return nil
+	}
+
 	// FUTURE: customize TLS, e.g. acceptable list of ciphers, etc.
 	return &tls.Config{
-		ServerName: strings.Split(host, ":")[0],
+		ServerName: strings.Split(target.Host, ":")[0],
 		MinVersion: tls.VersionTLS12,
 	}
 }
