@@ -45,8 +45,10 @@ func (this *ChannelReader) listen() bool {
 	for element := range this.control {
 		switch item := element.(type) {
 		case shutdownRequested:
-			this.shutdown = true
-			subscription.Close()
+			if !this.shutdown {
+				this.shutdown = true
+				subscription.Close()
+			}
 		case subscriptionClosed:
 			this.deliveryCount += item.DeliveryCount
 			if this.shutdown {

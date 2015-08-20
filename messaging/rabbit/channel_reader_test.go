@@ -118,6 +118,17 @@ func (this *ChannelReaderFixture) TestDeliveriesChannelClosedWhenReaderCompleted
 
 ///////////////////////////////////////////////////////////////
 
+func (this *ChannelReaderFixture) TestCloseOnlyClosesOnce() {
+	this.reader.Close()
+	this.reader.Close()
+
+	this.reader.Listen()
+
+	this.So(this.controller.channel.cancellations, should.Equal, 1)
+}
+
+///////////////////////////////////////////////////////////////
+
 type FakeReaderController struct {
 	channel        *FakeReaderChannel
 	removedReaders []messaging.Reader
@@ -146,9 +157,10 @@ func (this *FakeReaderController) Dispose() {
 ///////////////////////////////////////////////////////////////
 
 type FakeReaderChannel struct {
-	latestTag  uint64
-	deliveries chan amqp.Delivery
-	closed     int
+	latestTag     uint64
+	deliveries    chan amqp.Delivery
+	closed        int
+	cancellations int
 }
 
 func newFakeReaderChannel() *FakeReaderChannel {
@@ -165,6 +177,7 @@ func (this *FakeReaderChannel) ExclusiveConsume(string, string) (<-chan amqp.Del
 	return this.deliveries, nil
 }
 func (this *FakeReaderChannel) CancelConsumer(string) error {
+	this.cancellations++
 	close(this.deliveries)
 	return nil
 }
