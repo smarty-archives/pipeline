@@ -50,7 +50,7 @@ func (this *CompositeWriterBuilder) PanicWhenSerializationFails() *CompositeWrit
 func (this *CompositeWriterBuilder) Build() messaging.CommitWriter {
 	writer := this.broker.OpenTransactionalWriter()
 	writer = this.layerRetry(writer)
-	writer = this.layerDeserialize(writer)
+	writer = this.layerSerialize(writer)
 	writer = this.layerDispatch(writer)
 	return writer
 }
@@ -65,7 +65,7 @@ func (this *CompositeWriterBuilder) layerRetry(inner messaging.CommitWriter) mes
 	})
 }
 
-func (this *CompositeWriterBuilder) layerDeserialize(inner messaging.CommitWriter) messaging.CommitWriter {
+func (this *CompositeWriterBuilder) layerSerialize(inner messaging.CommitWriter) messaging.CommitWriter {
 	if this.discovery == nil {
 		return inner
 	}
