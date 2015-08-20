@@ -1,7 +1,6 @@
 package rabbit
 
 import (
-	"errors"
 	"log"
 	"sync"
 
@@ -38,7 +37,7 @@ func (this *TransactionWriter) Write(message messaging.Dispatch) error {
 
 func (this *TransactionWriter) Commit() error {
 	if this.channel == nil {
-		return commitBeforeWriteError
+		return nil
 	}
 
 	err := this.channel.CommitTransaction()
@@ -78,5 +77,3 @@ func (this *TransactionWriter) ensureChannel() bool {
 func (this *TransactionWriter) isActive() bool {
 	return !this.closed // must be called from within the safety of a mutex
 }
-
-var commitBeforeWriteError = errors.New("Write must be called before Commit.")

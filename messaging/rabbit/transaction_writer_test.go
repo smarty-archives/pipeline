@@ -69,10 +69,11 @@ func (this *TransactionWriterFixture) TestCloseWriter() {
 
 ///////////////////////////////////////////////////////////////
 
-func (this *TransactionWriterFixture) TestCommitWithoutWriteFails() {
+func (this *TransactionWriterFixture) TestCommitWithoutIsNoop() {
 	err := this.writer.Commit()
 
-	this.So(err, should.Equal, commitBeforeWriteError)
+	this.So(err, should.BeNil)
+	this.So(this.controller.channel.commits, should.Equal, 0)
 }
 
 func (this *TransactionWriterFixture) TestCommitCallsUnderlyingChannel() {
