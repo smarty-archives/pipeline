@@ -30,3 +30,11 @@ func (this *SimpleMessageRouter) Apply(event interface{}) bool {
 	}
 	return result
 }
+
+func (this *SimpleMessageRouter) AddHandler(handler Handler) {
+	this.handlers = append(this.handlers, handler)
+}
+
+func (this *SimpleMessageRouter) AddDocument(document Applicator) {
+	this.documents = append(this.documents, document)
+}
