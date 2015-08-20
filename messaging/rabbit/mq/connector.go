@@ -35,7 +35,7 @@ func (this *Connector) Connect(target url.URL) (rabbit.Connection, error) {
 	}
 }
 func buildTLS(target url.URL) *tls.Config {
-	if strings.ToLower(target.Scheme) == "amqp" {
+	if strings.ToLower(target.Scheme) != "amqps" {
 		return nil
 	}
 
