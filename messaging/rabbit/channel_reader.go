@@ -31,6 +31,7 @@ func (this *ChannelReader) Listen() {
 	for this.listen() {
 	}
 
+	close(this.deliveries)
 	this.controller.removeReader(this)
 }
 func (this *ChannelReader) listen() bool {
@@ -59,7 +60,6 @@ func (this *ChannelReader) listen() bool {
 				return true
 			}
 		case acknowledgementCompleted:
-			close(this.deliveries)
 			channel.Close() // we don't need the channel anymore
 			return false    // the shutdown process for this reader is complete
 		}

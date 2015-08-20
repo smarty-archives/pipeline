@@ -106,6 +106,18 @@ func (this *ChannelReaderFixture) TestCloseShutsdownReaderAfterLastMessageProces
 
 ///////////////////////////////////////////////////////////////
 
+func (this *ChannelReaderFixture) TestDeliveriesChannelClosedWhenReaderCompleted() {
+	this.controller.channel = nil
+	this.reader.Listen()
+
+	for range this.reader.Deliveries() {
+	}
+
+	this.So(true, should.BeTrue) // we only get here when the golang channel is closed
+}
+
+///////////////////////////////////////////////////////////////
+
 type FakeReaderController struct {
 	channel        *FakeReaderChannel
 	removedReaders []messaging.Reader
