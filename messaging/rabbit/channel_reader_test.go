@@ -122,9 +122,7 @@ func (this *ChannelReaderFixture) TestCloseOnlyClosesOnce() {
 	this.reader.Close()
 	this.reader.Close()
 
-	this.reader.Listen()
-
-	this.So(this.controller.channel.cancellations, should.Equal, 1)
+	this.So(len(this.reader.control), should.Equal, 1)
 }
 
 ///////////////////////////////////////////////////////////////
@@ -138,7 +136,11 @@ func newFakeReaderController() *FakeReaderController {
 	return &FakeReaderController{channel: newFakeReaderChannel()}
 }
 
-func (this *FakeReaderController) openChannel() Channel {
+func (this *FakeReaderController) openChannel(callback func() bool) Channel {
+	if !callback() {
+		return nil
+	}
+
 	if this.channel == nil {
 		return nil // interface quirks require this hack
 	}

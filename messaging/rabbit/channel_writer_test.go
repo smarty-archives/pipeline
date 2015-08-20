@@ -79,7 +79,11 @@ func newFakeWriterController() *FakeWriterController {
 	return &FakeWriterController{channel: newFakeWriterChannel()}
 }
 
-func (this *FakeWriterController) openChannel() Channel {
+func (this *FakeWriterController) openChannel(callback func() bool) Channel {
+	if !callback() {
+		return nil
+	}
+
 	if this.channel == nil {
 		return nil // interface quirks require this hack
 	}

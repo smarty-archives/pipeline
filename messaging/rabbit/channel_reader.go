@@ -1,20 +1,27 @@
 package rabbit
 
-import "github.com/smartystreets/pipeline/messaging"
+import (
+	"sync"
+
+	"github.com/smartystreets/pipeline/messaging"
+)
 
 type ChannelReader struct {
-	controller       Controller
-	queue            string
-	bindings         []string
-	control          chan interface{}
-	acknowledgements chan interface{}
-	deliveries       chan messaging.Delivery
-	shutdown         bool
-	deliveryCount    uint64
+	mutex             *sync.Mutex
+	controller        Controller
+	queue             string
+	bindings          []string
+	control           chan interface{}
+	acknowledgements  chan interface{}
+	deliveries        chan messaging.Delivery
+	shutdown          bool
+	shutdownRequested bool
+	deliveryCount     uint64
 }
 
 func newReader(controller Controller, queue string, bindings []string) *ChannelReader {
 	return &ChannelReader{
+		mutex:            &sync.Mutex{},
 		controller:       controller,
 		queue:            queue,
 		bindings:         bindings,
@@ -35,7 +42,7 @@ func (this *ChannelReader) Listen() {
 	this.controller.removeReader(this)
 }
 func (this *ChannelReader) listen() bool {
-	channel := this.controller.openChannel()
+	channel := this.controller.openChannel(this.isActive)
 	if channel == nil {
 		return false // broker no longer allowed to give me a channel, it has been manually closed
 	}
@@ -45,10 +52,8 @@ func (this *ChannelReader) listen() bool {
 	for element := range this.control {
 		switch item := element.(type) {
 		case shutdownRequested:
-			if !this.shutdown {
-				this.shutdown = true
-				subscription.Close()
-			}
+			this.shutdown = true
+			subscription.Close()
 		case subscriptionClosed:
 			this.deliveryCount += item.DeliveryCount
 			if this.shutdown {
@@ -76,7 +81,18 @@ func (this *ChannelReader) subscribe(channel Channel) *Subscription {
 }
 
 func (this *ChannelReader) Close() {
-	this.control <- shutdownRequested{}
+	this.mutex.Lock()
+	defer this.mutex.Unlock()
+
+	if !this.shutdownRequested {
+		this.control <- shutdownRequested{}
+		this.shutdownRequested = true
+	}
+}
+func (this *ChannelReader) isActive() bool {
+	this.mutex.Lock()
+	defer this.mutex.Unlock()
+	return !this.shutdownRequested
 }
 
 func (this *ChannelReader) Deliveries() <-chan messaging.Delivery {

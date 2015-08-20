@@ -53,10 +53,9 @@ func (this *ChannelWriter) ensureChannel() bool {
 	this.mutex.Lock()
 	defer this.mutex.Unlock()
 
-	if this.closed {
-		return false
-	}
-
-	this.channel = this.controller.openChannel()
+	this.channel = this.controller.openChannel(this.isActive)
 	return this.channel != nil
+}
+func (this *ChannelWriter) isActive() bool {
+	return !this.closed // must be called within the safety of a mutex
 }

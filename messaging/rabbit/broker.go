@@ -181,7 +181,7 @@ func (this *Broker) openWriter(transactional bool) messaging.Writer {
 	}
 }
 
-func (this *Broker) openChannel() Channel {
+func (this *Broker) openChannel(callback func() bool) Channel {
 	// don't lock for the duration of the loop
 	// otherwise this can deadlock because we're dependent
 	// upon the broker to be online/active. By avoiding
@@ -189,6 +189,10 @@ func (this *Broker) openChannel() Channel {
 	// we can still shutdown properly
 
 	for this.isActive() {
+		if !callback() {
+			break
+		}
+
 		if channel := this.tryOpenChannel(); channel != nil {
 			return channel
 		}

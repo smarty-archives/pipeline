@@ -259,24 +259,34 @@ func (this *BrokerFixture) TestOpenTransactionalWriter() {
 func (this *BrokerFixture) TestOpenChannel() {
 	this.broker.state = messaging.Connecting
 
-	channel := this.broker.openChannel()
+	channel := this.broker.openChannel(func() bool { return true })
 
 	this.So(channel, should.NotBeNil)
 	this.So(this.broker.state, should.Equal, messaging.Connected)
 }
+func (this *BrokerFixture) TestOpenChannelWithFalseCallback() {
+	this.broker.state = messaging.Connecting
+
+	channel := this.broker.openChannel(func() bool { return false })
+
+	this.So(channel, should.BeNil)
+	this.So(this.connector.connection.attempts, should.Equal, 0)
+	this.So(this.broker.state, should.Equal, messaging.Connecting) // don't change state
+}
+
 func (this *BrokerFixture) TestNoChannelWhileDisconnected() {
 	this.broker.state = messaging.Disconnected
-	this.So(this.broker.openChannel(), should.BeNil)
+	this.So(this.broker.openChannel(func() bool { return true }), should.BeNil)
 
 	this.broker.state = messaging.Disconnecting
-	this.So(this.broker.openChannel(), should.BeNil)
+	this.So(this.broker.openChannel(func() bool { return true }), should.BeNil)
 }
 func (this *BrokerFixture) TestOpenChannelAfterUnderlyingConnectorFailureRetries() {
 	this.connector = NewFakeConnector(1, 0)
 	this.createBroker()
 	this.broker.state = messaging.Connecting
 
-	channel := this.broker.openChannel()
+	channel := this.broker.openChannel(func() bool { return true })
 
 	this.So(channel, should.NotBeNil)
 	this.So(this.connector.attempts, should.BeGreaterThan, 1)
@@ -288,7 +298,7 @@ func (this *BrokerFixture) TestOpenChannelAfterUnderlyingConnectionFailureRetrie
 	this.createBroker()
 	this.broker.state = messaging.Connecting
 
-	channel := this.broker.openChannel()
+	channel := this.broker.openChannel(func() bool { return true })
 
 	this.So(channel, should.NotBeNil)
 	this.So(this.connector.attempts, should.Equal, 2)
@@ -302,7 +312,7 @@ func (this *BrokerFixture) TestOpenChannelClosesConnectionOnFailure() {
 	this.createBroker()
 	this.broker.state = messaging.Connecting
 
-	channel := this.broker.openChannel()
+	channel := this.broker.openChannel(func() bool { return true })
 
 	this.So(channel, should.NotBeNil)
 	this.So(this.connector.attempts, should.Equal, 3)

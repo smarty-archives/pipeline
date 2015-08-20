@@ -66,17 +66,17 @@ func (this *TransactionWriter) ensureChannel() bool {
 	this.mutex.Lock()
 	defer this.mutex.Unlock()
 
-	if this.closed {
-		return false
-	}
-
-	this.channel = this.controller.openChannel()
+	this.channel = this.controller.openChannel(this.isActive)
 	if this.channel == nil {
 		return false
 	}
 
 	this.channel.ConfigureChannelAsTransactional()
 	return true
+}
+
+func (this *TransactionWriter) isActive() bool {
+	return !this.closed // must be called from within the safety of a mutex
 }
 
 var commitBeforeWriteError = errors.New("Write must be called before Commit.")
