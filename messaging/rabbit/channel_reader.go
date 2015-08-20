@@ -16,7 +16,6 @@ type ChannelReader struct {
 	deliveries        chan messaging.Delivery
 	shutdown          bool
 	shutdownRequested bool
-	deliveryCount     uint64
 }
 
 func newReader(controller Controller, queue string, bindings []string) *ChannelReader {
@@ -55,12 +54,9 @@ func (this *ChannelReader) listen() bool {
 			this.shutdown = true
 			subscription.Close()
 		case subscriptionClosed:
-			this.deliveryCount += item.DeliveryCount
 			if this.shutdown {
 				// keep channel alive and gracefully stop acknowledgement listener
-				item.DeliveryCount = this.deliveryCount
 				this.acknowledgements <- item
-				this.deliveryCount = 0
 			} else {
 				// channel failure; reconnect
 				channel.Close()

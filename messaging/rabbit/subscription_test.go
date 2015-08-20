@@ -69,40 +69,43 @@ func (this *SubscriptionFixture) assertListen() {
 	this.So(this.channel.bufferSize, should.Equal, cap(this.output))
 	this.So(this.channel.bindings, should.Resemble, this.bindings)
 	this.So(this.channel.consumer, should.NotBeEmpty)
-	this.So((<-this.control).(subscriptionClosed).DeliveryCount, should.Equal, 0)
+	this.So((<-this.control).(subscriptionClosed).FinalReceipt, should.BeNil)
 }
 
 //////////////////////////////////////////////////////////////////
 
 func (this *SubscriptionFixture) TestDeliveriesArePushedToTheApplication() {
 	this.queue = "test-queue"
-	delivery1 := amqp.Delivery{Type: "test-message", Body: []byte{1, 2, 3, 4, 5}, DeliveryTag: 17}
-	delivery2 := amqp.Delivery{Type: "test-message2", Body: []byte{6, 7, 8, 9, 10}, DeliveryTag: 18}
+	amqpDelivery1 := amqp.Delivery{Type: "test-message", Body: []byte{1, 2, 3, 4, 5}, DeliveryTag: 17}
+	amqpDelivery2 := amqp.Delivery{Type: "test-message2", Body: []byte{6, 7, 8, 9, 10}, DeliveryTag: 18}
 
-	this.channel.incoming <- delivery1
-	this.channel.incoming <- delivery2
+	this.channel.incoming <- amqpDelivery1
+	this.channel.incoming <- amqpDelivery2
 	close(this.channel.incoming)
 
 	this.createSubscription()
 	go this.subscription.Listen()
 
-	this.So((<-this.output), should.Resemble, messaging.Delivery{
+	delivery1 := <-this.output
+	delivery2 := <-this.output
+
+	this.So(delivery1, should.Resemble, messaging.Delivery{
 		MessageType: "test-message",
 		Payload:     []byte{1, 2, 3, 4, 5},
-		Receipt:     newReceipt(this.channel, delivery1.DeliveryTag),
-		Upstream:    delivery1,
+		Receipt:     newReceipt(this.channel, amqpDelivery1.DeliveryTag),
+		Upstream:    amqpDelivery1,
 	})
-	this.So((<-this.output), should.Resemble, messaging.Delivery{
+	this.So(delivery2, should.Resemble, messaging.Delivery{
 		MessageType: "test-message2",
 		Payload:     []byte{6, 7, 8, 9, 10},
-		Receipt:     newReceipt(this.channel, delivery2.DeliveryTag),
-		Upstream:    delivery2,
+		Receipt:     newReceipt(this.channel, amqpDelivery2.DeliveryTag),
+		Upstream:    amqpDelivery2,
 	})
 
 	message := (<-this.control).(subscriptionClosed)
-	this.So(message.DeliveryCount, should.Equal, 2)
-	this.So(message.LatestConsumer, should.Equal, this.channel)
-	this.So(message.LatestDeliveryTag, should.Equal, delivery2.DeliveryTag)
+	this.So(delivery1.Receipt, should.NotEqual, delivery2.Receipt)
+	this.So(message.FinalReceipt, should.NotBeNil)
+	this.So(message.FinalReceipt, should.Resemble, delivery2.Receipt)
 }
 
 //////////////////////////////////////////////////////////////////

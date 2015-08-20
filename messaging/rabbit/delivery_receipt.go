@@ -5,7 +5,7 @@ type DeliveryReceipt struct {
 	deliveryTag uint64
 }
 
-func newReceipt(channel Acknowledger, deliveryTag uint64) DeliveryReceipt {
+func newReceipt(channel Acknowledger, deliveryTag uint64) interface{} {
 	return DeliveryReceipt{
 		channel:     channel,
 		deliveryTag: deliveryTag,

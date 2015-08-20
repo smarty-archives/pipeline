@@ -7,7 +7,7 @@ import (
 	"github.com/smartystreets/gunit"
 )
 
-type SimpleAcknowledgerFixture struct {
+type BatchAcknowledgerFixture struct {
 	*gunit.Fixture
 
 	channel      *FakeAcknowledgmentChannel
@@ -16,7 +16,7 @@ type SimpleAcknowledgerFixture struct {
 	input        chan interface{}
 }
 
-func (this *SimpleAcknowledgerFixture) Setup() {
+func (this *BatchAcknowledgerFixture) Setup() {
 	this.channel = &FakeAcknowledgmentChannel{}
 	this.control = make(chan interface{}, 16)
 	this.input = make(chan interface{}, 16)
@@ -26,7 +26,7 @@ func (this *SimpleAcknowledgerFixture) Setup() {
 
 ////////////////////////////////////////////////////////////////
 
-func (this *SimpleAcknowledgerFixture) TestItemIsAcknowledged() {
+func (this *BatchAcknowledgerFixture) TestItemIsAcknowledged() {
 	this.input <- newReceipt(this.channel, 5678)
 
 	close(this.input)
@@ -38,7 +38,7 @@ func (this *SimpleAcknowledgerFixture) TestItemIsAcknowledged() {
 
 ////////////////////////////////////////////////////////////////
 
-func (this *SimpleAcknowledgerFixture) TestOnlyLastItemIsAcknowledged() {
+func (this *BatchAcknowledgerFixture) TestOnlyLastItemIsAcknowledged() {
 	this.input <- newReceipt(this.channel, 5678)
 	this.input <- newReceipt(this.channel, 5679)
 
@@ -51,19 +51,19 @@ func (this *SimpleAcknowledgerFixture) TestOnlyLastItemIsAcknowledged() {
 
 ////////////////////////////////////////////////////////////////
 
-func (this *SimpleAcknowledgerFixture) TestControlChannelReceivesCompletionNotice() {
+func (this *BatchAcknowledgerFixture) TestControlChannelReceivesCompletionNotice() {
 	this.input <- newReceipt(this.channel, 1)
 	this.input <- newReceipt(this.channel, 2)
 	this.input <- newReceipt(this.channel, 3)
 
 	close(this.input)
 
-	this.So((<-this.control).(acknowledgementCompleted).Acknowledgements, should.Equal, 3)
+	this.So((<-this.control).(acknowledgementCompleted), should.NotBeNil)
 }
 
 ////////////////////////////////////////////////////////////////
 
-func (this *SimpleAcknowledgerFixture) TestFinalReceiptIsAlwaysCalled() {
+func (this *BatchAcknowledgerFixture) TestFinalReceiptIsAlwaysCalled() {
 	this.input <- newReceipt(this.channel, 1)
 	this.input <- newReceipt(this.channel, 2)
 	this.input <- newReceipt(this.channel, 3)
@@ -71,50 +71,42 @@ func (this *SimpleAcknowledgerFixture) TestFinalReceiptIsAlwaysCalled() {
 
 	close(this.input)
 
-	this.So((<-this.control).(acknowledgementCompleted).Acknowledgements, should.Equal, 3)
+	this.So((<-this.control).(acknowledgementCompleted), should.NotBeNil)
 	this.So(this.channel.callsMulti, should.Equal, 1)
 	this.So(this.channel.latestMulti, should.Equal, 3)
 }
 
 ////////////////////////////////////////////////////////////////
 
-func (this *SimpleAcknowledgerFixture) TestLoopExitsAfterAllDeliveriesReceived() {
+func (this *BatchAcknowledgerFixture) TestLoopExitsAfterFinalDelivery1() {
 	this.input <- newReceipt(this.channel, 1)
 	this.input <- newReceipt(this.channel, 2)
 	this.input <- newReceipt(this.channel, 3)
-	this.input <- subscriptionClosed{DeliveryCount: 1} // realistically, we'd only ever see a single closed event per ack'r lifetime
-	this.input <- subscriptionClosed{DeliveryCount: 2}
+	this.input <- subscriptionClosed{}
 
-	this.So((<-this.control).(acknowledgementCompleted).Acknowledgements, should.Equal, 3)
+	this.So((<-this.control).(acknowledgementCompleted), should.NotBeNil)
 	this.So(this.channel.callsMulti, should.Equal, 1)
 	this.So(this.channel.latestMulti, should.Equal, 3)
 }
 
 ////////////////////////////////////////////////////////////////
 
-func (this *SimpleAcknowledgerFixture) TestLoopExitsAfterOnlyFinalDeliveryReceived() {
+func (this *BatchAcknowledgerFixture) TestLoopExitsAfterFinalDelivery2() {
 	this.input <- newReceipt(this.channel, 17)
-	this.input <- subscriptionClosed{
-		LatestConsumer:    this.channel,
-		LatestDeliveryTag: 17,
-		DeliveryCount:     17,
-	}
+	this.input <- subscriptionClosed{}
 
-	this.So((<-this.control).(acknowledgementCompleted).Acknowledgements, should.Equal, 1)
+	this.So((<-this.control).(acknowledgementCompleted), should.NotBeNil)
 	this.So(this.channel.callsMulti, should.Equal, 1)
 	this.So(this.channel.latestMulti, should.Equal, 17)
 }
 
 ////////////////////////////////////////////////////////////////
 
-func (this *SimpleAcknowledgerFixture) TestLoopExitsAfterAllDeliveriesReceived2() {
-	this.input <- subscriptionClosed{DeliveryCount: 1} // realistically, we'd only ever see a single closed event per ack'r lifetime
-	this.input <- newReceipt(this.channel, 1)
-	this.input <- subscriptionClosed{DeliveryCount: 2}
-	this.input <- newReceipt(this.channel, 2)
+func (this *BatchAcknowledgerFixture) TestLoopExitsAfterFinalDelivery3() {
+	this.input <- subscriptionClosed{}
 	this.input <- newReceipt(this.channel, 3)
 
-	this.So((<-this.control).(acknowledgementCompleted).Acknowledgements, should.Equal, 3)
+	this.So((<-this.control).(acknowledgementCompleted), should.NotBeNil)
 	this.So(this.channel.callsMulti, should.Equal, 1)
 	this.So(this.channel.latestMulti, should.Equal, 3)
 }

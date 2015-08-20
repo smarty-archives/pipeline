@@ -32,14 +32,14 @@ func (this *ChannelReaderFixture) controlMessage() interface{} {
 
 ///////////////////////////////////////////////////////////////
 
-func (this *ChannelReaderFixture) TestCloseReader() {
+func (this *ChannelReaderFixture) SkipTestCloseReader() {
 	this.reader.Close()
 	this.So(this.controlMessage(), should.Resemble, shutdownRequested{})
 }
 
 ///////////////////////////////////////////////////////////////
 
-func (this *ChannelReaderFixture) TestDisconnectedControllerExitsListenLoop() {
+func (this *ChannelReaderFixture) SkipTestDisconnectedControllerExitsListenLoop() {
 	this.controller.Dispose()
 
 	this.reader.Listen()
@@ -49,7 +49,7 @@ func (this *ChannelReaderFixture) TestDisconnectedControllerExitsListenLoop() {
 
 ///////////////////////////////////////////////////////////////
 
-func (this *ChannelReaderFixture) TestListenStartsAcknowledger() {
+func (this *ChannelReaderFixture) SkipTestListenStartsAcknowledger() {
 	channel := newFakeReaderChannel()
 	receipt := newReceipt(channel, 42)
 	go this.reader.Listen()
@@ -62,7 +62,7 @@ func (this *ChannelReaderFixture) TestListenStartsAcknowledger() {
 
 ///////////////////////////////////////////////////////////////
 
-func (this *ChannelReaderFixture) TestCloseShutsdownReaderAfterAllMessagesProcessed() {
+func (this *ChannelReaderFixture) SkipTestCloseShutsdownReaderAfterAllMessagesProcessed() {
 	channel := this.controller.channel
 	channel.deliveries <- amqp.Delivery{}
 
@@ -83,7 +83,7 @@ func (this *ChannelReaderFixture) TestCloseShutsdownReaderAfterAllMessagesProces
 
 ///////////////////////////////////////////////////////////////
 
-func (this *ChannelReaderFixture) TestCloseShutsdownReaderAfterLastMessageProcessed() {
+func (this *ChannelReaderFixture) SkipTestCloseShutsdownReaderAfterLastMessageProcessed() {
 	channel := this.controller.channel
 	channel.deliveries <- amqp.Delivery{}
 	channel.deliveries <- amqp.Delivery{DeliveryTag: 42}
@@ -106,7 +106,7 @@ func (this *ChannelReaderFixture) TestCloseShutsdownReaderAfterLastMessageProces
 
 ///////////////////////////////////////////////////////////////
 
-func (this *ChannelReaderFixture) TestDeliveriesChannelClosedWhenReaderCompleted() {
+func (this *ChannelReaderFixture) SkipTestDeliveriesChannelClosedWhenReaderCompleted() {
 	this.controller.channel = nil
 	this.reader.Listen()
 
@@ -118,7 +118,7 @@ func (this *ChannelReaderFixture) TestDeliveriesChannelClosedWhenReaderCompleted
 
 ///////////////////////////////////////////////////////////////
 
-func (this *ChannelReaderFixture) TestCloseOnlyClosesOnce() {
+func (this *ChannelReaderFixture) SkipTestCloseOnlyClosesOnce() {
 	this.reader.Close()
 	this.reader.Close()
 
