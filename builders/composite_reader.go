@@ -58,8 +58,15 @@ func (this *CompositeReaderBuilder) Build() messaging.Reader {
 	receive := this.broker.OpenReader(this.sourceQueue)
 	input := receive.Deliveries()
 	output := make(chan messaging.Delivery, cap(input))
+
 	deserializer := handlers.NewJSONDeserializer(this.types)
 	deserialize := handlers.NewDeserializationHandler(input, output, deserializer)
+	if this.panicMissing {
+		deserializer.PanicWhenMessageTypeIsUnknown()
+	}
+	if this.panicFail {
+		deserializer.PanicWhenDeserializationFails()
+	}
 
 	return &compositeReader{
 		receive:     receive,
