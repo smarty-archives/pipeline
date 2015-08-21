@@ -6,15 +6,13 @@ import (
 	"io"
 	"log"
 	"net/http"
-
-	"github.com/smartystreets/pipeline/projector/persist"
 )
 
 type DocumentReader struct {
-	client persist.HTTPClient
+	client HTTPClient
 }
 
-func NewDocumentReader(client persist.HTTPClient) *DocumentReader {
+func NewDocumentReader(client HTTPClient) *DocumentReader {
 	return &DocumentReader{client: client}
 }
 
