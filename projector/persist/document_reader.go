@@ -10,15 +10,19 @@ import (
 	"github.com/smartystreets/pipeline/projector/persist"
 )
 
-type DocumentLoader struct {
+type DocumentReader struct {
 	client persist.HTTPClient
 }
 
-func NewDocumentLoader(client persist.HTTPClient) *DocumentLoader {
-	return &DocumentLoader{client: client}
+func NewDocumentReader(client persist.HTTPClient) *DocumentReader {
+	return &DocumentReader{client: client}
 }
 
-func (this *DocumentLoader) Load(path string, document interface{}) {
+func (this *DocumentReader) Read(path string, document interface{}) {
+	// TODO: revise the policy below of using panic().
+	// Do we really want to bring down ANY process that uses
+	// this code, including Street API, etc.?
+
 	request, err := http.NewRequest("GET", path, nil)
 	if err != nil {
 		log.Panic("Could not create request: ", err)

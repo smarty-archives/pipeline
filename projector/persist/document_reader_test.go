@@ -14,81 +14,81 @@ import (
 	"github.com/smartystreets/gunit"
 )
 
-type DocumentLoaderFixture struct {
+type DocumentReaderFixture struct {
 	*gunit.Fixture
 
 	path     string
-	loader   *DocumentLoader
+	reader   *DocumentReader
 	client   *FakeHTTPGetClient // HTTPClient
 	stdout   *bytes.Buffer
 	document *Document
 }
 
-func (this *DocumentLoaderFixture) Setup() {
+func (this *DocumentReaderFixture) Setup() {
 	this.path = "/document/path"
 	this.client = &FakeHTTPGetClient{}
-	this.loader = NewDocumentLoader(this.client)
+	this.reader = NewDocumentReader(this.client)
 	this.document = &Document{}
 	this.stdout = new(bytes.Buffer)
 	log.SetOutput(this.stdout)
 }
 
-func (this *DocumentLoaderFixture) TestRequestInvalid_ClientIgnored() {
+func (this *DocumentReaderFixture) TestRequestInvalid_ClientIgnored() {
 	this.path = "%%%%%%%%"
 	this.assertPanic(`Could not create request: parse %%%%%%%%: invalid URL escape "%%%"`)
 	this.So(this.client.called, should.BeFalse)
 }
 
-func (this *DocumentLoaderFixture) TestClientErrorPreventsDocumentLoading() {
+func (this *DocumentReaderFixture) TestClientErrorPreventsDocumentReading() {
 	this.client.err = errors.New("BOINK!")
 	this.assertPanic("HTTP Client Error: BOINK!")
 }
 
-func (this *DocumentLoaderFixture) TestDocumentNotFound_JSONMarshalNotAttempted() {
+func (this *DocumentReaderFixture) TestDocumentNotFound_JSONMarshalNotAttempted() {
 	this.client.response = NotFoundResponse
-	this.load()
+	this.read()
 	this.So(this.document.ID, should.Equal, 0)
 	this.So(this.stdout.String(), should.ContainSubstring, "Document not found at '/document/path'\n")
 }
 
-func (this *DocumentLoaderFixture) TestNilResponseBody() {
+func (this *DocumentReaderFixture) TestNilResponseBody() {
 	this.client.response = BodyNilResponse
 	this.assertPanic("HTTP response body was nil")
 }
 
-func (this *DocumentLoaderFixture) TestBodyUnreadable() {
+func (this *DocumentReaderFixture) TestBodyUnreadable() {
 	this.client.response = BodyReadErrorResponse
-	this.So(this.load, should.Panic)
+	this.So(this.read, should.Panic)
 	this.So(this.document.ID, should.Equal, 0)
 	this.So(BodyReadErrorResponse.Body.(*FakeHTTPResponseBody).closed, should.BeTrue)
 }
 
-func (this *DocumentLoaderFixture) TestBadJSON() {
+func (this *DocumentReaderFixture) TestBadJSON() {
 	this.client.response = BadJSONResponse
-	this.So(this.load, should.Panic)
+	this.So(this.read, should.Panic)
 	this.So(this.document.ID, should.Equal, 0)
 	this.So(BodyReadErrorResponse.Body.(*FakeHTTPResponseBody).closed, should.BeTrue)
 }
 
-func (this *DocumentLoaderFixture) TestValidUncompressedResponse_PopulatesDocument() {
+func (this *DocumentReaderFixture) TestValidUncompressedResponse_PopulatesDocument() {
 	this.client.response = ValidUncompressedResponse
-	this.load()
+	this.read()
 	this.So(this.document.ID, should.Equal, 1234)
 	this.So(this.stdout.String(), should.BeEmpty)
 	this.So(BodyReadErrorResponse.Body.(*FakeHTTPResponseBody).closed, should.BeTrue)
 }
-func (this *DocumentLoaderFixture) TestValidCompressedResponse_PopulatesDocument() {
+func (this *DocumentReaderFixture) TestValidCompressedResponse_PopulatesDocument() {
 	this.client.response = ValidCompressedResponse
-	this.load()
+	this.read()
 	this.So(this.document.ID, should.Equal, 1234)
 	this.So(this.stdout.String(), should.BeEmpty)
 	this.So(BodyReadErrorResponse.Body.(*FakeHTTPResponseBody).closed, should.BeTrue)
 }
-func (this *DocumentLoaderFixture) load() {
-	this.loader.Load(this.path, this.document)
+func (this *DocumentReaderFixture) read() {
+	this.reader.Read(this.path, this.document)
 }
-func (this *DocumentLoaderFixture) assertPanic(message string) {
-	this.So(this.load, should.Panic)
+func (this *DocumentReaderFixture) assertPanic(message string) {
+	this.So(this.read, should.Panic)
 	this.So(this.document.ID, should.Equal, 0)
 }
 
