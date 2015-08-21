@@ -25,7 +25,15 @@ func NewCompositeReader(broker messaging.MessageBroker, sourceQueue string) *Com
 	}
 }
 
-func (this *CompositeReaderBuilder) Register(prefix string, instances ...interface{}) *CompositeReaderBuilder {
+func (this *CompositeReaderBuilder) RegisterMap(types map[string]reflect.Type) *CompositeReaderBuilder {
+	for key, value := range types {
+		this.types[key] = value
+	}
+
+	return this
+}
+
+func (this *CompositeReaderBuilder) RegisterMultiple(prefix string, instances ...interface{}) *CompositeReaderBuilder {
 	discovery := messaging.NewReflectionDiscovery(prefix)
 
 	for _, instance := range instances {
@@ -36,6 +44,10 @@ func (this *CompositeReaderBuilder) Register(prefix string, instances ...interfa
 		}
 	}
 
+	return this
+}
+func (this *CompositeReaderBuilder) Register(typeName string, instance interface{}) *CompositeReaderBuilder {
+	this.types[typeName] = reflect.TypeOf(instance)
 	return this
 }
 
