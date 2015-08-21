@@ -1,4 +1,4 @@
-package transform
+package persist
 
 import (
 	"compress/gzip"
