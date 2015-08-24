@@ -25,7 +25,7 @@ func NewHTTPServer(listenAddress string, handler http.Handler) *HTTPServer {
 		},
 	}
 }
-func (this *HTTPServer) WithTLS(certificatePEM string, tlsConfig *tls.Config) {
+func (this *HTTPServer) WithTLS(certificatePEM string, tlsConfig *tls.Config) *HTTPServer {
 	if tlsConfig == nil {
 		tlsConfig = &tls.Config{
 			MinVersion:               tls.VersionTLS12,
@@ -41,6 +41,7 @@ func (this *HTTPServer) WithTLS(certificatePEM string, tlsConfig *tls.Config) {
 
 	this.certificatePEM = certificatePEM
 	this.inner.TLSConfig = tlsConfig
+	return this
 }
 
 func (this *HTTPServer) Listen() {
