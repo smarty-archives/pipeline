@@ -10,7 +10,7 @@ type (
 
 	Document interface {
 		Lapse(now time.Time) (next Document)
-		Handle(message interface{}) bool
+		Apply(message interface{}) bool
 		Path() string
 	}
 )

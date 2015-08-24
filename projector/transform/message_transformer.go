@@ -28,7 +28,7 @@ func (this *MessageTransformer) TransformAllDocuments(message interface{}, now t
 	for i, doc := range this.documents {
 		doc = doc.Lapse(now)
 		this.documents[i] = doc
-		if doc.Handle(message) {
+		if doc.Apply(message) {
 			this.changed[doc.Path()] = doc
 		}
 	}
