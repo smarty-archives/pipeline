@@ -77,7 +77,7 @@ type CloneableReport struct{ ID int }
 
 func NewCloneableReport(id int) *CloneableReport                            { return &CloneableReport{ID: id} }
 func (this *CloneableReport) Path() string                                  { panic("NOT IMPLEMENTED") }
-func (this *CloneableReport) Handle(message interface{}) bool               { panic("NOT IMPLEMENTED") }
+func (this *CloneableReport) Apply(message interface{}) bool                { panic("NOT IMPLEMENTED") }
 func (this *CloneableReport) Lapse(now time.Time) (next projector.Document) { panic("NOT IMPLEMENTED") }
 
 //////////////////////////////////////////////////////////////////
@@ -85,9 +85,9 @@ func (this *CloneableReport) Lapse(now time.Time) (next projector.Document) { pa
 // This type has no exported fields, which means it cannot be encoded by the gob.Encoder.
 type UncloneableReport struct{ id int }
 
-func NewUncloneableReport(id int) *UncloneableReport            { return &UncloneableReport{id: id} }
-func (this *UncloneableReport) Path() string                    { panic("NOT IMPLEMENTED") }
-func (this *UncloneableReport) Handle(message interface{}) bool { panic("NOT IMPLEMENTED") }
+func NewUncloneableReport(id int) *UncloneableReport           { return &UncloneableReport{id: id} }
+func (this *UncloneableReport) Path() string                   { panic("NOT IMPLEMENTED") }
+func (this *UncloneableReport) Apply(message interface{}) bool { panic("NOT IMPLEMENTED") }
 func (this *UncloneableReport) Lapse(now time.Time) (next projector.Document) {
 	panic("NOT IMPLEMENTED")
 }

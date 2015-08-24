@@ -101,6 +101,6 @@ type fakeDocument struct{ path string }
 
 func (this *fakeDocument) Path() string                                  { return this.path }
 func (this *fakeDocument) Lapse(now time.Time) (next projector.Document) { return this }
-func (this *fakeDocument) Handle(message interface{}) bool               { return false }
+func (this *fakeDocument) Apply(message interface{}) bool                { return false }
 
 /////////////////////////////////////////////////////////////////

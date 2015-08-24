@@ -89,7 +89,7 @@ func (this *FakeDocument) Lapse(now time.Time) projector.Document {
 	this.lapsed = now
 	return &FakeDocument{depth: this.depth + 1}
 }
-func (this *FakeDocument) Handle(message interface{}) bool {
+func (this *FakeDocument) Apply(message interface{}) bool {
 	this.handled++
 	this.handledMessage = message
 	return true

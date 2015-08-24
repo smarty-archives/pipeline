@@ -129,7 +129,7 @@ type FakeDocument struct{ id string }
 func NewFakeDocument(id string) *FakeDocument                 { return &FakeDocument{id: id} }
 func (this *FakeDocument) Path() string                       { return this.id }
 func (this *FakeDocument) Lapse(time.Time) projector.Document { panic("NOT IMPLEMENTED") }
-func (this *FakeDocument) Handle(interface{}) bool            { panic("NOT IMPLEMENTED") }
+func (this *FakeDocument) Apply(interface{}) bool             { panic("NOT IMPLEMENTED") }
 
 /////////////////////////
 

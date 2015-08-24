@@ -119,7 +119,7 @@ var writableDocument = &DocumentForWriting{Message: "Hello, World!"}
 type DocumentForWriting struct{ Message string }
 
 func (this *DocumentForWriting) Lapse(now time.Time) (next projector.Document) { return this }
-func (this *DocumentForWriting) Handle(message interface{}) bool               { return false }
+func (this *DocumentForWriting) Apply(message interface{}) bool                { return false }
 func (this *DocumentForWriting) Path() string                                  { return "/this/is/the/path.json" }
 
 /////////////////////////////////////////////////////////////////
@@ -130,7 +130,7 @@ var badJSONDocument = &BadJSONDocumentForWriting{}
 type BadJSONDocumentForWriting struct{ Stuff map[int]string }
 
 func (this *BadJSONDocumentForWriting) Lapse(now time.Time) (next projector.Document) { return this }
-func (this *BadJSONDocumentForWriting) Handle(message interface{}) bool               { return false }
+func (this *BadJSONDocumentForWriting) Apply(message interface{}) bool                { return false }
 func (this *BadJSONDocumentForWriting) Path() string                                  { return "" }
 
 /////////////////////////////////////////////////////////////////
@@ -140,5 +140,5 @@ var badPathDocument = &BadPathDocumentForWriting{path: "%%%%%%%%"}
 type BadPathDocumentForWriting struct{ path string }
 
 func (this *BadPathDocumentForWriting) Lapse(now time.Time) (next projector.Document) { return this }
-func (this *BadPathDocumentForWriting) Handle(message interface{}) bool               { return false }
+func (this *BadPathDocumentForWriting) Apply(message interface{}) bool                { return false }
 func (this *BadPathDocumentForWriting) Path() string                                  { return this.path }
