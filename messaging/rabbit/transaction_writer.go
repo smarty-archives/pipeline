@@ -45,7 +45,7 @@ func (this *TransactionWriter) Commit() error {
 		return nil
 	}
 
-	log.Println("[WARN] Transaction failed, closing channel.")
+	log.Println("[WARN] Transaction failed, closing channel: [", err, "]")
 	this.channel.Close()
 	this.channel = nil
 	return err
