@@ -14,6 +14,10 @@ type HTTPServer struct {
 }
 
 func NewHTTPServer(listenAddress string, handler http.Handler) *HTTPServer {
+	if len(listenAddress) == 0 {
+		return nil
+	}
+
 	return &HTTPServer{
 		inner: http.Server{
 			Addr:           listenAddress,
@@ -26,6 +30,10 @@ func NewHTTPServer(listenAddress string, handler http.Handler) *HTTPServer {
 	}
 }
 func (this *HTTPServer) WithTLS(certificatePEM string, tlsConfig *tls.Config) *HTTPServer {
+	if this == nil {
+		return nil
+	}
+
 	if tlsConfig == nil {
 		tlsConfig = &tls.Config{
 			MinVersion:               tls.VersionTLS12,
@@ -45,6 +53,10 @@ func (this *HTTPServer) WithTLS(certificatePEM string, tlsConfig *tls.Config) *H
 }
 
 func (this *HTTPServer) Listen() {
+	if this == nil {
+		return
+	}
+
 	log.Printf("[INFO] Listening for web traffic on %s.\n", this.inner.Addr)
 	if err := this.listen(); err != nil {
 		log.Fatal("[ERROR] Unable to listen to web traffic: ", err)
