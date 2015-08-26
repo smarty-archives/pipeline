@@ -10,11 +10,16 @@ import (
 
 func WriteResponse(response http.ResponseWriter, err error) {
 	if err != nil {
-		WriteErrorMessage(response, err.Error(), http.StatusInternalServerError)
+		WriteError(response, err, http.StatusInternalServerError)
 	} else {
 		response.Header().Set(ContentTypeHeader, MIMEApplicationJSON)
 	}
 }
+
+func WriteError(response http.ResponseWriter, err error, statusCode int) {
+	WriteErrorMessage(response, err.Error(), statusCode)
+}
+
 func WriteErrorMessage(response http.ResponseWriter, message string, statusCode int) {
 	response.Header().Set(ContentTypeHeader, MIMETextPlain)
 	http.Error(response, message, statusCode)
@@ -25,10 +30,12 @@ func WriteRequest(response http.ResponseWriter, request *http.Request, message s
 	response.Header().Set(ContentTypeHeader, MIMETextPlain)
 	http.Error(response, fmt.Sprintf("%d %s\n\nRaw Request:\n\n%s\n\n%s", status, message, string(dump)), status)
 }
+
 func WriteJSON(contents interface{}, response http.ResponseWriter) {
 	response.Header().Set(ContentTypeHeader, MIMEApplicationJSON)
 	json.NewEncoder(response).Encode(contents)
 }
+
 func WritePrettyJSON(contents interface{}, response http.ResponseWriter) {
 	response.Header().Set(ContentTypeHeader, MIMEApplicationJSON)
 
