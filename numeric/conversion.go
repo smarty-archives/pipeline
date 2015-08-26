@@ -48,7 +48,7 @@ func NewGUID() string {
 		encoded[20:])
 }
 
-func GUIDToString(value string) uint64 {
+func GUIDToUint64(value string) uint64 {
 	if len(value) != GUIDStringLength {
 		return 0
 	}
