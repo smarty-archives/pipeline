@@ -8,7 +8,7 @@ import (
 	"github.com/smartystreets/pipeline/numeric"
 )
 
-func ClientIPAddress(request *http.Request) string {
+func ReadClientIPAddress(request *http.Request) string {
 	if origin := request.Header.Get("X-Forwarded-For"); len(origin) > 0 {
 		return origin
 	} else if address, _, err := net.SplitHostPort(request.RemoteAddr); err == nil {
@@ -18,7 +18,7 @@ func ClientIPAddress(request *http.Request) string {
 	}
 }
 
-func ExtractUint64Header(request *http.Request, name string) uint64 {
+func ReadUint64Header(request *http.Request, name string) uint64 {
 	return numeric.StringToUint64(request.Header.Get(name))
 }
 
