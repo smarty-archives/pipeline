@@ -10,7 +10,7 @@ import (
 
 func WriteResponse(response http.ResponseWriter, err error) {
 	if err != nil {
-		writeErrorMessage(response, err.Error(), http.StatusInternalServerError)
+		WriteErrorMessage(response, err.Error(), http.StatusInternalServerError)
 	} else {
 		response.Header().Set(ContentTypeHeader, MIMEApplicationJSON)
 	}
@@ -32,7 +32,7 @@ func WriteJSON(contents interface{}, response http.ResponseWriter) {
 func WritePrettyJSON(contents interface{}, response http.ResponseWriter) {
 	response.Header().Set(ContentTypeHeader, MIMEApplicationJSON)
 
-	payload, _ := json.Marshal(envelope.Results)
+	payload, _ := json.Marshal(contents)
 	var buffer bytes.Buffer
 	json.Indent(&buffer, payload, "", "\t")
 	buffer.WriteTo(response)
