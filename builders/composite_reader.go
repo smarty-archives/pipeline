@@ -3,6 +3,7 @@ package builders
 import (
 	"log"
 	"reflect"
+	"strings"
 
 	"github.com/smartystreets/pipeline/handlers"
 	"github.com/smartystreets/pipeline/listeners"
@@ -11,6 +12,7 @@ import (
 
 type CompositeReaderBuilder struct {
 	sourceQueue  string
+	bindings     []string
 	broker       messaging.MessageBroker
 	types        map[string]reflect.Type
 	panicMissing bool
@@ -28,6 +30,7 @@ func NewCompositeReader(broker messaging.MessageBroker, sourceQueue string) *Com
 func (this *CompositeReaderBuilder) RegisterMap(types map[string]reflect.Type) *CompositeReaderBuilder {
 	for key, value := range types {
 		this.types[key] = value
+		this.addBinding(key)
 	}
 
 	return this
@@ -41,6 +44,7 @@ func (this *CompositeReaderBuilder) RegisterMultiple(prefix string, instances ..
 			log.Fatal("Unable to discover type for instance", instance)
 		} else {
 			this.types[discovered] = reflect.TypeOf(instance)
+			this.addBinding(discovered)
 		}
 	}
 
@@ -48,7 +52,11 @@ func (this *CompositeReaderBuilder) RegisterMultiple(prefix string, instances ..
 }
 func (this *CompositeReaderBuilder) Register(typeName string, instance interface{}) *CompositeReaderBuilder {
 	this.types[typeName] = reflect.TypeOf(instance)
+	this.addBinding(typeName)
 	return this
+}
+func (this *CompositeReaderBuilder) addBinding(typeName string) {
+	this.bindings = append(this.bindings, strings.Replace(typeName, ".", "-", -1))
 }
 
 func (this *CompositeReaderBuilder) RegisterType(name string, value reflect.Type) *CompositeReaderBuilder {
@@ -67,7 +75,7 @@ func (this *CompositeReaderBuilder) PanicWhenDeserializationFails() *CompositeRe
 }
 
 func (this *CompositeReaderBuilder) Build() messaging.Reader {
-	receive := this.broker.OpenReader(this.sourceQueue)
+	receive := this.openReader()
 	input := receive.Deliveries()
 	output := make(chan messaging.Delivery, cap(input))
 
@@ -85,6 +93,19 @@ func (this *CompositeReaderBuilder) Build() messaging.Reader {
 		deserialize: deserialize,
 		deliveries:  output,
 	}
+}
+
+func (this *CompositeReaderBuilder) openReader() messaging.Reader {
+	if len(this.sourceQueue) > 0 {
+		return this.broker.OpenReader(this.sourceQueue)
+	}
+
+	if len(this.bindings) > 0 {
+		return this.broker.OpenTransientReader(this.bindings)
+	}
+
+	log.Fatal("Unable to open reader. No source queue or bindings specified.")
+	return nil
 }
 
 type compositeReader struct {
