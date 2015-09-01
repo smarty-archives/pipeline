@@ -3,6 +3,7 @@ package persist
 import (
 	"compress/gzip"
 	"encoding/json"
+	"fmt"
 	"io"
 	"log"
 	"net/http"
@@ -16,28 +17,24 @@ func NewDocumentReader(client HTTPClient) *DocumentReader {
 	return &DocumentReader{client: client}
 }
 
-func (this *DocumentReader) Read(path string, document interface{}) {
-	// TODO: revise the policy below of using panic().
-	// Do we really want to bring down ANY process that uses
-	// this code, including Street API, etc.?
-
+func (this *DocumentReader) Read(path string, document interface{}) error {
 	request, err := http.NewRequest("GET", path, nil)
 	if err != nil {
-		log.Panic("Could not create request: ", err)
+		return fmt.Errorf("Could not create request: '%s'", err.Error())
 	}
 
 	response, err := this.client.Do(request)
 	if err != nil {
-		log.Panic("HTTP Client Error: ", err)
+		return fmt.Errorf("HTTP Client Error: '%s'", err.Error())
 	}
 
 	if response.StatusCode == http.StatusNotFound {
 		log.Printf("[INFO] Document not found at '%s'\n", path)
-		return
+		return nil
 	}
 
 	if response.Body == nil {
-		log.Panic("HTTP response body was nil")
+		return fmt.Errorf("HTTP response body was nil: '%s'", err.Error())
 	}
 
 	defer response.Body.Close()
@@ -49,6 +46,14 @@ func (this *DocumentReader) Read(path string, document interface{}) {
 
 	decoder := json.NewDecoder(reader)
 	if err := decoder.Decode(document); err != nil {
-		log.Panic("Document read error: ", err)
+		return fmt.Errorf("Document read error: '%s'", err.Error())
+	}
+
+	return nil
+}
+
+func (this *DocumentReader) ReadPanic(path string, document interface{}) {
+	if err := this.Read(path, document); err != nil {
+		log.Panic(err)
 	}
 }

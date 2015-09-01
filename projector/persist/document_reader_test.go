@@ -85,7 +85,7 @@ func (this *DocumentReaderFixture) TestValidCompressedResponse_PopulatesDocument
 	this.So(BodyReadErrorResponse.Body.(*FakeHTTPResponseBody).closed, should.BeTrue)
 }
 func (this *DocumentReaderFixture) read() {
-	this.reader.Read(this.path, this.document)
+	this.reader.ReadPanic(this.path, this.document)
 }
 func (this *DocumentReaderFixture) assertPanic(message string) {
 	this.So(this.read, should.Panic)
