@@ -24,7 +24,7 @@ func (this *CompositeListenerFixture) Setup() {
 func (this *CompositeListenerFixture) TestCompositeListenerCallsInnerListenersConcurrently() {
 	started := time.Now()
 	this.composite.Listen()
-	this.So(time.Since(started), should.BeLessThan, nap*2)
+	this.So(time.Since(started), should.BeLessThan, nap*5)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
