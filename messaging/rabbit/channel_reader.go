@@ -26,8 +26,8 @@ func newReader(controller Controller, queue string, bindings []string) *ChannelR
 		queue:            queue,
 		bindings:         bindings,
 		control:          make(chan interface{}, 32),
-		acknowledgements: make(chan interface{}, 65536),
-		deliveries:       make(chan messaging.Delivery, 65536),
+		acknowledgements: make(chan interface{}, 1024*2-1),
+		deliveries:       make(chan messaging.Delivery, 1024*32-1),
 	}
 }
 
