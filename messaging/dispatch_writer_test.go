@@ -46,26 +46,28 @@ func (this *DispatchWriterFixture) TestWriteUsingDefaults() {
 
 func (this *DispatchWriterFixture) TestWriteUsingCustomTemplate() {
 	this.writer.RegisterTemplate(Dispatch{
-		MessageID:   1,
-		SourceID:    2,
-		Destination: "3",
-		MessageType: "4", // overwritten
-		Encoding:    "5",
-		Durable:     true,
-		Expiration:  time.Second * 6,
+		MessageID:       1,
+		SourceID:        2,
+		Destination:     "3",
+		MessageType:     "4", // overwritten
+		ContentType:     "5",
+		ContentEncoding: "6",
+		Durable:         true,
+		Expiration:      time.Second * 7,
 	})
 
 	this.writer.Write(Dispatch{Message: "Hello, World!"})
 
 	this.So(this.inner.written, should.Resemble, []Dispatch{{
-		MessageID:   1,
-		SourceID:    2,
-		Destination: "prefix-string",
-		MessageType: "prefix.string",
-		Encoding:    "5",
-		Durable:     true,
-		Expiration:  time.Second * 6,
-		Message:     "Hello, World!",
+		MessageID:       1,
+		SourceID:        2,
+		Destination:     "prefix-string",
+		MessageType:     "prefix.string",
+		ContentType:     "5",
+		ContentEncoding: "6",
+		Durable:         true,
+		Expiration:      time.Second * 7,
+		Message:         "Hello, World!",
 	}})
 	this.So(this.writer.template.Message, should.BeNil)
 }
@@ -93,25 +95,27 @@ func (this *DispatchWriterFixture) TestWriteUsesOverrideTableWhenAvailable() {
 	applicationMessage := "Hello, World!"
 
 	this.writer.RegisterOverride(reflect.TypeOf(applicationMessage), Dispatch{
-		MessageID:   1,
-		SourceID:    2,
-		Destination: "3",
-		MessageType: "4",
-		Encoding:    "5",
-		Durable:     true,
-		Expiration:  time.Second * 6,
+		MessageID:       1,
+		SourceID:        2,
+		Destination:     "3",
+		MessageType:     "4",
+		ContentType:     "5",
+		ContentEncoding: "6",
+		Durable:         true,
+		Expiration:      time.Second * 7,
 	})
 
 	this.writer.Write(Dispatch{Message: applicationMessage})
 	this.So(this.inner.written, should.Resemble, []Dispatch{{
-		MessageID:   1,
-		SourceID:    2,
-		Destination: "3",
-		MessageType: "4",
-		Encoding:    "5",
-		Durable:     true,
-		Expiration:  time.Second * 6,
-		Message:     applicationMessage,
+		MessageID:       1,
+		SourceID:        2,
+		Destination:     "3",
+		MessageType:     "4",
+		ContentType:     "5",
+		ContentEncoding: "6",
+		Durable:         true,
+		Expiration:      time.Second * 7,
+		Message:         applicationMessage,
 	}})
 	this.So(this.writer.overrides[reflect.TypeOf(0)].Message, should.BeNil)
 }

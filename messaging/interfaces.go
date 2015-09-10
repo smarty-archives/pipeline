@@ -33,6 +33,8 @@ type (
 
 type Serializer interface {
 	Serialize(interface{}) ([]byte, error)
+	ContentType() string
+	ContentEncoding() string
 }
 
 type TypeDiscovery interface {

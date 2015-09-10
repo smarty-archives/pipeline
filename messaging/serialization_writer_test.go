@@ -38,19 +38,20 @@ func (this *SerializationWriterFixture) buildWriter() {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-func (this *SerializationWriterFixture) TestWriterAddsSerializedPayloadAndTypeToDispatch() {
+func (this *SerializationWriterFixture) TestWriterAddsSerializedPayloadAndTypesToDispatch() {
 	this.inner.writeError = errors.New("ensure inner errors are returned to caller")
 
 	original := Dispatch{
-		SourceID:    1,
-		MessageID:   2,
-		Destination: "3",
-		MessageType: "", // should be populated
-		Encoding:    "4",
-		Durable:     true,
-		Expiration:  time.Second * 5,
-		Payload:     nil,
-		Message:     TestMessage{},
+		SourceID:        1,
+		MessageID:       2,
+		Destination:     "3",
+		MessageType:     "", // will be populated
+		ContentType:     "", // will be populated
+		ContentEncoding: "", // will be populated
+		Durable:         true,
+		Expiration:      time.Second * 5,
+		Payload:         nil, // will be populated
+		Message:         TestMessage{},
 	}
 
 	err := this.writer.Write(original)
@@ -58,15 +59,16 @@ func (this *SerializationWriterFixture) TestWriterAddsSerializedPayloadAndTypeTo
 	this.So(err, should.Equal, this.inner.writeError)
 	this.So(this.inner.written, should.NotBeEmpty)
 	this.So(this.inner.written[0], should.Resemble, Dispatch{
-		SourceID:    1,
-		MessageID:   2,
-		Destination: "3",
-		MessageType: "message.type.discovered",
-		Encoding:    "4",
-		Durable:     true,
-		Expiration:  original.Expiration,
-		Payload:     testSerializedPayload,
-		Message:     TestMessage{},
+		SourceID:        1,
+		MessageID:       2,
+		Destination:     "3",
+		MessageType:     "message.type.discovered",
+		ContentType:     "application/serialized-type",
+		ContentEncoding: "serialized-encoding",
+		Durable:         true,
+		Expiration:      original.Expiration,
+		Payload:         testSerializedPayload,
+		Message:         TestMessage{},
 	})
 }
 
@@ -204,6 +206,9 @@ func (this *FakeSerializer) Serialize(interface{}) ([]byte, error) {
 		return testSerializedPayload, nil
 	}
 }
+
+func (this *FakeSerializer) ContentType() string     { return "application/serialized-type" }
+func (this *FakeSerializer) ContentEncoding() string { return "serialized-encoding" }
 
 var testSerializedPayload = []byte("serializer called successfully")
 

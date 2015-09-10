@@ -26,3 +26,6 @@ func (this *JSONSerializer) Serialize(message interface{}) ([]byte, error) {
 	}
 	return content, err
 }
+
+func (this *JSONSerializer) ContentType() string     { return "application/json" }
+func (this *JSONSerializer) ContentEncoding() string { return "" }

@@ -10,14 +10,15 @@ import (
 
 func fromAMQPDelivery(delivery amqp.Delivery, channel Acknowledger) messaging.Delivery {
 	return messaging.Delivery{
-		SourceID:    parseUint64(delivery.AppId),
-		MessageID:   parseUint64(delivery.MessageId),
-		MessageType: delivery.Type,
-		Encoding:    delivery.ContentEncoding,
-		Timestamp:   delivery.Timestamp,
-		Payload:     delivery.Body,
-		Upstream:    delivery,
-		Receipt:     newReceipt(channel, delivery.DeliveryTag),
+		SourceID:        parseUint64(delivery.AppId),
+		MessageID:       parseUint64(delivery.MessageId),
+		MessageType:     delivery.Type,
+		ContentType:     delivery.ContentType,
+		ContentEncoding: delivery.ContentEncoding,
+		Timestamp:       delivery.Timestamp,
+		Payload:         delivery.Body,
+		Upstream:        delivery,
+		Receipt:         newReceipt(channel, delivery.DeliveryTag),
 	}
 }
 func parseUint64(value string) uint64 {
@@ -34,7 +35,8 @@ func toAMQPDispatch(dispatch messaging.Dispatch, now time.Time) amqp.Publishing 
 		AppId:           strconv.FormatUint(dispatch.SourceID, base10),
 		MessageId:       strconv.FormatUint(dispatch.MessageID, base10),
 		Type:            dispatch.MessageType,
-		ContentEncoding: dispatch.Encoding,
+		ContentType:     dispatch.ContentType,
+		ContentEncoding: dispatch.ContentEncoding,
 		Timestamp:       dispatch.Timestamp,
 		Expiration:      computeExpiration(dispatch.Expiration),
 		DeliveryMode:    computePersistence(dispatch.Durable),

@@ -26,6 +26,7 @@ func (this *RabbitAdapterFixture) TestAMQPDeliveryConversion() {
 		AppId:           "1234",
 		MessageId:       "5678",
 		Type:            "message-type",
+		ContentType:     "content-type",
 		ContentEncoding: "content-encoding",
 		Timestamp:       this.now,
 		Body:            []byte{1, 2, 3, 4, 5, 6},
@@ -33,14 +34,15 @@ func (this *RabbitAdapterFixture) TestAMQPDeliveryConversion() {
 	}
 
 	this.So(fromAMQPDelivery(upstream, nil), should.Resemble, messaging.Delivery{
-		SourceID:    1234,
-		MessageID:   5678,
-		MessageType: "message-type",
-		Encoding:    "content-encoding",
-		Timestamp:   this.now,
-		Payload:     upstream.Body,
-		Upstream:    upstream,
-		Receipt:     DeliveryReceipt{channel: nil, deliveryTag: upstream.DeliveryTag},
+		SourceID:        1234,
+		MessageID:       5678,
+		MessageType:     "message-type",
+		ContentType:     "content-type",
+		ContentEncoding: "content-encoding",
+		Timestamp:       this.now,
+		Payload:         upstream.Body,
+		Upstream:        upstream,
+		Receipt:         DeliveryReceipt{channel: nil, deliveryTag: upstream.DeliveryTag},
 	})
 }
 
@@ -48,20 +50,22 @@ func (this *RabbitAdapterFixture) TestAMQPDeliveryConversion() {
 
 func (this *RabbitAdapterFixture) TestAMQPDispatchConversion() {
 	dispatch := messaging.Dispatch{
-		SourceID:    1234,
-		MessageID:   5678,
-		MessageType: "message-type",
-		Encoding:    "content-encoding",
-		Timestamp:   this.now.Add(-time.Second),
-		Expiration:  time.Second,
-		Durable:     true,
-		Payload:     []byte{1, 2, 3, 4, 5, 6, 7, 8, 9},
+		SourceID:        1234,
+		MessageID:       5678,
+		MessageType:     "message-type",
+		ContentType:     "content-type",
+		ContentEncoding: "content-encoding",
+		Timestamp:       this.now.Add(-time.Second),
+		Expiration:      time.Second,
+		Durable:         true,
+		Payload:         []byte{1, 2, 3, 4, 5, 6, 7, 8, 9},
 	}
 
 	this.So(toAMQPDispatch(dispatch, this.now), should.Resemble, amqp.Publishing{
 		AppId:           "1234",
 		MessageId:       "5678",
 		Type:            "message-type",
+		ContentType:     "content-type",
 		ContentEncoding: "content-encoding",
 		Timestamp:       this.now.Add(-time.Second),
 		Expiration:      "1",

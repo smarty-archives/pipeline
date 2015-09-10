@@ -1,19 +1,23 @@
 package messaging
 
 type SerializationWriter struct {
-	writer       Writer
-	commitWriter CommitWriter
-	serializer   Serializer
-	discovery    TypeDiscovery
+	writer          Writer
+	commitWriter    CommitWriter
+	serializer      Serializer
+	discovery       TypeDiscovery
+	contentType     string
+	contentEncoding string
 }
 
 func NewSerializationWriter(inner Writer, serializer Serializer, discovery TypeDiscovery) *SerializationWriter {
 	commitWriter, _ := inner.(CommitWriter)
 	return &SerializationWriter{
-		writer:       inner,
-		commitWriter: commitWriter,
-		serializer:   serializer,
-		discovery:    discovery,
+		writer:          inner,
+		commitWriter:    commitWriter,
+		serializer:      serializer,
+		discovery:       discovery,
+		contentType:     serializer.ContentType(),
+		contentEncoding: serializer.ContentEncoding(),
 	}
 }
 
@@ -46,6 +50,8 @@ func (this *SerializationWriter) Write(dispatch Dispatch) error {
 	}
 
 	dispatch.MessageType = messageType
+	dispatch.ContentType = this.contentType
+	dispatch.ContentEncoding = this.contentEncoding
 	return this.writer.Write(dispatch)
 }
 

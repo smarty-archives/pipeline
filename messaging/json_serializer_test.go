@@ -37,6 +37,14 @@ func (this *JSONSerializerFixture) TestSerializationFails() {
 	this.So(content, should.BeNil)
 }
 
+func (this *JSONSerializerFixture) TestContentType() {
+	this.So(this.serializer.ContentType(), should.Equal, "application/json")
+}
+
+func (this *JSONSerializerFixture) TestContentEncoding() {
+	this.So(this.serializer.ContentEncoding(), should.Equal, "")
+}
+
 func (this *JSONSerializerFixture) TestSerializationFailsAndPanics() {
 	this.serializer.PanicWhenSerializationFails()
 	message := InvalidMessage{Stuff: make(map[int]string)}
