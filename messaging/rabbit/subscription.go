@@ -1,6 +1,7 @@
 package rabbit
 
 import (
+	"log"
 	"strconv"
 	"time"
 
@@ -57,7 +58,10 @@ func (this *Subscription) open() <-chan amqp.Delivery {
 	this.channel.ConfigureChannelBuffer(cap(this.output))
 
 	if len(this.queue) > 0 {
-		this.channel.DeclareQueue(this.queue)
+		if err := this.channel.DeclareQueue(this.queue); err != nil {
+			log.Printf("[ERROR] Unable to declare queue [%s]: %s", this.queue, err)
+		}
+
 		this.bind(this.queue)
 		return this.consume()
 	} else {
@@ -68,7 +72,9 @@ func (this *Subscription) open() <-chan amqp.Delivery {
 }
 func (this *Subscription) bind(name string) {
 	for _, exchange := range this.bindings {
-		this.channel.BindExchangeToQueue(name, exchange)
+		if err := this.channel.BindExchangeToQueue(name, exchange); err != nil {
+			log.Printf("[ERROR] Unable to bind exchange [%s] to queue [%s]: %s", exchange, name, err)
+		}
 	}
 }
 
