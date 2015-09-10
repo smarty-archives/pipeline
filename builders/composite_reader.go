@@ -56,7 +56,13 @@ func (this *CompositeReaderBuilder) Register(typeName string, instance interface
 	return this
 }
 func (this *CompositeReaderBuilder) addBinding(typeName string) {
-	this.bindings = append(this.bindings, strings.Replace(typeName, ".", "-", -1))
+	if strings.Contains(typeName, " ") {
+		return // can't register .NET types
+	}
+
+	typeName = strings.Replace(typeName, ".", "-", -1)
+	typeName = strings.ToLower(typeName)
+	this.bindings = append(this.bindings, typeName)
 }
 
 func (this *CompositeReaderBuilder) RegisterType(name string, value reflect.Type) *CompositeReaderBuilder {
