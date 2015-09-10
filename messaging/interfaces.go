@@ -5,7 +5,7 @@ type (
 		Connect() error
 		Disconnect()
 
-		OpenReader(queue string) Reader
+		OpenReader(queue string, bindings ...string) Reader
 		OpenTransientReader(bindings []string) Reader
 
 		OpenWriter() Writer

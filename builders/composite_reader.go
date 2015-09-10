@@ -97,7 +97,7 @@ func (this *CompositeReaderBuilder) Build() messaging.Reader {
 
 func (this *CompositeReaderBuilder) openReader() messaging.Reader {
 	if len(this.sourceQueue) > 0 {
-		return this.broker.OpenReader(this.sourceQueue)
+		return this.broker.OpenReader(this.sourceQueue, this.bindings...)
 	}
 
 	if len(this.bindings) > 0 {

@@ -185,9 +185,10 @@ func (this *BrokerFixture) TestOpenReaderDuringConnection() {
 }
 func (this *BrokerFixture) assertValidReader(initialState uint64) {
 	this.broker.state = initialState
-	reader := this.broker.OpenReader("queue")
+	reader := this.broker.OpenReader("queue", "bindings1", "bindings2")
 	this.So(reader, should.NotBeNil)
 	this.So(reader.(*ChannelReader).queue, should.Equal, "queue")
+	this.So(reader.(*ChannelReader).bindings, should.Resemble, []string{"bindings1", "bindings2"})
 	this.So(this.broker.readers, should.NotBeEmpty)
 }
 

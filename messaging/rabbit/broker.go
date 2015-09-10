@@ -137,8 +137,8 @@ func (this *Broker) removeWriter(writer messaging.Writer) {
 	}
 }
 
-func (this *Broker) OpenReader(queue string) messaging.Reader {
-	return this.openReader(queue, nil)
+func (this *Broker) OpenReader(queue string, bindings ...string) messaging.Reader {
+	return this.openReader(queue, bindings)
 }
 func (this *Broker) OpenTransientReader(bindings []string) messaging.Reader {
 	return this.openReader("", bindings)
