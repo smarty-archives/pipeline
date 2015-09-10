@@ -57,15 +57,19 @@ func (this *Subscription) open() <-chan amqp.Delivery {
 	this.channel.ConfigureChannelBuffer(cap(this.output))
 
 	if len(this.queue) > 0 {
+		this.channel.DeclareQueue(this.queue)
+		this.bind(this.queue)
 		return this.consume()
+	} else {
+		this.queue, _ = this.channel.DeclareTransientQueue()
+		this.bind(this.queue)
+		return this.exclusiveConsume()
 	}
-
-	this.queue, _ = this.channel.DeclareTransientQueue()
+}
+func (this *Subscription) bind(name string) {
 	for _, exchange := range this.bindings {
-		this.channel.BindExchangeToQueue(this.queue, exchange)
+		this.channel.BindExchangeToQueue(name, exchange)
 	}
-
-	return this.exclusiveConsume()
 }
 
 func (this *Subscription) consume() <-chan amqp.Delivery {

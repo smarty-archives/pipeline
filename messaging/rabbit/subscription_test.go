@@ -52,6 +52,17 @@ func (this *SubscriptionFixture) TestExclusiveSubscription() {
 	this.So(this.channel.queue, should.NotBeEmpty)
 	this.So(this.channel.boundQueue[0], should.Equal, this.channel.queue)
 }
+func (this *SubscriptionFixture) TestQueuedBasedWithBindingsSubscription() {
+	this.queue = "test-queue"
+	this.bindings = []string{"exchange1", "exchange2"}
+
+	this.assertListen()
+
+	this.So(this.channel.exclusive, should.BeFalse)
+	this.So(this.channel.queue, should.Equal, this.queue)
+	this.So(this.channel.boundQueue[0], should.Equal, this.channel.queue)
+}
+
 func (this *SubscriptionFixture) TestFailingAMQPChannel() {
 	this.queue = "test-queue"
 	this.channel.incoming = nil
@@ -137,7 +148,8 @@ func (this *FakeSubscriptionChannel) ConfigureChannelBuffer(value int) error {
 	this.bufferSize = value
 	return nil
 }
-func (this *FakeSubscriptionChannel) DeclareQueue(string) error {
+func (this *FakeSubscriptionChannel) DeclareQueue(name string) error {
+	this.boundQueue = append(this.boundQueue, name)
 	return nil
 }
 func (this *FakeSubscriptionChannel) DeclareTransientQueue() (string, error) {
@@ -152,6 +164,7 @@ func (this *FakeSubscriptionChannel) BindExchangeToQueue(queue string, exchange 
 func (this *FakeSubscriptionChannel) Consume(queue, consumer string) (<-chan amqp.Delivery, error) {
 	this.queue = queue
 	this.consumer = consumer
+	this.exclusive = false
 	return this.incoming, nil
 }
 func (this *FakeSubscriptionChannel) ExclusiveConsume(queue string, consumer string) (<-chan amqp.Delivery, error) {
