@@ -22,6 +22,10 @@ func (this *Channel) ConfigureChannelAsTransactional() error {
 	return this.inner.Tx()
 }
 
+func (this *Channel) DeclareQueue(name string) error {
+	_, err := this.inner.QueueDeclare(name, true, false, false, false, nil)
+	return err
+}
 func (this *Channel) DeclareTransientQueue() (string, error) {
 	if queue, err := this.inner.QueueDeclare("", false, true, false, false, nil); err != nil {
 		return "", err

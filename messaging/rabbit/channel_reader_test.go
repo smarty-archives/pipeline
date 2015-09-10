@@ -170,6 +170,7 @@ func newFakeReaderChannel() *FakeReaderChannel {
 }
 
 func (this *FakeReaderChannel) ConfigureChannelBuffer(int) error         { return nil }
+func (this *FakeReaderChannel) DeclareQueue(string) error                { return nil }
 func (this *FakeReaderChannel) DeclareTransientQueue() (string, error)   { return "", nil }
 func (this *FakeReaderChannel) BindExchangeToQueue(string, string) error { return nil }
 func (this *FakeReaderChannel) Consume(string, string) (<-chan amqp.Delivery, error) {

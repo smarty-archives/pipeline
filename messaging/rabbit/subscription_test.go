@@ -137,6 +137,9 @@ func (this *FakeSubscriptionChannel) ConfigureChannelBuffer(value int) error {
 	this.bufferSize = value
 	return nil
 }
+func (this *FakeSubscriptionChannel) DeclareQueue(string) error {
+	return nil
+}
 func (this *FakeSubscriptionChannel) DeclareTransientQueue() (string, error) {
 	return strconv.FormatInt(time.Now().UnixNano(), 10), nil
 }

@@ -116,6 +116,7 @@ func newFakeWriterChannel() *FakeWriterChannel {
 }
 
 func (this *FakeWriterChannel) ConfigureChannelBuffer(int) error                     { return nil }
+func (this *FakeWriterChannel) DeclareQueue(string) error                            { return nil }
 func (this *FakeWriterChannel) DeclareTransientQueue() (string, error)               { return "", nil }
 func (this *FakeWriterChannel) BindExchangeToQueue(string, string) error             { return nil }
 func (this *FakeWriterChannel) Consume(string, string) (<-chan amqp.Delivery, error) { return nil, nil }
