@@ -31,8 +31,8 @@ type Consumer interface {
 
 	Consume(string, string) (<-chan amqp.Delivery, error)
 	ExclusiveConsume(string, string) (<-chan amqp.Delivery, error)
-	// ConsumeWithoutAcknowledgement(string, string) (<-chan amqp.Delivery, error)
-	// ExclusiveConsumeWithoutAcknowledgement(string, string) (<-chan amqp.Delivery, error)
+	ConsumeWithoutAcknowledgement(string, string) (<-chan amqp.Delivery, error)
+	ExclusiveConsumeWithoutAcknowledgement(string, string) (<-chan amqp.Delivery, error)
 
 	CancelConsumer(string) error
 }

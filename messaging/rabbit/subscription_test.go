@@ -157,7 +157,12 @@ func (this *FakeSubscriptionChannel) ExclusiveConsume(queue string, consumer str
 	this.exclusive = true
 	return this.incoming, nil
 }
-
+func (this *FakeSubscriptionChannel) ConsumeWithoutAcknowledgement(string, string) (<-chan amqp.Delivery, error) {
+	return nil, nil
+}
+func (this *FakeSubscriptionChannel) ExclusiveConsumeWithoutAcknowledgement(string, string) (<-chan amqp.Delivery, error) {
+	return nil, nil
+}
 func (this *FakeSubscriptionChannel) CancelConsumer(consumer string) error {
 	this.cancelled = true
 	this.consumer = consumer

@@ -391,6 +391,13 @@ func (this *FakeChannel) Consume(string, string) (<-chan amqp.Delivery, error) {
 func (this *FakeChannel) ExclusiveConsume(string, string) (<-chan amqp.Delivery, error) {
 	return nil, nil
 }
+func (this *FakeChannel) ConsumeWithoutAcknowledgement(string, string) (<-chan amqp.Delivery, error) {
+	return nil, nil
+}
+func (this *FakeChannel) ExclusiveConsumeWithoutAcknowledgement(string, string) (<-chan amqp.Delivery, error) {
+	return nil, nil
+}
+
 func (this *FakeChannel) CancelConsumer(string) error                  { return nil }
 func (this *FakeChannel) Close() error                                 { return nil }
 func (this *FakeChannel) AcknowledgeSingleMessage(uint64) error        { return nil }

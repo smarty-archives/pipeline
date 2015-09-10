@@ -178,6 +178,12 @@ func (this *FakeReaderChannel) Consume(string, string) (<-chan amqp.Delivery, er
 func (this *FakeReaderChannel) ExclusiveConsume(string, string) (<-chan amqp.Delivery, error) {
 	return this.deliveries, nil
 }
+func (this *FakeReaderChannel) ConsumeWithoutAcknowledgement(string, string) (<-chan amqp.Delivery, error) {
+	return nil, nil
+}
+func (this *FakeReaderChannel) ExclusiveConsumeWithoutAcknowledgement(string, string) (<-chan amqp.Delivery, error) {
+	return nil, nil
+}
 func (this *FakeReaderChannel) CancelConsumer(string) error {
 	this.cancellations++
 	close(this.deliveries)

@@ -122,6 +122,12 @@ func (this *FakeWriterChannel) Consume(string, string) (<-chan amqp.Delivery, er
 func (this *FakeWriterChannel) ExclusiveConsume(string, string) (<-chan amqp.Delivery, error) {
 	return nil, nil
 }
+func (this *FakeWriterChannel) ConsumeWithoutAcknowledgement(string, string) (<-chan amqp.Delivery, error) {
+	return nil, nil
+}
+func (this *FakeWriterChannel) ExclusiveConsumeWithoutAcknowledgement(string, string) (<-chan amqp.Delivery, error) {
+	return nil, nil
+}
 func (this *FakeWriterChannel) CancelConsumer(string) error { return nil }
 func (this *FakeWriterChannel) Close() error {
 	this.closed++
