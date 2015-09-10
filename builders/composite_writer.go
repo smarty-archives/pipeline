@@ -8,12 +8,13 @@ import (
 )
 
 type CompositeWriterBuilder struct {
-	broker     messaging.MessageBroker
-	discovery  messaging.TypeDiscovery
-	retrySleep time.Duration
-	template   messaging.Dispatch
-	overrides  map[reflect.Type]messaging.Dispatch
-	panicFail  bool
+	broker             messaging.MessageBroker
+	discovery          messaging.TypeDiscovery
+	retrySleep         time.Duration
+	template           messaging.Dispatch
+	templateRegistered bool
+	overrides          map[reflect.Type]messaging.Dispatch
+	panicFail          bool
 }
 
 func NewCompositeWriter(broker messaging.MessageBroker) *CompositeWriterBuilder {
@@ -24,6 +25,7 @@ func NewCompositeWriter(broker messaging.MessageBroker) *CompositeWriterBuilder 
 }
 
 func (this *CompositeWriterBuilder) RegisterDispatchTemplate(template messaging.Dispatch) *CompositeWriterBuilder {
+	this.templateRegistered = true
 	this.template = template
 	return this
 }
@@ -84,7 +86,10 @@ func (this *CompositeWriterBuilder) layerDispatch(inner messaging.CommitWriter) 
 	}
 
 	writer := messaging.NewDispatchWriter(inner, this.discovery)
-	writer.RegisterTemplate(this.template)
+
+	if this.templateRegistered {
+		writer.RegisterTemplate(this.template)
+	}
 
 	for instanceType, override := range this.overrides {
 		writer.RegisterOverride(instanceType, override)
