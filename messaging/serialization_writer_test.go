@@ -105,9 +105,11 @@ func (this *SerializationWriterFixture) TestDispatchAlreadyContainsMessageType()
 	}
 	this.writer.Write(message)
 	this.So(this.inner.written, should.Resemble, []Dispatch{Dispatch{
-		MessageType: "untouched",
-		Payload:     testSerializedPayload,
-		Message:     TestMessage{},
+		MessageType:     "untouched",
+		Payload:         testSerializedPayload,
+		Message:         TestMessage{},
+		ContentType:     this.serializer.ContentType(),
+		ContentEncoding: this.serializer.ContentEncoding(),
 	}})
 }
 

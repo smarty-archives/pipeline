@@ -37,6 +37,8 @@ func (this *SerializationWriter) Write(dispatch Dispatch) error {
 	if payload, err := this.serializer.Serialize(dispatch.Message); err != nil {
 		return err // serialization failed
 	} else {
+		dispatch.ContentType = this.contentType
+		dispatch.ContentEncoding = this.contentEncoding
 		dispatch.Payload = payload
 	}
 
@@ -50,8 +52,6 @@ func (this *SerializationWriter) Write(dispatch Dispatch) error {
 	}
 
 	dispatch.MessageType = messageType
-	dispatch.ContentType = this.contentType
-	dispatch.ContentEncoding = this.contentEncoding
 	return this.writer.Write(dispatch)
 }
 
