@@ -27,17 +27,12 @@ func (this *DocumentReader) Read(path string, document interface{}) error {
 	if err != nil {
 		return fmt.Errorf("HTTP Client Error: '%s'", err.Error())
 	}
+	defer response.Body.Close()
 
 	if response.StatusCode == http.StatusNotFound {
 		log.Printf("[INFO] Document not found at '%s'\n", path)
 		return nil
 	}
-
-	if response.Body == nil {
-		return fmt.Errorf("HTTP response body was nil: '%s'", err.Error())
-	}
-
-	defer response.Body.Close()
 
 	reader := response.Body.(io.Reader)
 	if response.Header.Get("Content-Encoding") == "gzip" {

@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"os"
 	"strings"
 
 	"github.com/smartystreets/assertions/should"
@@ -20,7 +21,6 @@ type DocumentReaderFixture struct {
 	path     string
 	reader   *DocumentReader
 	client   *FakeHTTPGetClient // HTTPClient
-	stdout   *bytes.Buffer
 	document *Document
 }
 
@@ -29,8 +29,10 @@ func (this *DocumentReaderFixture) Setup() {
 	this.client = &FakeHTTPGetClient{}
 	this.reader = NewDocumentReader(this.client)
 	this.document = &Document{}
-	this.stdout = new(bytes.Buffer)
-	log.SetOutput(this.stdout)
+	log.SetOutput(ioutil.Discard)
+}
+func (this *DocumentReaderFixture) Teardown() {
+	log.SetOutput(os.Stdout)
 }
 
 func (this *DocumentReaderFixture) TestRequestInvalid_ClientIgnored() {
@@ -45,44 +47,50 @@ func (this *DocumentReaderFixture) TestClientErrorPreventsDocumentReading() {
 }
 
 func (this *DocumentReaderFixture) TestDocumentNotFound_JSONMarshalNotAttempted() {
-	this.client.response = NotFoundResponse
+	this.client.response = &http.Response{StatusCode: 404, Body: newHTTPBody("Not found")}
 	this.read()
 	this.So(this.document.ID, should.Equal, 0)
-	this.So(this.stdout.String(), should.ContainSubstring, "Document not found at '/document/path'\n")
-}
-
-func (this *DocumentReaderFixture) TestNilResponseBody() {
-	this.client.response = BodyNilResponse
-	this.assertPanic("HTTP response body was nil")
 }
 
 func (this *DocumentReaderFixture) TestBodyUnreadable() {
-	this.client.response = BodyReadErrorResponse
+	var BodyUnreadableResponse = &http.Response{StatusCode: 200, Body: newReadErrorHTTPBody()}
+	this.client.response = BodyUnreadableResponse
 	this.So(this.read, should.Panic)
 	this.So(this.document.ID, should.Equal, 0)
-	this.So(BodyReadErrorResponse.Body.(*FakeHTTPResponseBody).closed, should.BeTrue)
+	this.So(BodyUnreadableResponse.Body.(*FakeHTTPResponseBody).closed, should.BeTrue)
 }
 
 func (this *DocumentReaderFixture) TestBadJSON() {
+	var BadJSONResponse = &http.Response{StatusCode: 200, Body: newHTTPBody("I am bad JSON.")}
 	this.client.response = BadJSONResponse
 	this.So(this.read, should.Panic)
 	this.So(this.document.ID, should.Equal, 0)
-	this.So(BodyReadErrorResponse.Body.(*FakeHTTPResponseBody).closed, should.BeTrue)
+	this.So(BadJSONResponse.Body.(*FakeHTTPResponseBody).closed, should.BeTrue)
 }
 
 func (this *DocumentReaderFixture) TestValidUncompressedResponse_PopulatesDocument() {
+	var ValidUncompressedResponse = &http.Response{StatusCode: 200, Body: newHTTPBody(`{"ID": 1234}`)}
 	this.client.response = ValidUncompressedResponse
 	this.read()
 	this.So(this.document.ID, should.Equal, 1234)
-	this.So(this.stdout.String(), should.BeEmpty)
-	this.So(BodyReadErrorResponse.Body.(*FakeHTTPResponseBody).closed, should.BeTrue)
+	this.So(ValidUncompressedResponse.Body.(*FakeHTTPResponseBody).closed, should.BeTrue)
 }
 func (this *DocumentReaderFixture) TestValidCompressedResponse_PopulatesDocument() {
+	var ValidCompressedResponse = &http.Response{StatusCode: 200, Body: newHTTPBody(`{"ID": 1234}`)}
+
+	ValidCompressedResponse.Header = make(http.Header)
+	ValidCompressedResponse.Header.Set("Content-Encoding", "gzip")
+
+	targetBuffer := bytes.NewBuffer([]byte{})
+	writer := gzip.NewWriter(targetBuffer)
+	io.Copy(writer, ValidCompressedResponse.Body)
+	writer.Close()
+
+	ValidCompressedResponse.Body = ioutil.NopCloser(targetBuffer)
+
 	this.client.response = ValidCompressedResponse
 	this.read()
 	this.So(this.document.ID, should.Equal, 1234)
-	this.So(this.stdout.String(), should.BeEmpty)
-	this.So(BodyReadErrorResponse.Body.(*FakeHTTPResponseBody).closed, should.BeTrue)
 }
 func (this *DocumentReaderFixture) read() {
 	this.reader.ReadPanic(this.path, this.document)
@@ -110,27 +118,6 @@ func (this *FakeHTTPGetClient) Do(request *http.Request) (*http.Response, error)
 type Document struct{ ID int }
 
 ////////////////////////////////////////////////////////////////////////////////////////////
-
-var (
-	NotFoundResponse          = &http.Response{StatusCode: 404, Body: newHTTPBody("Not found")}
-	BodyNilResponse           = &http.Response{StatusCode: 200, Body: nil}
-	BodyReadErrorResponse     = &http.Response{StatusCode: 200, Body: newReadErrorHTTPBody()}
-	BadJSONResponse           = &http.Response{StatusCode: 200, Body: newHTTPBody("I am bad JSON.")}
-	ValidCompressedResponse   = &http.Response{StatusCode: 200, Body: newHTTPBody(`{"ID": 1234}`)}
-	ValidUncompressedResponse = &http.Response{StatusCode: 200, Body: newHTTPBody(`{"ID": 1234}`)}
-)
-
-func init() {
-	ValidCompressedResponse.Header = make(http.Header)
-	ValidCompressedResponse.Header.Set("Content-Encoding", "gzip")
-
-	targetBuffer := bytes.NewBuffer([]byte{})
-	writer := gzip.NewWriter(targetBuffer)
-	io.Copy(writer, ValidCompressedResponse.Body)
-	writer.Close()
-
-	ValidCompressedResponse.Body = ioutil.NopCloser(targetBuffer)
-}
 
 func newHTTPBody(message string) io.ReadCloser {
 	return &FakeHTTPResponseBody{Reader: strings.NewReader(message)}
