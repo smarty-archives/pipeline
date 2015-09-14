@@ -4,7 +4,6 @@ import (
 	"time"
 
 	"github.com/smartystreets/assertions/should"
-	"github.com/smartystreets/clock"
 	"github.com/smartystreets/gunit"
 	"github.com/smartystreets/pipeline/messaging"
 )
@@ -21,16 +20,11 @@ type DeliveryHandlerFixture struct {
 }
 
 func (this *DeliveryHandlerFixture) Setup() {
-	this.now = clock.UTCNow()
 	this.input = make(chan messaging.Delivery, 8)
 	this.output = make(chan interface{}, 8)
 	this.writer = &FakeCommitWriter{}
 	this.application = &FakeApplication{}
 	this.handler = NewDeliveryHandler(this.input, this.output, this.writer, this.application)
-	clock.Freeze(this.now)
-}
-func (this *DeliveryHandlerFixture) Teardown() {
-	clock.Restore()
 }
 
 ///////////////////////////////////////////////////////////////
