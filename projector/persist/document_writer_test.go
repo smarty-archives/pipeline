@@ -5,7 +5,6 @@ import (
 	"compress/gzip"
 	"errors"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"strings"
 	"time"
@@ -22,7 +21,6 @@ type DocumentWriterFixture struct {
 }
 
 func (this *DocumentWriterFixture) Setup() {
-	log.SetOutput(ioutil.Discard)
 	this.client = NewFakeHTTPClientForWriting()
 	this.writer = NewDocumentWriter(this.client)
 }

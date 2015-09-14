@@ -6,9 +6,7 @@ import (
 	"errors"
 	"io"
 	"io/ioutil"
-	"log"
 	"net/http"
-	"os"
 	"strings"
 
 	"github.com/smartystreets/assertions/should"
@@ -29,10 +27,6 @@ func (this *DocumentReaderFixture) Setup() {
 	this.client = &FakeHTTPGetClient{}
 	this.reader = NewDocumentReader(this.client)
 	this.document = &Document{}
-	log.SetOutput(ioutil.Discard)
-}
-func (this *DocumentReaderFixture) Teardown() {
-	log.SetOutput(os.Stdout)
 }
 
 func (this *DocumentReaderFixture) TestRequestInvalid_ClientIgnored() {

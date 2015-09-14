@@ -10,10 +10,11 @@ import (
 type GetRetryClient struct {
 	inner   HTTPClient
 	retries int
+	napTime func(time.Duration)
 }
 
 func NewGetRetryClient(inner HTTPClient, retries int) *GetRetryClient {
-	return &GetRetryClient{inner: inner, retries: retries}
+	return &GetRetryClient{inner: inner, retries: retries, napTime: napTime}
 }
 
 func (this *GetRetryClient) Do(request *http.Request) (*http.Response, error) {
@@ -26,7 +27,7 @@ func (this *GetRetryClient) Do(request *http.Request) (*http.Response, error) {
 		} else if response.Body != nil {
 			log.Printf("[WARN] Target host rejected request ('%s'):\n%s\n", request.URL.Path, readResponse(response))
 		}
-		napTime(time.Second * 5)
+		this.napTime(time.Second * 5)
 	}
 	return nil, errors.New("Max retries exceeded. Unable to connect.")
 }

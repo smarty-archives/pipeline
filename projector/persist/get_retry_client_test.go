@@ -1,9 +1,7 @@
 package persist
 
 import (
-	"bytes"
 	"errors"
-	"log"
 	"net/http"
 	"time"
 
@@ -19,15 +17,12 @@ type GetRetryClientFixture struct {
 	response    *http.Response
 	err         error
 	naps        int
-	stdout      *bytes.Buffer
 }
 
 func (this *GetRetryClientFixture) Setup() {
-	this.stdout = new(bytes.Buffer)
-	log.SetOutput(this.stdout)
-	napTime = func(time.Duration) { this.naps++ }
 	this.fakeClient = &FakeHTTPClientForGetRetry{}
 	this.retryClient = NewGetRetryClient(this.fakeClient, retries)
+	this.retryClient.napTime = func(time.Duration) { this.naps++ }
 }
 
 /////////////////////////////////////////////////////////
@@ -100,16 +95,7 @@ func (this *GetRetryClientFixture) TestClientBadStatusCodeAtFirst_ThenFindsDocum
 	}
 	this.So(this.err, should.BeNil)
 	this.So(this.fakeClient.calls, should.Equal, maxAttempts)
-	this.assertBodySentToStdOut()
 }
-
-func (this *GetRetryClientFixture) assertBodySentToStdOut() {
-	this.So(this.stdout.String(), should.ContainSubstring, "Internal Server Error")
-}
-
-var (
-	GetRetry_ServerErrorResponse = &http.Response{StatusCode: 500, Body: newFakeBody("Internal Server Error")}
-)
 
 /////////////////////////////////////////////////////////
 
@@ -119,14 +105,13 @@ type FakeHTTPClientForGetRetry struct {
 }
 
 func (this *FakeHTTPClientForGetRetry) Do(request *http.Request) (*http.Response, error) {
-
 	this.calls++
 	if request.URL.Path == "/fail-first" && this.calls < maxAttempts {
 		return nil, errors.New("GOPHERS!")
 	} else if request.URL.Path == "/fail-always" {
 		return nil, errors.New("GOPHERS!")
 	} else if request.URL.Path == "/bad-status" && this.calls < maxAttempts {
-		return GetRetry_ServerErrorResponse, nil
+		return &http.Response{StatusCode: 500, Body: newFakeBody("Internal Server Error")}, nil
 	} else {
 		return &http.Response{StatusCode: this.statusCode}, nil
 	}
