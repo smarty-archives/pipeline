@@ -5,7 +5,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/smartystreets/clock"
 	"github.com/smartystreets/pipeline/messaging"
 )
 
@@ -18,6 +17,7 @@ type Broker struct {
 	writers    []messaging.Writer
 	state      uint64
 	updates    func(uint64)
+	sleep      func(time.Duration)
 }
 
 func NewBroker(target url.URL, connector Connector) *Broker {
@@ -25,6 +25,7 @@ func NewBroker(target url.URL, connector Connector) *Broker {
 		mutex:     &sync.Mutex{},
 		target:    target,
 		connector: connector,
+		sleep:     sleep,
 	}
 }
 
@@ -197,7 +198,7 @@ func (this *Broker) openChannel(callback func() bool) Channel {
 			return channel
 		}
 
-		clock.Sleep(time.Second * 4)
+		this.sleep(time.Second * 4)
 	}
 
 	return nil
@@ -238,4 +239,8 @@ func (this *Broker) openChannelFromExistingConnection() Channel {
 		this.updateState(messaging.Connected)
 		return channel
 	}
+}
+
+var sleep = func(duration time.Duration) {
+	time.Sleep(duration)
 }
