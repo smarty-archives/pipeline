@@ -3,9 +3,9 @@ package persist
 import (
 	"errors"
 	"net/http"
-	"time"
 
 	"github.com/smartystreets/assertions/should"
+	"github.com/smartystreets/clock"
 	"github.com/smartystreets/gunit"
 )
 
@@ -16,13 +16,12 @@ type GetRetryClientFixture struct {
 	retryClient *GetRetryClient
 	response    *http.Response
 	err         error
-	naps        int
 }
 
 func (this *GetRetryClientFixture) Setup() {
 	this.fakeClient = &FakeHTTPClientForGetRetry{}
 	this.retryClient = NewGetRetryClient(this.fakeClient, retries)
-	this.retryClient.napTime = func(time.Duration) { this.naps++ }
+	this.retryClient.sleeper = clock.StayAwake()
 }
 
 /////////////////////////////////////////////////////////
@@ -81,7 +80,7 @@ func (this *GetRetryClientFixture) TestClientNeverSucceeds() {
 	this.So(this.response, should.BeNil)
 	this.So(this.err, should.NotBeNil)
 	this.So(this.fakeClient.calls, should.Equal, maxAttempts)
-	this.So(this.naps, should.Equal, maxAttempts)
+	this.So(len(this.retryClient.sleeper.Naps), should.Equal, maxAttempts)
 }
 
 /////////////////////////////////////////////////////////

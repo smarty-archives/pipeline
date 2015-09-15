@@ -5,16 +5,18 @@ import (
 	"log"
 	"net/http"
 	"time"
+
+	"github.com/smartystreets/clock"
 )
 
 type GetRetryClient struct {
 	inner   HTTPClient
 	retries int
-	napTime func(time.Duration)
+	sleeper *clock.Sleeper
 }
 
 func NewGetRetryClient(inner HTTPClient, retries int) *GetRetryClient {
-	return &GetRetryClient{inner: inner, retries: retries, napTime: napTime}
+	return &GetRetryClient{inner: inner, retries: retries}
 }
 
 func (this *GetRetryClient) Do(request *http.Request) (*http.Response, error) {
@@ -27,7 +29,7 @@ func (this *GetRetryClient) Do(request *http.Request) (*http.Response, error) {
 		} else if response.Body != nil {
 			log.Printf("[WARN] Target host rejected request ('%s'):\n%s\n", request.URL.Path, readResponse(response))
 		}
-		this.napTime(time.Second * 5)
+		this.sleeper.Sleep(time.Second * 5)
 	}
 	return nil, errors.New("Max retries exceeded. Unable to connect.")
 }
