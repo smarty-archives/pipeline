@@ -14,9 +14,9 @@ type SerialListenerFixture struct {
 
 func (this *SerialListenerFixture) TestListenCallInOrder() {
 	items := []Listener{
-		&FakeForSerialListener{listened: time.Now().Add(time.Second)},
-		&FakeForSerialListener{listened: time.Now()},
-		&FakeForSerialListener{listened: time.Now().Add(-time.Second)},
+		&FakeForSerialListener{listened: clock.UTCNow().Add(time.Second)},
+		&FakeForSerialListener{listened: clock.UTCNow()},
+		&FakeForSerialListener{listened: clock.UTCNow().Add(-time.Second)},
 	}
 
 	NewSerialListener(items...).Listen()

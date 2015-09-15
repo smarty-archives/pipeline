@@ -3,8 +3,8 @@ package rabbit
 import (
 	"log"
 	"strconv"
-	"time"
 
+	"github.com/smartystreets/clock"
 	"github.com/smartystreets/pipeline/messaging"
 	"github.com/streadway/amqp"
 )
@@ -27,7 +27,7 @@ func newSubscription(
 	return &Subscription{
 		channel:  channel,
 		queue:    queue,
-		consumer: strconv.FormatInt(time.Now().UnixNano(), 10),
+		consumer: strconv.FormatInt(clock.UTCNow().UnixNano(), 10),
 		bindings: bindings,
 		control:  control,
 		output:   output,

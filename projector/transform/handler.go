@@ -13,6 +13,7 @@ type Handler struct {
 	input       <-chan messaging.Delivery
 	output      chan<- projector.DocumentMessage
 	transformer Transformer
+	clock       *clock.Clock
 }
 
 func NewHandler(input <-chan messaging.Delivery, output chan<- projector.DocumentMessage, transformer Transformer) *Handler {
@@ -21,7 +22,7 @@ func NewHandler(input <-chan messaging.Delivery, output chan<- projector.Documen
 
 func (this *Handler) Listen() {
 	for message := range this.input {
-		now := clock.Now()
+		now := this.clock.UTCNow()
 
 		metrics.Measure(transformQueueDepth, int64(len(this.input)))
 

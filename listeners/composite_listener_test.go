@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/smartystreets/assertions/should"
+	"github.com/smartystreets/clock"
 	"github.com/smartystreets/gunit"
 )
 
@@ -22,7 +23,7 @@ func (this *CompositeListenerFixture) Setup() {
 }
 
 func (this *CompositeListenerFixture) TestCompositeListenerCallsInnerListenersConcurrently() {
-	started := time.Now()
+	started := clock.UTCNow()
 	this.composite.Listen()
 	this.So(time.Since(started), should.BeLessThan, nap*5)
 }

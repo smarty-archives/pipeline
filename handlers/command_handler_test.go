@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/smartystreets/assertions/should"
+	"github.com/smartystreets/clock"
 	"github.com/smartystreets/gunit"
 )
 
@@ -101,7 +102,7 @@ type FakeLockerRouter struct {
 
 func (this *FakeLockerRouter) Handle(item interface{}) []interface{} {
 	this.handled = append(this.handled, item)
-	this.handles = append(this.handles, time.Now())
+	this.handles = append(this.handles, clock.UTCNow())
 
 	if len(this.results) == 0 {
 		return nil
@@ -112,10 +113,10 @@ func (this *FakeLockerRouter) Handle(item interface{}) []interface{} {
 
 func (this *FakeLockerRouter) Lock() {
 	this.locked++
-	this.locks = append(this.locks, time.Now())
+	this.locks = append(this.locks, clock.UTCNow())
 }
 
 func (this *FakeLockerRouter) Unlock() {
 	this.locked--
-	this.unlocks = append(this.unlocks, time.Now())
+	this.unlocks = append(this.unlocks, clock.UTCNow())
 }

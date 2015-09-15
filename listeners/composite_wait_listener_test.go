@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/smartystreets/assertions/should"
+	"github.com/smartystreets/clock"
 	"github.com/smartystreets/gunit"
 )
 
@@ -31,7 +32,7 @@ func (this *CompositeWaitListenerFixture) Setup() {
 func (this *CompositeWaitListenerFixture) TestAllListenersAreCalledAndWaitedFor() {
 	this.listener.Listen()
 
-	this.completed = time.Now().UTC()
+	this.completed = clock.UTCNow()
 
 	for _, fake := range this.fakes {
 		if fake == nil {
@@ -60,7 +61,7 @@ func (this *FakeListener) Listen() {
 		return
 	}
 
-	this.instant = time.Now().UTC()
+	this.instant = clock.UTCNow()
 	time.Sleep(time.Millisecond)
 	this.calls++
 }

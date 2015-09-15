@@ -23,10 +23,12 @@ type HandlerFixture struct {
 }
 
 func (this *HandlerFixture) Setup() {
+	this.now = clock.UTCNow()
 	this.input = make(chan messaging.Delivery, 2)
 	this.output = make(chan projector.DocumentMessage, 2)
 	this.transformer = NewFakeTransformer()
 	this.handler = NewHandler(this.input, this.output, this.transformer)
+	this.handler.clock = clock.Freeze(this.now)
 
 	this.firstInput = messaging.Delivery{
 		Message: 1,
@@ -36,12 +38,6 @@ func (this *HandlerFixture) Setup() {
 		Message: 2,
 		Receipt: &FakeAcknowledgement{},
 	}
-
-	this.now = time.Now()
-	clock.Freeze(this.now)
-}
-func (this *HandlerFixture) Teardown() {
-	clock.Restore()
 }
 
 /////////////////////////////////////////////////////////////////

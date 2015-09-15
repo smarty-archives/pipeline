@@ -4,6 +4,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/smartystreets/clock"
 	"github.com/smartystreets/metrics"
 	"github.com/smartystreets/pipeline/projector"
 )
@@ -64,7 +65,7 @@ func (this *Handler) persistPendingDocuments() {
 	this.waiter.Wait()
 }
 func (this *Handler) persist(document projector.Document) {
-	started := time.Now()
+	started := clock.UTCNow()
 	this.writer.Write(document)
 	metrics.Measure(DocumentWriteLatency, milliseconds(time.Since(started)))
 	this.waiter.Done()

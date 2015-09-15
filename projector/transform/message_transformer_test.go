@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/smartystreets/assertions/should"
+	"github.com/smartystreets/clock"
 	"github.com/smartystreets/gunit"
 	"github.com/smartystreets/pipeline/projector"
 )
@@ -22,7 +23,7 @@ func (this *MessageTransformerFixture) Setup() {
 	this.documents = []projector.Document{&FakeDocument{}}
 	this.cloner = &FakeCloner{}
 	this.transformer = NewMessageTransformer(this.documents, this.cloner)
-	this.now = time.Now()
+	this.now = clock.UTCNow()
 }
 
 ////////////////////////////////////////////////////////////

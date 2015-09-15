@@ -31,7 +31,7 @@ func (this *TransactionWriter) Write(message messaging.Dispatch) error {
 	// FUTURE: if error on publish, don't publish anything else
 	// until we reset the channel during commit
 	// opening a new channel is what marks it as able to continue
-	dispatch := toAMQPDispatch(message, clock.Now())
+	dispatch := toAMQPDispatch(message, clock.UTCNow())
 	return this.channel.PublishMessage(message.Destination, dispatch)
 }
 

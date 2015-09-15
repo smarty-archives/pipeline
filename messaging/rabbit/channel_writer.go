@@ -24,7 +24,7 @@ func (this *ChannelWriter) Write(message messaging.Dispatch) error {
 		return messaging.WriterClosedError
 	}
 
-	dispatch := toAMQPDispatch(message, clock.Now())
+	dispatch := toAMQPDispatch(message, clock.UTCNow())
 	err := this.channel.PublishMessage(message.Destination, dispatch)
 	if err == nil {
 		return nil
