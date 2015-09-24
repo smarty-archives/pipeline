@@ -8,7 +8,7 @@ import (
 	"net/http/httputil"
 )
 
-func WriteResult(response htttp.ResponseWriter, statusCode int) {
+func WriteResult(response http.ResponseWriter, statusCode int) {
 	WriteErrorMessage(response, http.StatusText(statusCode), statusCode)
 }
 
