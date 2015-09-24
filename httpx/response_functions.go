@@ -8,6 +8,10 @@ import (
 	"net/http/httputil"
 )
 
+func WriteResult(response htttp.ResponseWriter, statusCode int) {
+	WriteErrorMessage(response, http.StatusText(statusCode), statusCode)
+}
+
 func WriteResponse(response http.ResponseWriter, err error) {
 	if err != nil {
 		WriteError(response, err, http.StatusInternalServerError)
