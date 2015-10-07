@@ -27,3 +27,15 @@ func NewWaitGroup(workers int) *sync.WaitGroup {
 	waiter.Add(workers)
 	return waiter
 }
+
+func ReadHeader(request *http.Request, canoicalHeaderName string) string {
+	if values, contains := request.Header[canoicalHeaderName]; contains && len(values) > 0 {
+		return values[0]
+	} else {
+		return ""
+	}
+}
+
+func WriteHeader(request *http.Request, canonicalHeaderName string, value string) {
+	request.Header[canonicalHeaderName] = []string{value}
+}
