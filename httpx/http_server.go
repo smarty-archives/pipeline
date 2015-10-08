@@ -19,6 +19,7 @@ func NewHTTPServer(listenAddress string, handler http.Handler) *HTTPServer {
 	}
 
 	return &HTTPServer{
+		// MaxHeaderBytes: 1024 * 32, // TODO
 		inner: http.Server{
 			Addr:           listenAddress,
 			Handler:        handler,
