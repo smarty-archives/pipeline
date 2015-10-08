@@ -31,6 +31,22 @@ func (this *SimpleMessageRouter) Apply(event interface{}) bool {
 	return result
 }
 
+func (this *SimpleMessageRouter) Add(item interface{}) bool {
+	added := false
+
+	if handler, ok := item.(Handler); ok {
+		this.AddHandler(handler)
+		added = true
+	}
+
+	if applicator, ok := item.(Applicator); ok {
+		this.AddDocument(applicator)
+		added = true
+	}
+
+	return added
+}
+
 func (this *SimpleMessageRouter) AddHandler(handler Handler) {
 	this.handlers = append(this.handlers, handler)
 }

@@ -61,7 +61,7 @@ func (this *SimpleMessageRouterFixture) TestCommandsAreHandledAndResultingEvents
 
 func (this *SimpleMessageRouterFixture) TestHandlersCanBeAdded() {
 	handler := NewFakeAggregate("")
-	this.messageRouter.AddHandler(handler)
+	this.messageRouter.Add(handler)
 
 	this.messageRouter.Handle("1")
 
@@ -72,11 +72,26 @@ func (this *SimpleMessageRouterFixture) TestHandlersCanBeAdded() {
 
 func (this *SimpleMessageRouterFixture) TestDocumentsCanBeAdded() {
 	document := NewFakeAggregate("")
-	this.messageRouter.AddDocument(document)
+	this.messageRouter.Add(document)
 
 	this.messageRouter.Apply("2")
 
 	this.So(document.applied, should.Resemble, []interface{}{"2"})
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+func (this *SimpleMessageRouterFixture) TestCompositeItemCanBeAdded() {
+	document := NewFakeAggregate("")
+	this.messageRouter = NewSimpleMessageRouter(nil, nil)
+
+	added := this.messageRouter.Add(document)
+	this.messageRouter.Handle("1")
+	this.messageRouter.Apply("abc")
+
+	this.So(added, should.BeTrue)
+	this.So(document.handled, should.Resemble, []interface{}{"1"})
+	this.So(document.applied, should.Resemble, []interface{}{"1event1", "1event2", "abc"})
 }
 
 ///////////////////////////////////////////////////////////////////////////////
