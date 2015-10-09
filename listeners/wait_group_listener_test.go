@@ -12,7 +12,7 @@ type WaitGroupListenerFixture struct {
 
 	inner    *FakeForWaitGroupListener
 	waiter   *WrappedWaitGroup
-	listener Listener
+	listener *WaitGroupListener
 }
 
 func (this *WaitGroupListenerFixture) Setup() {
@@ -26,7 +26,7 @@ func (this *WaitGroupListenerFixture) TestWaitGroupListenerCallsDone() {
 	this.waiter.Wait() // This ensures that .Add(1) and .Done() were called.
 	this.So(this.waiter.added, should.BeTrue)
 	this.So(this.waiter.done, should.BeTrue)
-	this.So(this.inner.called, should.Equal, 1)
+	this.So(this.inner.listenCalls, should.Equal, 1)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -35,16 +35,30 @@ func (this *WaitGroupListenerFixture) TestNilInnerListener() {
 	this.listener = NewWaitGroupListener(nil, this.waiter)
 
 	this.So(this.listener.Listen, should.NotPanic)
+	this.So(this.listener.Close, should.NotPanic)
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+func (this *WaitGroupListenerFixture) TestCloseCallsInner() {
+	this.listener.Close()
+
+	this.So(this.inner.closeCalls, should.Equal, 1)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
 type FakeForWaitGroupListener struct {
-	called int
+	listenCalls int
+	closeCalls  int
 }
 
 func (this *FakeForWaitGroupListener) Listen() {
-	this.called++
+	this.listenCalls++
+}
+
+func (this *FakeForWaitGroupListener) Close() {
+	this.closeCalls++
 }
 
 ////////////////////////////////////////////////////////////////////////////////

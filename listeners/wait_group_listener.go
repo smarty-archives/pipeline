@@ -5,7 +5,7 @@ type WaitGroupListener struct {
 	waiter WaitGroup
 }
 
-func NewWaitGroupListener(listener Listener, waiter WaitGroup) Listener {
+func NewWaitGroupListener(listener Listener, waiter WaitGroup) *WaitGroupListener {
 	return &WaitGroupListener{
 		inner:  listener,
 		waiter: waiter,
@@ -20,4 +20,10 @@ func (this *WaitGroupListener) Listen() {
 	this.waiter.Add(1)
 	this.inner.Listen()
 	this.waiter.Done()
+}
+
+func (this *WaitGroupListener) Close() {
+	if closer, ok := this.inner.(ListenCloser); ok {
+		closer.Close()
+	}
 }
