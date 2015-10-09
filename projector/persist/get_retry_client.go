@@ -15,6 +15,11 @@ type GetRetryClient struct {
 	sleeper *clock.Sleeper
 }
 
+// FUTURE: We may want to consider a ShutdownClient that sits just under
+// the RetryClient. This makes it possible for a shutdown signal to break
+// a retry loop because the Shutdown client would retry success (HTTP 200)
+// or perhaps HTTP 404?
+
 func NewGetRetryClient(inner HTTPClient, retries int) *GetRetryClient {
 	return &GetRetryClient{inner: inner, retries: retries}
 }
