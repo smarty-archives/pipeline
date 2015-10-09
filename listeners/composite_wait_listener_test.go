@@ -56,6 +56,15 @@ func (this *CompositeWaitListenerFixture) TestCloseCallsInnerListeners() {
 	}
 }
 
+func (this *CompositeWaitListenerFixture) TestMultipleCloseCallInnerListenersExactlyOnce() {
+	this.listener.Close()
+	this.listener.Close()
+
+	for _, item := range this.items {
+		this.So(item.(*FakeListener).closeCalls, should.Equal, 1)
+	}
+}
+
 //////////////////////////////////////////
 
 type FakeListener struct {
