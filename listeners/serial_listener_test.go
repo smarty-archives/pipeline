@@ -35,15 +35,31 @@ func (this *SerialListenerFixture) TestListenCallInOrder() {
 
 func (this *SerialListenerFixture) TestNilListenersAreIgnored() {
 	this.So(NewSerialListener(nil).Listen, should.NotPanic)
+	this.So(NewSerialListener(nil).Close, should.NotPanic)
+}
+
+func (this *SerialListenerFixture) TestCloseCalledOnInnerListeners() {
+	items := []Listener{&FakeForSerialListener{}, &FakeForSerialListener{}}
+
+	NewSerialListener(items...).Close()
+
+	for _, item := range items {
+		this.So(item.(*FakeForSerialListener).closeCalls, should.Equal, 1)
+	}
 }
 
 type FakeForSerialListener struct {
-	calls    int
-	listened time.Time
+	calls      int
+	closeCalls int
+	listened   time.Time
 }
 
 func (this *FakeForSerialListener) Listen() {
 	this.calls++
 	this.listened = clock.UTCNow()
 	time.Sleep(time.Microsecond)
+}
+
+func (this *FakeForSerialListener) Close() {
+	this.closeCalls++
 }

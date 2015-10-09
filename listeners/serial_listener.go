@@ -15,3 +15,11 @@ func (this *SerialListener) Listen() {
 		}
 	}
 }
+
+func (this *SerialListener) Close() {
+	for _, item := range this.items {
+		if closer, ok := item.(ListenCloser); ok {
+			closer.Close()
+		}
+	}
+}
