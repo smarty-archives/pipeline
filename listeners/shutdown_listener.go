@@ -22,7 +22,7 @@ func NewShutdownListener(shutdown func()) *ShutdownListener {
 }
 
 func (this *ShutdownListener) Listen() {
-	if <-this.channel == nil {
+	if <-this.channel != nil {
 		log.Println("[INFO] Received OS shutdown signal.")
 	}
 
