@@ -39,3 +39,11 @@ func (this *ShutdownListenerFixture) TestClosingBlockedListenerInvokesShutdownCa
 
 	this.So(calls, should.Equal, 1)
 }
+
+func (this *ShutdownListenerFixture) TestCloseBehaviorHappensOnce() {
+	listener := NewShutdownListener(func() {})
+
+	listener.Close()
+
+	this.So(listener.Close, should.NotPanic)
+}

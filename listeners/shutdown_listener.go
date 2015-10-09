@@ -4,10 +4,12 @@ import (
 	"log"
 	"os"
 	"os/signal"
+	"sync"
 	"syscall"
 )
 
 type ShutdownListener struct {
+	mutex    sync.Once
 	channel  chan os.Signal
 	shutdown func()
 }
@@ -15,6 +17,7 @@ type ShutdownListener struct {
 func NewShutdownListener(shutdown func()) *ShutdownListener {
 	channel := make(chan os.Signal, 2)
 	signal.Notify(channel, os.Interrupt, syscall.SIGTERM)
+
 	return &ShutdownListener{channel: channel, shutdown: shutdown}
 }
 
@@ -27,6 +30,10 @@ func (this *ShutdownListener) Listen() {
 }
 
 func (this *ShutdownListener) Close() {
+	this.mutex.Do(this.close)
+}
+
+func (this *ShutdownListener) close() {
 	log.Println("[INFO] Disconnecting for OS shutdown signals")
 	signal.Stop(this.channel)
 	close(this.channel)
