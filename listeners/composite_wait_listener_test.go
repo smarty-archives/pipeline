@@ -65,6 +65,17 @@ func (this *CompositeWaitListenerFixture) TestMultipleCloseCallInnerListenersExa
 	}
 }
 
+func (this *CompositeWaitListenerFixture) TestCloseDoesntInvokeInfiniteLoop() {
+	this.listener = NewCompositeWaitShutdownListener(this.items...)
+
+	go this.listener.Close()
+	this.listener.Listen()
+
+	for _, item := range this.items {
+		this.So(item.(*FakeListener).closeCalls, should.Equal, 1)
+	}
+}
+
 //////////////////////////////////////////
 
 type FakeListener struct {

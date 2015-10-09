@@ -9,10 +9,6 @@ type CompositeWaitListener struct {
 }
 
 func NewCompositeWaitShutdownListener(listeners ...Listener) *CompositeWaitListener {
-	// NOTE: We are using sync.Once to prevent a loop. If someone calls this.Close
-	// it will call the ShutdownListener's Close which then calls this.Close again
-	// sync.Once prevents this. Furthermore, the ShutdownListener also implements
-	// a sync.Once to prevent a similar type of situation.
 	this := NewCompositeWaitListener()
 	this.items = []Listener{NewShutdownListener(this.Close)}
 	this.items = append(this.items, listeners...)
