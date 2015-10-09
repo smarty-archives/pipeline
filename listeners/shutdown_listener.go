@@ -34,7 +34,7 @@ func (this *ShutdownListener) Close() {
 }
 
 func (this *ShutdownListener) close() {
-	log.Println("[INFO] Disconnecting for OS shutdown signals")
+	log.Println("[INFO] Unsubscribing from OS shutdown signals")
 	signal.Stop(this.channel)
 	close(this.channel)
 }
