@@ -29,3 +29,13 @@ func (this *ShutdownListenerFixture) TestShutdownSignalInvokesShutdownCallback()
 
 	this.So(calls, should.Equal, 1)
 }
+
+func (this *ShutdownListenerFixture) TestClosingBlockedListenerInvokesShutdownCallback() {
+	var calls int
+	listener := NewShutdownListener(func() { calls++ })
+
+	go listener.Close()
+	listener.Listen()
+
+	this.So(calls, should.Equal, 1)
+}

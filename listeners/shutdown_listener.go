@@ -19,7 +19,15 @@ func NewShutdownListener(shutdown func()) *ShutdownListener {
 }
 
 func (this *ShutdownListener) Listen() {
-	<-this.channel
-	log.Println("[INFO] Received OS shutdown signal")
+	if <-this.channel == nil {
+		log.Println("[INFO] Received OS shutdown signal")
+	}
+
 	this.shutdown()
+}
+
+func (this *ShutdownListener) Close() {
+	log.Println("[INFO] Disconnecting for OS shutdown signals")
+	signal.Stop(this.channel)
+	close(this.channel)
 }
