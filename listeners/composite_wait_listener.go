@@ -36,3 +36,11 @@ func (this *CompositeWaitListener) listen(listener Listener) {
 
 	this.waiter.Done()
 }
+
+func (this *CompositeWaitListener) Close() {
+	for _, item := range this.items {
+		if closer, ok := item.(ListenCloser); ok {
+			closer.Close()
+		}
+	}
+}

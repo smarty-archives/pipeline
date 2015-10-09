@@ -13,18 +13,12 @@ type CompositeWaitListenerFixture struct {
 
 	completed time.Time
 	listener  *CompositeWaitListener
-	fakes     []*FakeListener
+	items     []Listener
 }
 
 func (this *CompositeWaitListenerFixture) Setup() {
-	this.fakes = []*FakeListener{&FakeListener{}, &FakeListener{}, nil}
-
-	var fakes []Listener
-	for _, fake := range this.fakes {
-		fakes = append(fakes, fake)
-	}
-
-	this.listener = NewCompositeWaitListener(fakes...)
+	this.items = []Listener{&FakeListener{}, &FakeListener{}}
+	this.listener = NewCompositeWaitListener(this.items...)
 }
 
 //////////////////////////////////////////
@@ -34,36 +28,50 @@ func (this *CompositeWaitListenerFixture) TestAllListenersAreCalledAndWaitedFor(
 
 	this.completed = clock.UTCNow()
 
-	for _, fake := range this.fakes {
-		if fake == nil {
+	for _, item := range this.items {
+		if item == nil {
 			continue
 		}
 
-		this.So(fake.calls, should.Equal, 1)
-		this.So(this.completed.After(fake.instant), should.BeTrue)
+		this.So(item.(*FakeListener).calls, should.Equal, 1)
+		this.So(this.completed.After(item.(*FakeListener).instant), should.BeTrue)
 	}
 }
 
 //////////////////////////////////////////
 
-func (this *CompositeWaitListenerFixture) Test() {
+func (this *CompositeWaitListenerFixture) TestNilListenersDontCausePanic() {
+	this.listener = NewCompositeWaitListener(nil, nil, nil)
+	this.So(this.listener.Listen, should.NotPanic)
+	this.So(this.listener.Close, should.NotPanic)
+}
+
+//////////////////////////////////////////
+
+func (this *CompositeWaitListenerFixture) TestCloseCallsInnerListeners() {
+	this.listener.Close()
+
+	for _, item := range this.items {
+		this.So(item.(*FakeListener).closeCalls, should.Equal, 1)
+	}
 }
 
 //////////////////////////////////////////
 
 type FakeListener struct {
-	calls   int
-	instant time.Time
+	calls      int
+	closeCalls int
+	instant    time.Time
 }
 
 func (this *FakeListener) Listen() {
-	if this == nil {
-		return
-	}
-
 	this.instant = clock.UTCNow()
 	time.Sleep(time.Millisecond)
 	this.calls++
+}
+
+func (this *FakeListener) Close() {
+	this.closeCalls++
 }
 
 //////////////////////////////////////////
