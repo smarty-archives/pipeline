@@ -8,11 +8,10 @@ import (
 )
 
 type ChannelWriter struct {
-	mutex           *sync.Mutex
-	controller      Controller
-	channel         Channel
-	closed          bool
-	skipUntilCommit bool
+	mutex      *sync.Mutex
+	controller Controller
+	channel    Channel
+	closed     bool
 }
 
 func newWriter(controller Controller) *ChannelWriter {

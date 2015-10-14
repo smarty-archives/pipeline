@@ -9,11 +9,10 @@ import (
 )
 
 type TransactionWriter struct {
-	mutex           *sync.Mutex
-	controller      Controller
-	channel         Channel
-	closed          bool
-	skipUntilCommit bool
+	mutex      *sync.Mutex
+	controller Controller
+	channel    Channel
+	closed     bool
 }
 
 func transactionWriter(controller Controller) *TransactionWriter {
