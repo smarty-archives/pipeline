@@ -11,7 +11,7 @@ func NewSimpleMessageRouter(handlers []Handler, documents []Applicator) *SimpleM
 }
 
 func (this *SimpleMessageRouter) Handle(command interface{}) []interface{} {
-	this.events = this.events[:]
+	this.events = this.events[0:0]
 
 	for _, handler := range this.handlers {
 		for _, event := range handler.Handle(command) {

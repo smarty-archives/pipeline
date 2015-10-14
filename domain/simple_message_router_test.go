@@ -96,6 +96,18 @@ func (this *SimpleMessageRouterFixture) TestCompositeItemCanBeAdded() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+func (this *SimpleMessageRouterFixture) TestHandleMultipleTimesGivesBackCorrectEvents() {
+	handler := NewFakeAggregate("")
+	this.messageRouter.Add(handler)
+
+	events1 := this.messageRouter.Handle("1")
+	events2 := this.messageRouter.Handle("1")
+
+	this.So(events1, should.Resemble, events2)
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 type FakeAggregate struct {
 	id         string
 	handled    []interface{}
