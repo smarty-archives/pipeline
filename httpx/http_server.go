@@ -2,7 +2,6 @@ package httpx
 
 import (
 	"crypto/tls"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"time"
@@ -19,14 +18,12 @@ func NewHTTPServer(listenAddress string, handler http.Handler) *HTTPServer {
 	}
 
 	return &HTTPServer{
-		// MaxHeaderBytes: 1024 * 32, // TODO
 		inner: http.Server{
 			Addr:           listenAddress,
 			Handler:        handler,
 			ReadTimeout:    time.Second * 15,
 			WriteTimeout:   time.Second * 15,
 			MaxHeaderBytes: 1024 * 2,
-			ErrorLog:       log.New(ioutil.Discard, "", 0),
 		},
 	}
 }
