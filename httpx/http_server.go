@@ -2,7 +2,6 @@ package httpx
 
 import (
 	"crypto/tls"
-	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -56,7 +55,6 @@ func (this *HTTPServer) WithTLS(certificatePEM string, tlsConfig *tls.Config) *H
 }
 
 func (this *HTTPServer) Listen() {
-	fmt.Println("HI")
 	if this == nil {
 		return
 	}
@@ -64,8 +62,6 @@ func (this *HTTPServer) Listen() {
 	log.Printf("[INFO] Listening for web traffic on %s.\n", this.inner.Addr)
 	if err := this.listen(); err != nil {
 		log.Fatal("[ERROR] Unable to listen to web traffic: ", err)
-	} else {
-		fmt.Println("NO ERROR!")
 	}
 }
 func (this *HTTPServer) listen() error {
