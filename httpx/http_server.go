@@ -14,6 +14,7 @@ type HTTPServer struct {
 
 func NewHTTPServer(listenAddress string, handler http.Handler) *HTTPServer {
 	if len(listenAddress) == 0 {
+		log.Println("[WARN] Blank listenAddress provided. No HTTPServer will be constructed.")
 		return nil
 	}
 
