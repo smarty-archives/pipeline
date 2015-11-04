@@ -48,15 +48,3 @@ func (this *HTTPRequestContextFixture) TestCloseInvokesWaiter() {
 }
 
 /////////////////////////////////////////////////
-
-type FakeWaiter struct{ addCalls, doneCalls, counter int }
-
-func (this *FakeWaiter) Add(delta int) {
-	this.addCalls++
-	this.counter += delta
-}
-
-func (this *FakeWaiter) Done() {
-	this.doneCalls++
-	this.counter--
-}
