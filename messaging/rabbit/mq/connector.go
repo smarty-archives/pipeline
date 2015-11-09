@@ -3,7 +3,6 @@ package mq
 import (
 	"crypto/tls"
 	"log"
-	"net"
 	"net/url"
 	"strings"
 	"time"
@@ -22,7 +21,6 @@ func (this *Connector) Connect(target url.URL) (rabbit.Connection, error) {
 	config := amqp.Config{
 		TLSClientConfig: buildTLS(target),
 		Heartbeat:       time.Second * 15,
-		Dial:            dial,
 	}
 
 	log.Println("[INFO] Establishing connection to AMQP broker.")
@@ -45,8 +43,3 @@ func buildTLS(target url.URL) *tls.Config {
 		MinVersion: tls.VersionTLS12,
 	}
 }
-func dial(network, address string) (net.Conn, error) {
-	return net.DialTimeout(network, address, timeout)
-}
-
-var timeout = time.Second * 5 // FUTURE: customize timeout
