@@ -3,7 +3,6 @@ package mq
 import (
 	"crypto/tls"
 	"log"
-	"net"
 	"net/url"
 	"strings"
 	"time"
@@ -20,8 +19,8 @@ func NewConnector() *Connector {
 
 func (this *Connector) Connect(target url.URL) (rabbit.Connection, error) {
 	config := amqp.Config{
-		Heartbeat: time.Second * 15,
-		Dial:      customDialer,
+		TLSClientConfig: buildTLS(target),
+		Heartbeat:       time.Second * 15,
 	}
 
 	log.Println("[INFO] Establishing connection to AMQP broker.")
@@ -33,43 +32,7 @@ func (this *Connector) Connect(target url.URL) (rabbit.Connection, error) {
 		return newConnection(connection), nil
 	}
 }
-func customDialer(network, target string) (net.Conn, error) {
-	connection, err := defaultDialer(network, target)
-	if err != nil {
-		return nil, err
-	}
-
-	tlsConfig := buildTLS(target)
-	if tlsConfig == nil {
-		return connection, nil
-	}
-
-	tlsClient := tls.Client(connection, tlsConfig)
-	tlsClient.SetDeadline(time.Now().Add(timeout))
-	if err := tlsClient.Handshake(); err != nil {
-		connection.Close()
-		return nil, err
-	}
-
-	return tlsClient, nil
-}
-
-func defaultDialer(network, target string) (net.Conn, error) {
-	connection, err := net.DialTimeout(network, target, timeout)
-	if err != nil {
-		return nil, err
-	}
-
-	// Heartbeating hasn't started yet, don't stall forever on a dead server.
-	if err := connection.SetReadDeadline(time.Now().Add(timeout)); err != nil {
-		return nil, err
-	}
-
-	return connection, nil
-}
-
-func buildTLS(address string) *tls.Config {
-	target, _ := url.Parse(address)
+func buildTLS(target url.URL) *tls.Config {
 	if strings.ToLower(target.Scheme) != "amqps" {
 		return nil
 	}
@@ -80,5 +43,3 @@ func buildTLS(address string) *tls.Config {
 		MinVersion: tls.VersionTLS12,
 	}
 }
-
-var timeout = time.Second * 5 // FUTURE: customize timeout
