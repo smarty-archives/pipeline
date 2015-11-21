@@ -1,10 +1,8 @@
 package numeric
 
 import (
-	"crypto/rand"
 	"encoding/binary"
 	"encoding/hex"
-	"fmt"
 	"strconv"
 )
 
@@ -35,19 +33,6 @@ func BinaryToUint64(bytes []byte) uint64 {
 	return sum
 }
 
-func NewGUID() string {
-	buffer := make([]byte, GUIDByteLength)
-	rand.Read(buffer)
-
-	encoded := hex.EncodeToString(buffer)
-	return fmt.Sprintf("%s-%s-%s-%s-%s",
-		encoded[:8],
-		encoded[8:12],
-		encoded[12:16],
-		encoded[16:20],
-		encoded[20:])
-}
-
 func GUIDToUint64(value string) uint64 {
 	if len(value) != GUIDStringLength {
 		return 0
@@ -61,7 +46,8 @@ func GUIDToUint64(value string) uint64 {
 	}
 }
 
-const Base10Encoding = 10
-const Uint64ByteLength = 8
-const GUIDByteLength = 16
-const GUIDStringLength = 36
+const (
+	Base10Encoding   = 10
+	Uint64ByteLength = 8
+	GUIDStringLength = 36
+)
