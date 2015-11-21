@@ -8,21 +8,21 @@ import (
 	"github.com/smartystreets/pipeline/handlers"
 )
 
-type MessageSenderFixture struct {
+type EventSenderFixture struct {
 	*gunit.Fixture
 
 	waiter  *FakeWaiter
 	channel chan handlers.EventMessage
-	sender  *MessageSender
+	sender  *EventSender
 }
 
-func (this *MessageSenderFixture) Setup() {
+func (this *EventSenderFixture) Setup() {
 	this.waiter = &FakeWaiter{}
 	this.channel = make(chan handlers.EventMessage, 4)
-	this.sender = NewMessageSender(this.channel, func() WaitGroup { return this.waiter })
+	this.sender = NewEventSender(this.channel, func() WaitGroup { return this.waiter })
 }
 
-func (this *MessageSenderFixture) TestMessageSent() {
+func (this *EventSenderFixture) TestMessageSent() {
 	this.sender.Send(42)
 
 	this.So((<-this.channel).Message, should.Equal, 42)
