@@ -5,3 +5,7 @@ type WaitGroup interface {
 	Wait()
 	Done()
 }
+
+type Sender interface {
+	Send(interface{}) interface{}
+}
