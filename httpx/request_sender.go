@@ -22,5 +22,5 @@ func (this *RequestSender) Send(message interface{}) interface{} {
 		Context: context,
 	}
 	waiter.Wait()
-	return context.Result
+	return context.Written()
 }

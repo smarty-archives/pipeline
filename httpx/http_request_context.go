@@ -1,7 +1,7 @@
 package httpx
 
 type HTTPRequestContext struct {
-	Result interface{}
+	Result []interface{}
 	Waiter WaitGroup
 }
 
@@ -12,7 +12,17 @@ func NewRequestContext(waiter WaitGroup) *HTTPRequestContext {
 }
 
 func (this *HTTPRequestContext) Write(message interface{}) {
-	this.Result = message
+	this.Result = append(this.Result, message)
+}
+
+func (this *HTTPRequestContext) Written() interface{} {
+	if length := len(this.Result); length == 0 {
+		return nil
+	} else if length == 1 {
+		return this.Result[0]
+	} else {
+		return this.Result
+	}
 }
 
 func (this *HTTPRequestContext) Close() {
