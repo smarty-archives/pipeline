@@ -46,9 +46,8 @@ func (this *HTTPRequestContextFixture) TestMultipleWritesToContext() {
 	this.context.Write(43)
 	this.context.Write(44)
 
-	this.So(this.context.Written(), should.Resemble, []interface{}{42,43,44})
+	this.So(this.context.Written(), should.Resemble, []interface{}{42, 43, 44})
 }
-
 
 /////////////////////////////////////////////////
 
