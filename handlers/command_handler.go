@@ -38,12 +38,25 @@ func (this *CommandHandler) Listen() {
 func (this *CommandHandler) processCommand(item RequestMessage) {
 	this.locker.Lock()
 
-	events := this.router.Handle(item.Message)
+	events := this.handleCommand(item)
 	this.sendResultingEvents(item, events)
 
 	if len(this.input) == 0 {
 		this.locker.Unlock()
 	}
+}
+
+func (this *CommandHandler) handleCommand(item RequestMessage) (events []interface{}) {
+	context := item.Context
+	for _, item := range this.router.Handle(item.Message) {
+		if _, ok := item.(error); ok {
+			context.Write(item)
+		} else {
+			events = append(events, item)
+		}
+	}
+
+	return events
 }
 
 func (this *CommandHandler) sendResultingEvents(item RequestMessage, events []interface{}) {

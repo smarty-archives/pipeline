@@ -3,6 +3,7 @@ package handlers
 import (
 	"time"
 
+	"errors"
 	"github.com/smartystreets/assertions/should"
 	"github.com/smartystreets/clock"
 	"github.com/smartystreets/gunit"
@@ -84,6 +85,23 @@ func (this *CommandHandlerFixture) TestNoResultsPassesContextToNextPhase() {
 	this.So(<-this.output, should.Resemble, EventMessage{Context: context1, EndOfBatch: true})
 }
 
+///////////////////////////////////////////////////////////////
+
+func (this *CommandHandlerFixture) TestErrorsAreReturned_AndNotPassedToNextPhase() {
+	context := &FakeRequestContext{id: 1}
+	this.input <- RequestMessage{Message: 1, Context: context}
+	this.router.results = append(this.router.results, []interface{}{"1a", "1b"})
+	this.router.err = errors.New("returned to caller")
+
+	this.listen()
+
+	this.So(<-this.output, should.Resemble, EventMessage{Message: "1a", Context: context})
+	this.So(<-this.output, should.Resemble, EventMessage{Message: "1b", Context: context, EndOfBatch: true})
+	this.So(context.written, should.Resemble, []interface{}{this.router.err})
+}
+
+///////////////////////////////////////////////////////////////
+
 func (this *CommandHandlerFixture) listen() {
 	close(this.input)
 	this.handler.Listen()
@@ -92,6 +110,7 @@ func (this *CommandHandlerFixture) listen() {
 ///////////////////////////////////////////////////////////////
 
 type FakeLockerRouter struct {
+	err     error
 	handled []interface{}
 	results [][]interface{}
 	locked  int
@@ -108,7 +127,11 @@ func (this *FakeLockerRouter) Handle(item interface{}) []interface{} {
 		return nil
 	}
 
-	return this.results[len(this.handled)-1]
+	if this.err == nil {
+		return this.results[len(this.handled)-1]
+	}
+
+	return append(this.results[len(this.handled)-1], this.err)
 }
 
 func (this *FakeLockerRouter) Lock() {

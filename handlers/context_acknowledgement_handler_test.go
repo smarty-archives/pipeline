@@ -33,12 +33,15 @@ func (this *ContextAcknowledgementHandlerFixture) TestContextsThatArriveClosed()
 ////////////////////////////////////////////////////////////////////////////////
 
 type FakeRequestContext struct {
-	waiter WaitGroup
-	id     int
+	waiter  WaitGroup
+	written []interface{}
+	id      int
 }
 
-func (this *FakeRequestContext) Write(interface{}) {}
-func (this *FakeRequestContext) Close()            { this.waiter.Done() }
+func (this *FakeRequestContext) Write(item interface{}) {
+	this.written = append(this.written, item)
+}
+func (this *FakeRequestContext) Close() { this.waiter.Done() }
 
 type EmptyWaitGroup struct{ done bool }
 
