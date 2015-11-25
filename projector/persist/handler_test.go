@@ -67,10 +67,16 @@ func (this *HandlerFixture) TestAllDocumentsWrittenInAConsolidatedBatch() {
 		this.assertDocumentsWritten("0", "1", "2")
 	}
 	this.assertLatestDeliveryReceiptSentToNextPhase(finalAck)
+	this.assertOutputChannelClosed()
 }
 func (this *HandlerFixture) assertLatestDeliveryReceiptSentToNextPhase(expectedAck int) {
 	deliveryReceipt := (<-this.output).(*FakeReceipt)
 	this.So(deliveryReceipt.id, should.Equal, expectedAck)
+}
+func (this *HandlerFixture) assertOutputChannelClosed() {
+	for range this.output {
+		// if the channel isn't closed, it will block here
+	}
 }
 
 //////////////////////////////////////////////////////////////

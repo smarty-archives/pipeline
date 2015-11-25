@@ -36,7 +36,7 @@ func (this *Handler) Listen() {
 		}
 	}
 
-	close(this.output) // TODO: add test
+	close(this.output)
 }
 
 var transformQueueDepth = metrics.AddGauge("pipeline:transform-phase-backlog-depth", time.Second)

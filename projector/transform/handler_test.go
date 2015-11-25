@@ -57,6 +57,10 @@ func (this *HandlerFixture) TestTransformerInvokedForEveryInputMessage() {
 		Receipt:   this.secondInput.Receipt,
 		Documents: collectedDocuments,
 	})
+
+	for range this.output {
+		// will block unless output channel is closed
+	}
 }
 
 /////////////////////////////////////////////////////////////////

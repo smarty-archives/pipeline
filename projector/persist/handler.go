@@ -39,7 +39,7 @@ func (this *Handler) Listen() {
 		}
 	}
 
-	close(this.output) // TODO: add test
+	close(this.output)
 }
 
 func (this *Handler) addToBatch(message projector.DocumentMessage) {
