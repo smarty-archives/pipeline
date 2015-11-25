@@ -3,6 +3,7 @@ package numeric
 import (
 	"encoding/binary"
 	"encoding/hex"
+	"fmt"
 	"strconv"
 )
 
@@ -44,6 +45,20 @@ func GUIDToUint64(value string) uint64 {
 	} else {
 		return uint64(binary.BigEndian.Uint32(raw)) // .NET stores GUIDs in big endian
 	}
+}
+
+func Uint32ToGUID(value uint32) string {
+	var target [16]byte
+	binary.BigEndian.PutUint32(target[:], value)
+	return formatGUIDString(target)
+}
+func formatGUIDString(value [16]byte) string {
+	return fmt.Sprintf("%x-%x-%x-%x-%x",
+		value[0:4],
+		value[4:6],
+		value[6:8],
+		value[8:10],
+		value[10:16])
 }
 
 const (

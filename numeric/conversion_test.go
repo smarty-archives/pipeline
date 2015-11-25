@@ -23,6 +23,10 @@ func Test(t *testing.T) {
 	assert.So(GUIDToUint64(guidString), should.Equal, guidUint64)
 	assert.So(GUIDToUint64("wrong length"), should.Equal, 0)
 	assert.So(GUIDToUint64("malforms-0000-0000-0000-000000000000"), should.Equal, 0)
+
+	assert.So(Uint32ToGUID(0), should.Equal, "00000000-0000-0000-0000-000000000000")
+	assert.So(Uint32ToGUID(8675309), should.Equal, "00845fed-0000-0000-0000-000000000000")
+	assert.So(Uint32ToGUID(uint32(0xFFFFFFFF)), should.Equal, "ffffffff-0000-0000-0000-000000000000")
 }
 
 const (
