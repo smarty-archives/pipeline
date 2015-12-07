@@ -21,6 +21,7 @@ func NewCompositeWriter(broker messaging.MessageBroker) *CompositeWriterBuilder 
 	return &CompositeWriterBuilder{
 		broker:     broker,
 		retrySleep: time.Second * 5,
+		overrides:  map[reflect.Type]messaging.Dispatch{},
 	}
 }
 
