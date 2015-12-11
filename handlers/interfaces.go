@@ -19,3 +19,7 @@ type WaitGroup interface {
 type MessageHandler interface {
 	Handle(interface{}) interface{}
 }
+
+type ApplicationHandler interface {
+	Handle(interface{})
+}
