@@ -54,20 +54,28 @@ func (this *Subscription) listen(input <-chan amqp.Delivery) {
 		this.output <- fromAMQPDelivery(item, this.channel)
 	}
 }
+
 func (this *Subscription) open() <-chan amqp.Delivery {
 	this.channel.ConfigureChannelBuffer(cap(this.output))
 
-	if len(this.queue) > 0 {
-		if err := this.channel.DeclareQueue(this.queue); err != nil {
-			log.Printf("[ERROR] Unable to declare queue [%s]: %s", this.queue, err)
-		}
+	queue, _ := this.declareQueue(this.queue)
+	this.bind(queue)
 
-		this.bind(this.queue)
+	if len(this.queue) > 0 {
 		return this.consume()
 	} else {
-		this.queue, _ = this.channel.DeclareTransientQueue()
-		this.bind(this.queue)
+		this.queue = queue
 		return this.exclusiveConsume()
+	}
+}
+func (this *Subscription) declareQueue(name string) (string, error) {
+	if len(name) == 0 {
+		return this.channel.DeclareTransientQueue()
+	} else if err := this.channel.DeclareQueue(name); err != nil {
+		log.Printf("[ERROR] Unable to declare queue [%s]: %s", name, err)
+		return "", err
+	} else {
+		return name, nil
 	}
 }
 func (this *Subscription) bind(name string) {
