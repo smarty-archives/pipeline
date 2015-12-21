@@ -380,6 +380,7 @@ func (this *FakeConnection) Close() error {
 type FakeChannel struct{}
 
 func (this *FakeChannel) ConfigureChannelBuffer(int) error                     { return nil }
+func (this *FakeChannel) DeclareExchange(string, string) error                 { return nil }
 func (this *FakeChannel) DeclareQueue(string) error                            { return nil }
 func (this *FakeChannel) DeclareTransientQueue() (string, error)               { return "", nil }
 func (this *FakeChannel) BindExchangeToQueue(string, string) error             { return nil }

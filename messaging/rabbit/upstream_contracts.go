@@ -26,6 +26,7 @@ type Consumer interface {
 	Acknowledger
 
 	ConfigureChannelBuffer(int) error
+	DeclareExchange(string, string) error
 	DeclareQueue(string) error
 	DeclareTransientQueue() (string, error)
 	BindExchangeToQueue(string, string) error

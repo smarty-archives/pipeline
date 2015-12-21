@@ -72,6 +72,10 @@ func (this *Subscription) open() <-chan amqp.Delivery {
 }
 func (this *Subscription) bind(name string) {
 	for _, exchange := range this.bindings {
+		if err := this.channel.DeclareExchange(exchange, "fanout"); err != nil {
+			log.Printf("[ERROR] Unable to create [%s ]exchange [%s]", "fanout", exchange, err)
+		}
+
 		if err := this.channel.BindExchangeToQueue(name, exchange); err != nil {
 			log.Printf("[ERROR] Unable to bind exchange [%s] to queue [%s]: %s", exchange, name, err)
 		}

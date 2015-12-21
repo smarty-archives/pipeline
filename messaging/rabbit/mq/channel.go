@@ -22,6 +22,9 @@ func (this *Channel) ConfigureChannelAsTransactional() error {
 	return this.inner.Tx()
 }
 
+func (this *Channel) DeclareExchange(name, kind string) error {
+	return this.inner.ExchangeDeclare(name, kind, true, false, false, false, nil)
+}
 func (this *Channel) DeclareQueue(name string) error {
 	_, err := this.inner.QueueDeclare(name, true, false, false, false, nil)
 	return err

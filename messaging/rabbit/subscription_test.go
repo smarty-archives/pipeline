@@ -62,6 +62,7 @@ func (this *SubscriptionFixture) TestQueuedBasedWithBindingsSubscription() {
 	this.So(this.channel.exclusive, should.BeFalse)
 	this.So(this.channel.queue, should.Equal, this.queue)
 	this.So(this.channel.boundQueue[0], should.Equal, this.channel.queue)
+	this.So(this.channel.declaredExchange, should.Resemble, []string{"exchange1@fanout", "exchange2@fanout"})
 }
 
 func (this *SubscriptionFixture) TestFailingAMQPChannel() {
@@ -129,14 +130,15 @@ func (this *SubscriptionFixture) TestConsumerCancellation() {
 //////////////////////////////////////////////////////////////////
 
 type FakeSubscriptionChannel struct {
-	bufferSize int
-	queue      string
-	consumer   string
-	boundQueue []string
-	bindings   []string
-	exclusive  bool
-	cancelled  bool
-	incoming   chan amqp.Delivery
+	bufferSize       int
+	queue            string
+	consumer         string
+	declaredExchange []string
+	boundQueue       []string
+	bindings         []string
+	exclusive        bool
+	cancelled        bool
+	incoming         chan amqp.Delivery
 }
 
 func newFakeSubscriptionChannel() *FakeSubscriptionChannel {
@@ -147,6 +149,10 @@ func newFakeSubscriptionChannel() *FakeSubscriptionChannel {
 
 func (this *FakeSubscriptionChannel) ConfigureChannelBuffer(value int) error {
 	this.bufferSize = value
+	return nil
+}
+func (this *FakeSubscriptionChannel) DeclareExchange(name, kind string) error {
+	this.declaredExchange = append(this.declaredExchange, name+"@"+kind)
 	return nil
 }
 func (this *FakeSubscriptionChannel) DeclareQueue(name string) error {
