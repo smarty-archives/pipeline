@@ -41,16 +41,16 @@ func (this *Channel) BindExchangeToQueue(queue, exchange string) error {
 }
 
 func (this *Channel) Consume(queueName, consumerName string) (<-chan amqp.Delivery, error) {
-	return this.inner.Consume(queueName, consumerName, false, false, false, false, nil)
+	return this.inner.Consume(queueName, consumerName, false, false, true, false, nil)
 }
 func (this *Channel) ConsumeWithoutAcknowledgement(queueName, consumerName string) (<-chan amqp.Delivery, error) {
-	return this.inner.Consume(queueName, consumerName, true, true, false, false, nil)
+	return this.inner.Consume(queueName, consumerName, true, true, true, false, nil)
 }
 func (this *Channel) ExclusiveConsume(queueName, consumerName string) (<-chan amqp.Delivery, error) {
-	return this.inner.Consume(queueName, consumerName, false, true, false, false, nil)
+	return this.inner.Consume(queueName, consumerName, false, true, true, false, nil)
 }
 func (this *Channel) ExclusiveConsumeWithoutAcknowledgement(queueName, consumerName string) (<-chan amqp.Delivery, error) {
-	return this.inner.Consume(queueName, consumerName, true, true, false, false, nil)
+	return this.inner.Consume(queueName, consumerName, true, true, true, false, nil)
 }
 func (this *Channel) CancelConsumer(consumerName string) error {
 	return this.inner.Cancel(consumerName, false)
