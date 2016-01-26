@@ -27,7 +27,9 @@ func NewGetRetryClient(inner HTTPClient, retries int) *GetRetryClient {
 func (this *GetRetryClient) Do(request *http.Request) (*http.Response, error) {
 	for current := 0; current <= this.retries; current++ {
 		response, err := this.inner.Do(request)
-		if err == nil && (response.StatusCode == http.StatusOK || response.StatusCode == http.StatusNotFound) {
+		if err == nil && response.StatusCode == http.StatusOK {
+			return response, nil
+		} else if err == nil && response.StatusCode == http.StatusNotFound {
 			return response, nil
 		} else if err != nil {
 			log.Println("[WARN] Unexpected response from target storage:", err)
