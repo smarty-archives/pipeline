@@ -51,7 +51,9 @@ func (this *DispatchHandler) tryCommit(context RequestContext) {
 }
 
 func (this *DispatchHandler) commit() {
-	this.writer.Commit()
+	if this.writer.Commit() != nil {
+		return
+	}
 
 	for _, context := range this.buffer {
 		this.output <- context

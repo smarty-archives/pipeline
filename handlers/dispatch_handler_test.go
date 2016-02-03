@@ -1,6 +1,8 @@
 package handlers
 
 import (
+	"errors"
+
 	"github.com/smartystreets/assertions/should"
 	"github.com/smartystreets/gunit"
 	"github.com/smartystreets/pipeline/messaging"
@@ -97,6 +99,18 @@ func (this *DispatchHandlerFixture) TestNilMessageSendsContextDirectlyToOutput()
 
 /////////////////////////////////////////////////////////////////////////
 
+func (this *DispatchHandlerFixture) TestFailedCommitDoesNotSendToNextPhase() {
+	this.writer.err = errors.New("Do not continue dispatching...")
+	this.input <- EventMessage{Message: 1, Context: &FakeRequestContext{}, EndOfBatch: true}
+
+	this.listen()
+
+	this.So(len(this.output), should.Equal, 0)
+	this.So(this.handler.buffer, should.NotBeEmpty)
+}
+
+/////////////////////////////////////////////////////////////////////////
+
 func (this *DispatchHandlerFixture) listen() {
 	close(this.input)
 	this.handler.Listen()
@@ -107,6 +121,7 @@ func (this *DispatchHandlerFixture) listen() {
 type FakeWriter struct {
 	messages []messaging.Dispatch
 	commits  int
+	err      error
 }
 
 func (this *FakeWriter) Write(dispatch messaging.Dispatch) error {
@@ -116,7 +131,7 @@ func (this *FakeWriter) Write(dispatch messaging.Dispatch) error {
 
 func (this *FakeWriter) Commit() error {
 	this.commits++
-	return nil
+	return this.err
 }
 
 func (this *FakeWriter) Close() {}
