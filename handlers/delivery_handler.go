@@ -1,32 +1,49 @@
 package handlers
 
-import "github.com/smartystreets/pipeline/messaging"
+import (
+	"sync"
+
+	"github.com/smartystreets/pipeline/messaging"
+)
 
 type DeliveryHandler struct {
 	input       <-chan messaging.Delivery
 	output      chan<- interface{}
 	writer      messaging.CommitWriter
 	application MessageHandler
+	locker      sync.Locker
 }
 
 func NewDeliveryHandler(input <-chan messaging.Delivery,
 	output chan<- interface{},
 	writer messaging.CommitWriter,
-	application MessageHandler) *DeliveryHandler {
+	application MessageHandler,
+	locker sync.Locker) *DeliveryHandler {
+
+	if locker == nil {
+		locker = NoopLocker{}
+	} else {
+		locker = NewIdempotentLocker(locker)
+	}
 
 	return &DeliveryHandler{
 		input:       input,
 		output:      output,
 		writer:      writer,
 		application: application,
+		locker:      locker,
 	}
 }
 
 func (this *DeliveryHandler) Listen() {
 	for delivery := range this.input {
+		this.locker.Lock()
+
 		results := this.application.Handle(delivery.Message)
 		this.write(results)
-		this.tryCommit(delivery.Receipt)
+		if this.tryCommit(delivery.Receipt) {
+			this.locker.Unlock()
+		}
 	}
 
 	close(this.output)
@@ -42,18 +59,18 @@ func (this *DeliveryHandler) write(message interface{}) {
 	} else {
 		this.dispatch(message)
 	}
-
 }
 func (this *DeliveryHandler) dispatch(message interface{}) {
 	dispatch := messaging.Dispatch{Message: message}
 	this.writer.Write(dispatch)
 }
 
-func (this *DeliveryHandler) tryCommit(receipt interface{}) {
+func (this *DeliveryHandler) tryCommit(receipt interface{}) bool {
 	if len(this.input) > 0 {
-		return
+		return false
 	}
 
 	this.writer.Commit()
 	this.output <- receipt
+	return true
 }

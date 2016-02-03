@@ -17,6 +17,7 @@ type DeliveryHandlerFixture struct {
 	writer      *FakeCommitWriter
 	application *FakeApplication
 	handler     *DeliveryHandler
+	locker      *FakeLocker
 }
 
 func (this *DeliveryHandlerFixture) Setup() {
@@ -24,7 +25,8 @@ func (this *DeliveryHandlerFixture) Setup() {
 	this.output = make(chan interface{}, 8)
 	this.writer = &FakeCommitWriter{}
 	this.application = &FakeApplication{}
-	this.handler = NewDeliveryHandler(this.input, this.output, this.writer, this.application)
+	this.locker = &FakeLocker{}
+	this.handler = NewDeliveryHandler(this.input, this.output, this.writer, this.application, this.locker)
 }
 
 ///////////////////////////////////////////////////////////////
@@ -40,6 +42,8 @@ func (this *DeliveryHandlerFixture) TestCommitCalledAtEndOfBatch() {
 	this.So(this.writer.commits, should.Equal, 1)
 	this.So(len(this.output), should.Equal, 1)
 	this.So(<-this.output, should.Equal, "Delivery Receipt 3")
+	this.So(this.locker.locks, should.Equal, 1)
+	this.So(this.locker.unlocks, should.Equal, 1)
 }
 
 ///////////////////////////////////////////////////////////////
@@ -84,6 +88,8 @@ func (this *DeliveryHandlerFixture) TestNilMessagesAreNotWritten() {
 	this.So(this.writer.commits, should.Equal, 1)
 	this.So(len(this.output), should.Equal, 1)
 	this.So(<-this.output, should.Equal, "Delivery Receipt")
+	this.So(this.locker.locks, should.Equal, 1)
+	this.So(this.locker.unlocks, should.Equal, 1)
 }
 
 ///////////////////////////////////////////////////////////////
@@ -102,6 +108,8 @@ func (this *DeliveryHandlerFixture) TestMessageSlicesAreWritten() {
 	this.So(this.writer.commits, should.Equal, 1)
 	this.So(len(this.output), should.Equal, 1)
 	this.So(<-this.output, should.Equal, "Delivery Receipt")
+	this.So(this.locker.locks, should.Equal, 1)
+	this.So(this.locker.unlocks, should.Equal, 1)
 }
 
 ///////////////////////////////////////////////////////////////
