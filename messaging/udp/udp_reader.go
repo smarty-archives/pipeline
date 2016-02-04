@@ -35,7 +35,7 @@ func NewDatagramReader(address string, capacity int) *DatagramReader {
 func (this *DatagramReader) Listen() {
 	go this.acknowledge()
 	this.listen()
-	close(this.acknowledgements)
+	close(this.deliveries)
 }
 func (this *DatagramReader) acknowledge() {
 	for range this.acknowledgements {
