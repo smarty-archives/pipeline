@@ -4,31 +4,28 @@ import (
 	"io"
 	"net"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/smartystreets/clock"
-	"github.com/smartystreets/logging"
 	"github.com/smartystreets/pipeline/messaging"
 )
 
 type DatagramReader struct {
 	acknowledgements chan interface{}
 	deliveries       chan messaging.Delivery
-	address          string
-	mutex            *sync.Mutex
-	listener         *net.UDPConn
+	socket           net.Conn
 	clock            *clock.Clock
-	logger           *logging.Logger
-	closed           bool
 }
 
-func NewDatagramReader(address string, capacity int) *DatagramReader {
+func NewDatagramReader(bindAddress string, capacity int) *DatagramReader {
+	socket, _ := BindSocket(bindAddress)
+	return NewDatagramReaderWithSocket(socket, capacity)
+}
+func NewDatagramReaderWithSocket(socket net.Conn, capacity int) *DatagramReader {
 	return &DatagramReader{
-		acknowledgements: make(chan interface{}, 64),
+		acknowledgements: make(chan interface{}, capacity),
 		deliveries:       make(chan messaging.Delivery, capacity),
-		address:          address,
-		mutex:            &sync.Mutex{},
+		socket:           socket,
 	}
 }
 
@@ -42,81 +39,33 @@ func (this *DatagramReader) acknowledge() {
 	}
 }
 func (this *DatagramReader) listen() {
-	this.resolveListener()
-
-	if this.listener == nil {
+	if this.socket == nil {
 		return
 	}
 
-	this.listener.SetReadBuffer(readBufferSize)
-
 	for {
-		buffer := make([]byte, readBufferSize)
 		deadline := this.clock.UTCNow().Add(readDeadlineDuration)
-		this.listener.SetReadDeadline(deadline)
-		if read, err := this.listener.Read(buffer); err == nil {
+		this.socket.SetReadDeadline(deadline)
+
+		buffer := make([]byte, readBufferSize)
+		if read, err := this.socket.Read(buffer); err == nil {
 			this.deliveries <- messaging.Delivery{
 				Timestamp: this.clock.UTCNow(),
 				Payload:   buffer[0:read],
 			}
-		} else if isClosed(err) {
+		} else if err == io.EOF {
 			break
-		}
-	}
-}
-func (this *DatagramReader) resolveListener() {
-	var listener *net.UDPConn
-
-	for listener == nil {
-		if listener, err := this.openListener(); listener != nil {
-			this.logger.Printf("[INFO] Listening for UDP datagrams on %s.\n", this.address)
-			this.saveListener(listener)
-			break
-		} else if this.isClosed() {
+		} else if strings.Contains(err.Error(), "use of closed network connection") {
 			break
 		} else {
-			this.logger.Println("[WARN] UDP socket bind failure:", err)
-			time.Sleep(time.Second)
+			continue // e.g. timeout messages
 		}
 	}
-}
-func (this *DatagramReader) openListener() (*net.UDPConn, error) {
-	if address, err := net.ResolveUDPAddr("udp", this.address); err != nil {
-		return nil, err
-	} else if listener, err := net.ListenUDP("udp", address); err != nil {
-		return nil, err
-	} else {
-		return listener, nil
-	}
-}
-func (this *DatagramReader) saveListener(listener *net.UDPConn) {
-	this.mutex.Lock()
-	defer this.mutex.Unlock()
-
-	this.listener = listener
-
-	if this.closed {
-		this.listener.Close()
-	}
-}
-func (this *DatagramReader) isClosed() bool {
-	this.mutex.Lock()
-	defer this.mutex.Unlock()
-	return this.closed
-}
-func isClosed(err error) bool {
-	return err == io.EOF || strings.Contains(err.Error(), "use of closed network connection")
 }
 
 func (this *DatagramReader) Close() {
-	this.mutex.Lock()
-	defer this.mutex.Unlock()
-
-	this.closed = true
-
-	listener := this.listener
-	if listener != nil {
-		listener.Close()
+	if this.socket != nil {
+		this.socket.Close()
 	}
 }
 
