@@ -31,7 +31,7 @@ func (this *DeliveryHandlerFixture) Setup() {
 
 ///////////////////////////////////////////////////////////////
 
-func (this *DeliveryHandlerFixture) TestCommitCalledAtEndOfBatch() {
+func (this *DeliveryHandlerFixture) TestCommittCalledAtEndOfBatch() {
 	this.input <- messaging.Delivery{Message: 1, Receipt: "Delivery Receipt 1"}
 	this.input <- messaging.Delivery{Message: 2, Receipt: "Delivery Receipt 2"}
 	this.input <- messaging.Delivery{Message: 3, Receipt: "Delivery Receipt 3"}
@@ -44,6 +44,17 @@ func (this *DeliveryHandlerFixture) TestCommitCalledAtEndOfBatch() {
 	this.So(<-this.output, should.Equal, "Delivery Receipt 3")
 	this.So(this.locker.locks, should.Equal, 1)
 	this.So(this.locker.unlocks, should.Equal, 1)
+}
+
+///////////////////////////////////////////////////////////////
+
+func (this *DeliveryHandlerFixture) TestNilMessagesAreNotDelivered() {
+	this.input <- messaging.Delivery{Message: nil}
+	close(this.input)
+
+	this.handler.Listen()
+
+	this.So(this.application.counter, should.BeZeroValue)
 }
 
 ///////////////////////////////////////////////////////////////

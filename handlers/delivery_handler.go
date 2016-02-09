@@ -39,7 +39,7 @@ func (this *DeliveryHandler) Listen() {
 	for delivery := range this.input {
 		this.locker.Lock()
 
-		results := this.application.Handle(delivery.Message)
+		results := this.handle(delivery.Message)
 		this.write(results)
 		if this.tryCommit(delivery.Receipt) {
 			this.locker.Unlock()
@@ -47,6 +47,14 @@ func (this *DeliveryHandler) Listen() {
 	}
 
 	close(this.output)
+}
+
+func (this *DeliveryHandler) handle(message interface{}) interface{} {
+	if message == nil {
+		return nil
+	}
+
+	return this.application.Handle(message)
 }
 
 func (this *DeliveryHandler) write(message interface{}) {
