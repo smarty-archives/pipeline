@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/smartystreets/clock"
-	"net/http/httputil"
 )
 
 type GetRetryClient struct {
@@ -31,9 +30,6 @@ func (this *GetRetryClient) Do(request *http.Request) (*http.Response, error) {
 		if err == nil && response.StatusCode == http.StatusOK {
 			return response, nil
 		} else if err == nil && response.StatusCode == http.StatusNotFound {
-			rawRequest, _ := httputil.DumpRequest(request, true)
-			rawResponse, _ := httputil.DumpResponse(response, true)
-			log.Printf("[INFO] Document Not Found:\n%s%s", string(rawRequest), string(rawResponse))
 			return response, nil
 		} else if err != nil {
 			log.Println("[WARN] Unexpected response from target storage:", err)
