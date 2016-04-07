@@ -35,8 +35,9 @@ func (this *Broker) Notify(callback func(uint64)) {
 
 func (this *Broker) State() uint64 {
 	this.mutex.Lock()
-	defer this.mutex.Unlock()
-	return this.state
+	state := this.state
+	this.mutex.Unlock()
+	return state
 }
 func (this *Broker) updateState(state uint64) {
 	this.state = state
@@ -205,8 +206,9 @@ func (this *Broker) openChannel(callback func() bool) Channel {
 }
 func (this *Broker) isActive() bool {
 	this.mutex.Lock()
-	defer this.mutex.Unlock()
-	return this.state == messaging.Connecting || this.state == messaging.Connected
+	active := this.state == messaging.Connecting || this.state == messaging.Connected
+	this.mutex.Unlock()
+	return active
 }
 func (this *Broker) tryOpenChannel() Channel {
 	this.mutex.Lock()

@@ -52,8 +52,8 @@ func (this *TransactionWriter) Commit() error {
 
 func (this *TransactionWriter) Close() {
 	this.mutex.Lock()
-	defer this.mutex.Unlock()
 	this.closed = true
+	this.mutex.Unlock()
 }
 
 func (this *TransactionWriter) ensureChannel() bool {

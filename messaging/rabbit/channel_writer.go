@@ -40,8 +40,8 @@ func (this *ChannelWriter) Commit() error {
 
 func (this *ChannelWriter) Close() {
 	this.mutex.Lock()
-	defer this.mutex.Unlock()
 	this.closed = true
+	this.mutex.Unlock()
 }
 
 func (this *ChannelWriter) ensureChannel() bool {

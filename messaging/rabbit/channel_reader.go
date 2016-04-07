@@ -82,17 +82,19 @@ func (this *ChannelReader) subscribe(channel Channel) *Subscription {
 
 func (this *ChannelReader) Close() {
 	this.mutex.Lock()
-	defer this.mutex.Unlock()
 
 	if !this.shutdownRequested {
 		this.control <- shutdownRequested{}
 		this.shutdownRequested = true
 	}
+
+	this.mutex.Unlock()
 }
 func (this *ChannelReader) isActive() bool {
 	this.mutex.Lock()
-	defer this.mutex.Unlock()
-	return !this.shutdownRequested
+	active := !this.shutdownRequested
+	this.mutex.Unlock()
+	return active
 }
 
 func (this *ChannelReader) Deliveries() <-chan messaging.Delivery {
