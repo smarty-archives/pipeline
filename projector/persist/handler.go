@@ -83,7 +83,7 @@ func (this *Handler) prepareForNextBatch() {
 }
 
 var (
-	DepthPersistQueue    = metrics.AddGauge("pipeline:persist-phase-backlog-depth", time.Second)
-	DocumentsToSave      = metrics.AddGauge("pipeline:documents-to-save", time.Second)
-	DocumentWriteLatency = metrics.AddGauge("pipeline:document-write-latency-milliseconds", time.Second)
+	DepthPersistQueue    = metrics.AddGauge("pipeline:persist-phase-backlog-depth", time.Second*30)
+	DocumentsToSave      = metrics.AddGauge("pipeline:documents-to-save", time.Second*30)
+	DocumentWriteLatency = metrics.AddGauge("pipeline:document-write-latency-milliseconds", time.Second*30)
 )
