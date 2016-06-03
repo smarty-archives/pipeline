@@ -30,7 +30,7 @@ func (this *SimpleAcknowledgerFixture) TestItemIsAcknowledged() {
 	this.input <- newReceipt(this.channel, 5678)
 
 	close(this.input)
-	time.Sleep(time.Millisecond)
+	time.Sleep(time.Millisecond * 10)
 
 	this.So(this.channel.callsMulti, should.Equal, 1)
 	this.So(this.channel.latestMulti, should.Equal, 5678)
@@ -43,7 +43,7 @@ func (this *SimpleAcknowledgerFixture) TestOnlyLastItemIsAcknowledged() {
 	this.input <- newReceipt(this.channel, 5679)
 
 	close(this.input)
-	time.Sleep(time.Millisecond)
+	time.Sleep(time.Millisecond * 10)
 
 	this.So(this.channel.callsMulti, should.Equal, 1)
 	this.So(this.channel.latestMulti, should.Equal, 5679)

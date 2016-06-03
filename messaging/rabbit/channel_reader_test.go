@@ -55,7 +55,7 @@ func (this *ChannelReaderFixture) TestListenStartsAcknowledger() {
 	go this.reader.Listen()
 
 	this.reader.Acknowledgements() <- receipt
-	time.Sleep(time.Millisecond)
+	time.Sleep(time.Millisecond * 10)
 
 	this.So(channel.latestTag, should.Equal, 42)
 }
