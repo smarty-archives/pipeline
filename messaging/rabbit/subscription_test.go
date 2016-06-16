@@ -79,10 +79,10 @@ func (this *SubscriptionFixture) assertListen() {
 	go this.subscription.Listen()
 	this.channel.close()
 
+	this.So((<-this.control).(subscriptionClosed).DeliveryCount, should.Equal, 0)
 	this.So(this.channel.bufferSize, should.Equal, cap(this.output))
 	this.So(this.channel.bindings, should.Resemble, this.bindings)
 	this.So(this.channel.consumer, should.NotBeEmpty)
-	this.So((<-this.control).(subscriptionClosed).DeliveryCount, should.Equal, 0)
 }
 
 //////////////////////////////////////////////////////////////////
