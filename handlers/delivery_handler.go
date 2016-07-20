@@ -78,7 +78,10 @@ func (this *DeliveryHandler) tryCommit(receipt interface{}) bool {
 		return false
 	}
 
-	this.writer.Commit()
+	if this.writer != nil {
+		this.writer.Commit()
+	}
+
 	this.output <- receipt
 	return true
 }
