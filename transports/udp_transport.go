@@ -56,7 +56,6 @@ func (this *UDPTransport) ensureConnection() error {
 	} else if sockets, err := this.dial(); err != nil {
 		return err
 	} else {
-		log.Println("[INFO] UDP Transport Connection(s) Established:", len(sockets))
 		this.sockets = sockets
 		this.canLogFailure = true
 	}
@@ -89,7 +88,7 @@ func (this *UDPTransport) dial() ([]net.Conn, error) {
 func (this *UDPTransport) logFailure(err error) {
 	if this.canLogFailure {
 		this.canLogFailure = false // don't log again until we have a good socket
-		log.Println("[WARNING] UDP Transport Connection Failure:", err)
+		log.Println("[WARN] UDP Transport Connection Failure:", err)
 	}
 }
 func (this *UDPTransport) closeConnection() {
