@@ -25,12 +25,9 @@ func (this *PutRetryClient) Do(request *http.Request) (*http.Response, error) {
 	request.Body = newRetryBuffer(request.Body)
 
 	for current := 0; current <= this.retries; current++ {
-		log.Printf("[INFO] Saving document: '%s' (attempt #%d)\n", request.URL.Path, current)
-
 		response, err := this.inner.Do(request)
 
 		if err == nil && response.StatusCode == http.StatusOK {
-			log.Println("[INFO] Document saved:", request.URL.Path)
 			return response, nil
 		} else if err != nil {
 			log.Println("[WARN] Unexpected response from target storage:", err)
