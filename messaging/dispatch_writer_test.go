@@ -3,11 +3,16 @@ package messaging
 import (
 	"errors"
 	"reflect"
+	"testing"
 	"time"
 
 	"github.com/smartystreets/assertions/should"
 	"github.com/smartystreets/gunit"
 )
+
+func TestDispatchWriterFixture(t *testing.T) {
+	gunit.Run(new(DispatchWriterFixture), t)
+}
 
 type DispatchWriterFixture struct {
 	*gunit.Fixture

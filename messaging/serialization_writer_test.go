@@ -5,11 +5,16 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"testing"
 	"time"
 
 	"github.com/smartystreets/assertions/should"
 	"github.com/smartystreets/gunit"
 )
+
+func TestSerializationWriterFixture(t *testing.T) {
+	gunit.Run(new(SerializationWriterFixture), t)
+}
 
 type SerializationWriterFixture struct {
 	*gunit.Fixture

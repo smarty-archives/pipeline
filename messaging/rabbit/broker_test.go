@@ -4,6 +4,7 @@ import (
 	"errors"
 	"net/url"
 	"reflect"
+	"testing"
 	"time"
 
 	"github.com/smartystreets/assertions/should"
@@ -11,6 +12,10 @@ import (
 	"github.com/smartystreets/pipeline/messaging"
 	"github.com/streadway/amqp"
 )
+
+func TestBrokerFixture(t *testing.T) {
+	gunit.Run(new(BrokerFixture), t)
+}
 
 type BrokerFixture struct {
 	*gunit.Fixture

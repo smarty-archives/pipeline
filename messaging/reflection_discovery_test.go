@@ -1,9 +1,15 @@
 package messaging
 
 import (
+	"testing"
+
 	"github.com/smartystreets/assertions/should"
 	"github.com/smartystreets/gunit"
 )
+
+func TestReflectionDiscoveryFixture(t *testing.T) {
+	gunit.Run(new(ReflectionDiscoveryFixture), t)
+}
 
 type ReflectionDiscoveryFixture struct {
 	*gunit.Fixture

@@ -1,10 +1,16 @@
 package httpx
 
 import (
+	"testing"
+
 	"github.com/smartystreets/assertions/should"
 	"github.com/smartystreets/gunit"
 	"github.com/smartystreets/pipeline/handlers"
 )
+
+func TestRequestSenderFixture(t *testing.T) {
+	gunit.Run(new(RequestSenderFixture), t)
+}
 
 type RequestSenderFixture struct {
 	*gunit.Fixture

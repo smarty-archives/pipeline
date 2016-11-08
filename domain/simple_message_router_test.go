@@ -1,9 +1,15 @@
 package domain
 
 import (
+	"testing"
+
 	"github.com/smartystreets/assertions/should"
 	"github.com/smartystreets/gunit"
 )
+
+func TestSimpleMessageRouterFixture(t *testing.T) {
+	gunit.Run(new(SimpleMessageRouterFixture), t)
+}
 
 type SimpleMessageRouterFixture struct {
 	*gunit.Fixture

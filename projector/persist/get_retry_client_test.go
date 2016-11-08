@@ -3,11 +3,16 @@ package persist
 import (
 	"errors"
 	"net/http"
+	"testing"
 
 	"github.com/smartystreets/assertions/should"
 	"github.com/smartystreets/clock"
 	"github.com/smartystreets/gunit"
 )
+
+func TestGetRetryClientFixture(t *testing.T) {
+	gunit.Run(new(GetRetryClientFixture), t)
+}
 
 type GetRetryClientFixture struct {
 	*gunit.Fixture

@@ -2,11 +2,16 @@ package handlers
 
 import (
 	"errors"
+	"testing"
 
 	"github.com/smartystreets/assertions/should"
 	"github.com/smartystreets/gunit"
 	"github.com/smartystreets/pipeline/messaging"
 )
+
+func TestDispatchHandlerFixture(t *testing.T) {
+	gunit.Run(new(DispatchHandlerFixture), t)
+}
 
 type DispatchHandlerFixture struct {
 	*gunit.Fixture

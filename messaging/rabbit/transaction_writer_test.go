@@ -2,11 +2,16 @@ package rabbit
 
 import (
 	"errors"
+	"testing"
 
 	"github.com/smartystreets/assertions/should"
 	"github.com/smartystreets/gunit"
 	"github.com/smartystreets/pipeline/messaging"
 )
+
+func TestTransactionWriterFixture(t *testing.T) {
+	gunit.Run(new(TransactionWriterFixture), t)
+}
 
 type TransactionWriterFixture struct {
 	*gunit.Fixture

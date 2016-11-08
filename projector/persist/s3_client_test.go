@@ -3,10 +3,15 @@ package persist
 import (
 	"net/http"
 	"net/url"
+	"testing"
 
 	"github.com/smartystreets/assertions/should"
 	"github.com/smartystreets/gunit"
 )
+
+func TestS3ClientFixture(t *testing.T) {
+	gunit.Run(new(S3ClientFixture), t)
+}
 
 type S3ClientFixture struct {
 	*gunit.Fixture

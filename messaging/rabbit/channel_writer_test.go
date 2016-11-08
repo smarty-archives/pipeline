@@ -2,12 +2,17 @@ package rabbit
 
 import (
 	"errors"
+	"testing"
 
 	"github.com/smartystreets/assertions/should"
 	"github.com/smartystreets/gunit"
 	"github.com/smartystreets/pipeline/messaging"
 	"github.com/streadway/amqp"
 )
+
+func TestChannelWriterFixture(t *testing.T) {
+	gunit.Run(new(ChannelWriterFixture), t)
+}
 
 type ChannelWriterFixture struct {
 	*gunit.Fixture

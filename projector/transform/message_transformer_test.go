@@ -2,6 +2,7 @@ package transform
 
 import (
 	"strconv"
+	"testing"
 	"time"
 
 	"github.com/smartystreets/assertions/should"
@@ -9,6 +10,10 @@ import (
 	"github.com/smartystreets/gunit"
 	"github.com/smartystreets/pipeline/projector"
 )
+
+func TestMessageTransformerFixture(t *testing.T) {
+	gunit.Run(new(MessageTransformerFixture), t)
+}
 
 type MessageTransformerFixture struct {
 	*gunit.Fixture

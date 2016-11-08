@@ -5,11 +5,16 @@ import (
 	"log"
 	"os"
 	"reflect"
+	"testing"
 
 	"github.com/smartystreets/assertions/should"
 	"github.com/smartystreets/gunit"
 	"github.com/smartystreets/pipeline/messaging"
 )
+
+func TestJSONDeserializerFixture(t *testing.T) {
+	gunit.Run(new(JSONDeserializerFixture), t)
+}
 
 type JSONDeserializerFixture struct {
 	*gunit.Fixture

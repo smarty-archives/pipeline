@@ -4,10 +4,15 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"testing"
 
 	"github.com/smartystreets/assertions/should"
 	"github.com/smartystreets/gunit"
 )
+
+func TestJSONSerializerFixture(t *testing.T) {
+	gunit.Run(new(JSONSerializerFixture), t)
+}
 
 type JSONSerializerFixture struct {
 	*gunit.Fixture

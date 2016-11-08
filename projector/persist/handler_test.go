@@ -3,12 +3,17 @@ package persist
 import (
 	"strconv"
 	"sync"
+	"testing"
 	"time"
 
 	"github.com/smartystreets/assertions/should"
 	"github.com/smartystreets/gunit"
 	"github.com/smartystreets/pipeline/projector"
 )
+
+func TestHandlerFixture(t *testing.T) {
+	gunit.Run(new(HandlerFixture), t)
+}
 
 type HandlerFixture struct {
 	*gunit.Fixture

@@ -2,9 +2,6 @@ package httpx
 
 import "time"
 
-//go:generate go install github.com/smartystreets/gunit/gunit
-//go:generate gunit
-
 type FakeWaiter struct {
 	addCalls, doneCalls, waitCalls, counter int
 	addCalled, waitCalled                   time.Time

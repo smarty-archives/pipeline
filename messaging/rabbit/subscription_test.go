@@ -2,6 +2,7 @@ package rabbit
 
 import (
 	"strconv"
+	"testing"
 	"time"
 
 	"github.com/smartystreets/assertions/should"
@@ -10,6 +11,10 @@ import (
 	"github.com/smartystreets/pipeline/messaging"
 	"github.com/streadway/amqp"
 )
+
+func TestSubscriptionFixture(t *testing.T) {
+	gunit.Run(new(SubscriptionFixture), t)
+}
 
 type SubscriptionFixture struct {
 	*gunit.Fixture

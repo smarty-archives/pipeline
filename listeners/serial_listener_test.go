@@ -1,12 +1,17 @@
 package listeners
 
 import (
+	"testing"
 	"time"
 
 	"github.com/smartystreets/assertions/should"
 	"github.com/smartystreets/clock"
 	"github.com/smartystreets/gunit"
 )
+
+func TestSerialListenerFixture(t *testing.T) {
+	gunit.Run(new(SerialListenerFixture), t)
+}
 
 type SerialListenerFixture struct {
 	*gunit.Fixture

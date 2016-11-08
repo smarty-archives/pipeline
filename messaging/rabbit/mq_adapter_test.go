@@ -1,6 +1,7 @@
 package rabbit
 
 import (
+	"testing"
 	"time"
 
 	"github.com/smartystreets/assertions/should"
@@ -9,6 +10,10 @@ import (
 	"github.com/smartystreets/pipeline/messaging"
 	"github.com/streadway/amqp"
 )
+
+func TestRabbitAdapterFixture(t *testing.T) {
+	gunit.Run(new(RabbitAdapterFixture), t)
+}
 
 type RabbitAdapterFixture struct {
 	*gunit.Fixture

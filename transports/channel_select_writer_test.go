@@ -3,8 +3,13 @@ package transports
 import (
 	"github.com/smartystreets/assertions/should"
 	"github.com/smartystreets/gunit"
+	"testing"
 	"time"
 )
+
+func TestChannelSelectWriterFixture(t *testing.T) {
+	gunit.Run(new(ChannelSelectWriterFixture), t)
+}
 
 type ChannelSelectWriterFixture struct {
 	*gunit.Fixture

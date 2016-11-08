@@ -6,12 +6,17 @@ import (
 	"io"
 	"io/ioutil"
 	"log"
+	"testing"
 	"time"
 
 	"github.com/smartystreets/assertions/should"
 	"github.com/smartystreets/gunit"
 	"github.com/smartystreets/pipeline/projector"
 )
+
+func TestClonerFixture(t *testing.T) {
+	gunit.Run(new(ClonerFixture), t)
+}
 
 type ClonerFixture struct {
 	*gunit.Fixture

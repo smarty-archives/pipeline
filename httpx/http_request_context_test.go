@@ -1,9 +1,15 @@
 package httpx
 
 import (
+	"testing"
+
 	"github.com/smartystreets/assertions/should"
 	"github.com/smartystreets/gunit"
 )
+
+func TestHTTPRequestContextFixture(t *testing.T) {
+	gunit.Run(new(HTTPRequestContextFixture), t)
+}
 
 type HTTPRequestContextFixture struct {
 	*gunit.Fixture

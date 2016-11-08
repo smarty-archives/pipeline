@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"testing"
 	"time"
 
 	"errors"
@@ -8,6 +9,10 @@ import (
 	"github.com/smartystreets/clock"
 	"github.com/smartystreets/gunit"
 )
+
+func TestCommandHandlerFixture(t *testing.T) {
+	gunit.Run(new(CommandHandlerFixture), t)
+}
 
 type CommandHandlerFixture struct {
 	*gunit.Fixture

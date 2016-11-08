@@ -1,10 +1,16 @@
 package handlers
 
 import (
+	"testing"
+
 	"github.com/smartystreets/assertions/should"
 	"github.com/smartystreets/gunit"
 	"github.com/smartystreets/pipeline/messaging"
 )
+
+func TestEventHandlerFixture(t *testing.T) {
+	gunit.Run(new(EventHandlerFixture), t)
+}
 
 type EventHandlerFixture struct {
 	*gunit.Fixture

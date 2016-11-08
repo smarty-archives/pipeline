@@ -1,11 +1,16 @@
 package rabbit
 
 import (
+	"testing"
 	"time"
 
 	"github.com/smartystreets/assertions/should"
 	"github.com/smartystreets/gunit"
 )
+
+func TestSimpleAcknowledgerFixture(t *testing.T) {
+	gunit.Run(new(SimpleAcknowledgerFixture), t)
+}
 
 type SimpleAcknowledgerFixture struct {
 	*gunit.Fixture

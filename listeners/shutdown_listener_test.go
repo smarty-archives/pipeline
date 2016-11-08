@@ -4,10 +4,15 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"testing"
 
 	"github.com/smartystreets/assertions/should"
 	"github.com/smartystreets/gunit"
 )
+
+func TestShutdownListenerFixture(t *testing.T) {
+	gunit.Run(new(ShutdownListenerFixture), t)
+}
 
 type ShutdownListenerFixture struct {
 	*gunit.Fixture

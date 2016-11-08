@@ -2,10 +2,15 @@ package listeners
 
 import (
 	"sync"
+	"testing"
 
 	"github.com/smartystreets/assertions/should"
 	"github.com/smartystreets/gunit"
 )
+
+func TestWaitGroupListenerFixture(t *testing.T) {
+	gunit.Run(new(WaitGroupListenerFixture), t)
+}
 
 type WaitGroupListenerFixture struct {
 	*gunit.Fixture

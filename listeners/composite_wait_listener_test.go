@@ -1,12 +1,17 @@
 package listeners
 
 import (
+	"testing"
 	"time"
 
 	"github.com/smartystreets/assertions/should"
 	"github.com/smartystreets/clock"
 	"github.com/smartystreets/gunit"
 )
+
+func TestCompositeWaitListenerFixture(t *testing.T) {
+	gunit.Run(new(CompositeWaitListenerFixture), t)
+}
 
 type CompositeWaitListenerFixture struct {
 	*gunit.Fixture

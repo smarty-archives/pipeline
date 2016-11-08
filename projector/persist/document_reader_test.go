@@ -8,10 +8,15 @@ import (
 	"io/ioutil"
 	"net/http"
 	"strings"
+	"testing"
 
 	"github.com/smartystreets/assertions/should"
 	"github.com/smartystreets/gunit"
 )
+
+func TestDocumentReaderFixture(t *testing.T) {
+	gunit.Run(new(DocumentReaderFixture), t)
+}
 
 type DocumentReaderFixture struct {
 	*gunit.Fixture

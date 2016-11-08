@@ -1,9 +1,15 @@
 package handlers
 
 import (
+	"testing"
+
 	"github.com/smartystreets/assertions/should"
 	"github.com/smartystreets/gunit"
 )
+
+func TestContextAcknowledgementHandlerFixture(t *testing.T) {
+	gunit.Run(new(ContextAcknowledgementHandlerFixture), t)
+}
 
 type ContextAcknowledgementHandlerFixture struct {
 	*gunit.Fixture

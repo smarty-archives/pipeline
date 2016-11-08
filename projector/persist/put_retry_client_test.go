@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"strings"
+	"testing"
 
 	"github.com/smartystreets/assertions/should"
 	"github.com/smartystreets/clock"
@@ -16,6 +17,10 @@ var (
 	retries     int = 5
 	maxAttempts int = retries + 1
 )
+
+func TestPutRetryClientFixture(t *testing.T) {
+	gunit.Run(new(PutRetryClientFixture), t)
+}
 
 type PutRetryClientFixture struct {
 	*gunit.Fixture

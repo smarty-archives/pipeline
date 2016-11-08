@@ -2,10 +2,15 @@ package messaging
 
 import (
 	"errors"
+	"testing"
 
 	"github.com/smartystreets/assertions/should"
 	"github.com/smartystreets/gunit"
 )
+
+func TestRetryCommitWriterFixture(t *testing.T) {
+	gunit.Run(new(RetryCommitWriterFixture), t)
+}
 
 type RetryCommitWriterFixture struct {
 	*gunit.Fixture

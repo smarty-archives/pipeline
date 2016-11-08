@@ -7,12 +7,17 @@ import (
 	"io/ioutil"
 	"net/http"
 	"strings"
+	"testing"
 	"time"
 
 	"github.com/smartystreets/assertions/should"
 	"github.com/smartystreets/gunit"
 	"github.com/smartystreets/pipeline/projector"
 )
+
+func TestDocumentWriterFixture(t *testing.T) {
+	gunit.Run(new(DocumentWriterFixture), t)
+}
 
 type DocumentWriterFixture struct {
 	*gunit.Fixture

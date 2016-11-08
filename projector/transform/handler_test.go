@@ -1,6 +1,7 @@
 package transform
 
 import (
+	"testing"
 	"time"
 
 	"github.com/smartystreets/assertions/should"
@@ -9,6 +10,10 @@ import (
 	"github.com/smartystreets/pipeline/messaging"
 	"github.com/smartystreets/pipeline/projector"
 )
+
+func TestHandlerFixture(t *testing.T) {
+	gunit.Run(new(HandlerFixture), t)
+}
 
 type HandlerFixture struct {
 	*gunit.Fixture

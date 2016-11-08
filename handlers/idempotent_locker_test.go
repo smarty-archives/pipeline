@@ -1,9 +1,15 @@
 package handlers
 
 import (
+	"testing"
+
 	"github.com/smartystreets/assertions/should"
 	"github.com/smartystreets/gunit"
 )
+
+func TestIdempotentLockerFixture(t *testing.T) {
+	gunit.Run(new(IdempotentLockerFixture), t)
+}
 
 type IdempotentLockerFixture struct {
 	*gunit.Fixture
