@@ -56,7 +56,7 @@ func decodeBody(body []byte) string {
 
 func (this *DocumentWriterFixture) TestDocumentWithIncompatibleFieldCausesPanicUponSerialization() {
 	action := func() { this.writer.Write(badJSONDocument) }
-	this.So(action, should.PanicWith, "json: unsupported type: map[int]string")
+	this.So(action, should.PanicWith, "json: unsupported type: chan int")
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -130,7 +130,7 @@ func (this *DocumentForWriting) Path() string                                  {
 var badJSONDocument = &BadJSONDocumentForWriting{}
 
 // Maps must have string keys to be JSON serialized.
-type BadJSONDocumentForWriting struct{ Stuff map[int]string }
+type BadJSONDocumentForWriting struct{ Stuff chan int }
 
 func (this *BadJSONDocumentForWriting) Lapse(now time.Time) (next projector.Document) { return this }
 func (this *BadJSONDocumentForWriting) Apply(message interface{}) bool                { return false }

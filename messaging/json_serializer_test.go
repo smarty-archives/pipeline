@@ -36,7 +36,7 @@ func (this *JSONSerializerFixture) TestSerializationSucceeds() {
 }
 
 func (this *JSONSerializerFixture) TestSerializationFails() {
-	message := InvalidMessage{Stuff: make(map[int]string)}
+	message := InvalidMessage{Stuff: make(chan int, 4)}
 	content, err := this.serializer.Serialize(message)
 	this.So(err, should.NotBeNil)
 	this.So(content, should.BeNil)
@@ -52,7 +52,7 @@ func (this *JSONSerializerFixture) TestContentEncoding() {
 
 func (this *JSONSerializerFixture) TestSerializationFailsAndPanics() {
 	this.serializer.PanicWhenSerializationFails()
-	message := InvalidMessage{Stuff: make(map[int]string)}
+	message := InvalidMessage{Stuff: make(chan int, 4)}
 	this.So(func() { this.serializer.Serialize(message) }, should.Panic)
 }
 
@@ -63,5 +63,5 @@ type ExampleMessage struct {
 }
 
 type InvalidMessage struct {
-	Stuff map[int]string `json:"stuff"`
+	Stuff chan int `json:"stuff"`
 }
