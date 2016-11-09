@@ -1,13 +1,12 @@
 package listeners
 
 import (
-	"io/ioutil"
-	"log"
 	"os"
 	"testing"
 
 	"github.com/smartystreets/assertions/should"
 	"github.com/smartystreets/gunit"
+	"github.com/smartystreets/logging"
 )
 
 func TestShutdownListenerFixture(t *testing.T) {
@@ -16,39 +15,29 @@ func TestShutdownListenerFixture(t *testing.T) {
 
 type ShutdownListenerFixture struct {
 	*gunit.Fixture
+
+	calls    int
+	listener *ShutdownListener
 }
 
 func (this *ShutdownListenerFixture) Setup() {
-	log.SetOutput(ioutil.Discard)
-}
-func (this *ShutdownListenerFixture) Teardown() {
-	log.SetOutput(os.Stdout)
+	this.listener = NewShutdownListener(func() { this.calls++ })
+	this.listener.logger = logging.Capture()
 }
 
 func (this *ShutdownListenerFixture) TestShutdownSignalInvokesShutdownCallback() {
-	var calls int
-	listener := NewShutdownListener(func() { calls++ })
-	listener.channel <- os.Interrupt
-
-	listener.Listen()
-
-	this.So(calls, should.Equal, 1)
+	this.listener.channel <- os.Interrupt
+	this.listener.Listen()
+	this.So(this.calls, should.Equal, 1)
 }
 
 func (this *ShutdownListenerFixture) TestClosingBlockedListenerInvokesShutdownCallback() {
-	var calls int
-	listener := NewShutdownListener(func() { calls++ })
-
-	go listener.Close()
-	listener.Listen()
-
-	this.So(calls, should.Equal, 1)
+	go this.listener.Close()
+	this.listener.Listen()
+	this.So(this.calls, should.Equal, 1)
 }
 
 func (this *ShutdownListenerFixture) TestCloseBehaviorHappensOnce() {
-	listener := NewShutdownListener(func() {})
-
-	listener.Close()
-
-	this.So(listener.Close, should.NotPanic)
+	this.listener.Close()
+	this.So(this.listener.Close, should.NotPanic)
 }

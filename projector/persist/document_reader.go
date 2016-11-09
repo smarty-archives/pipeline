@@ -5,11 +5,14 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
+
+	"github.com/smartystreets/logging"
 )
 
 type DocumentReader struct {
+	logger *logging.Logger
+
 	client HTTPClient
 }
 
@@ -30,7 +33,7 @@ func (this *DocumentReader) Read(path string, document interface{}) error {
 	defer response.Body.Close()
 
 	if response.StatusCode == http.StatusNotFound {
-		log.Printf("[INFO] Document not found at '%s'\n", path)
+		this.logger.Printf("[INFO] Document not found at '%s'\n", path)
 		return nil
 	}
 
@@ -49,6 +52,6 @@ func (this *DocumentReader) Read(path string, document interface{}) error {
 
 func (this *DocumentReader) ReadPanic(path string, document interface{}) {
 	if err := this.Read(path, document); err != nil {
-		log.Panic(err)
+		this.logger.Panic(err)
 	}
 }

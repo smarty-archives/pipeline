@@ -5,9 +5,13 @@ import (
 	"log"
 	"net/http"
 	"time"
+
+	"github.com/smartystreets/logging"
 )
 
 type HTTPServer struct {
+	logger *logging.Logger
+
 	certificatePEM string
 	inner          http.Server
 }
@@ -56,9 +60,9 @@ func (this *HTTPServer) Listen() {
 		return
 	}
 
-	log.Printf("[INFO] Listening for web traffic on %s.\n", this.inner.Addr)
+	this.logger.Printf("[INFO] Listening for web traffic on %s.\n", this.inner.Addr)
 	if err := this.listen(); err != nil {
-		log.Fatal("[ERROR] Unable to listen to web traffic: ", err)
+		this.logger.Fatal("[ERROR] Unable to listen to web traffic: ", err)
 	}
 }
 func (this *HTTPServer) listen() error {

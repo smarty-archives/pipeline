@@ -1,6 +1,9 @@
 package listeners
 
 import (
+	"io/ioutil"
+	"log"
+	"os"
 	"testing"
 	"time"
 
@@ -22,8 +25,13 @@ type CompositeWaitListenerFixture struct {
 }
 
 func (this *CompositeWaitListenerFixture) Setup() {
+	log.SetOutput(ioutil.Discard)
 	this.items = []Listener{&FakeListener{}, &FakeListener{}}
 	this.listener = NewCompositeWaitListener(this.items...)
+}
+
+func (this *CompositeListenerFixture) Teardown() {
+	log.SetOutput(os.Stderr)
 }
 
 //////////////////////////////////////////

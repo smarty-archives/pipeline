@@ -12,6 +12,7 @@ import (
 
 	"github.com/smartystreets/assertions/should"
 	"github.com/smartystreets/gunit"
+	"github.com/smartystreets/logging"
 	"github.com/smartystreets/pipeline/projector"
 )
 
@@ -28,6 +29,7 @@ type DocumentWriterFixture struct {
 func (this *DocumentWriterFixture) Setup() {
 	this.client = NewFakeHTTPClientForWriting()
 	this.writer = NewDocumentWriter(this.client)
+	this.writer.logger = logging.Capture()
 }
 
 ///////////////////////////////////////////////////////////////////

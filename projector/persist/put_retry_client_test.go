@@ -11,6 +11,7 @@ import (
 	"github.com/smartystreets/assertions/should"
 	"github.com/smartystreets/clock"
 	"github.com/smartystreets/gunit"
+	"github.com/smartystreets/logging"
 )
 
 var (
@@ -35,6 +36,7 @@ func (this *PutRetryClientFixture) Setup() {
 	this.fakeClient = newFakeHTTPClientForPutRetry()
 	this.retryClient = NewPutRetryClient(this.fakeClient, retries)
 	this.retryClient.sleeper = clock.StayAwake()
+	this.retryClient.logger = logging.Capture()
 }
 
 ////////////////////////////////////////////////////////////////////

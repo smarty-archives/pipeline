@@ -4,13 +4,12 @@ import (
 	"bytes"
 	"fmt"
 	"io"
-	"io/ioutil"
-	"log"
 	"testing"
 	"time"
 
 	"github.com/smartystreets/assertions/should"
 	"github.com/smartystreets/gunit"
+	"github.com/smartystreets/logging"
 	"github.com/smartystreets/pipeline/projector"
 )
 
@@ -28,10 +27,14 @@ type ClonerFixture struct {
 }
 
 func (this *ClonerFixture) Setup() {
-	log.SetOutput(ioutil.Discard)
 	this.buffer = &bytes.Buffer{}
-	this.cloner = NewDocumentCloner(this.buffer)
+	this.initializeDocumentCloner()
 	this.original = NewCloneableReport(42)
+}
+
+func (this *ClonerFixture) initializeDocumentCloner() {
+	this.cloner = NewDocumentCloner(this.buffer)
+	this.cloner.logger = logging.Capture()
 }
 
 func (this *ClonerFixture) Clone() {
@@ -63,7 +66,7 @@ func (this *ClonerFixture) TestClonePanicsIfGOBEncodingFails() {
 
 func (this *ClonerFixture) TestClonePanicsIfGOBDecodingFails() {
 	this.buffer = &EOFReadBuffer{Buffer: &bytes.Buffer{}}
-	this.cloner = NewDocumentCloner(this.buffer)
+	this.initializeDocumentCloner()
 	this.So(this.Clone, should.Panic)
 }
 

@@ -6,6 +6,7 @@ import (
 
 	"github.com/smartystreets/assertions/should"
 	"github.com/smartystreets/gunit"
+	"github.com/smartystreets/logging"
 	"github.com/smartystreets/pipeline/messaging"
 )
 
@@ -23,6 +24,7 @@ type TransactionWriterFixture struct {
 func (this *TransactionWriterFixture) Setup() {
 	this.controller = newFakeWriterController()
 	this.writer = transactionWriter(this.controller)
+	this.writer.logger = logging.Capture()
 }
 
 ///////////////////////////////////////////////////////////////

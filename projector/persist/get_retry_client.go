@@ -2,17 +2,18 @@ package persist
 
 import (
 	"errors"
-	"log"
 	"net/http"
 	"time"
 
 	"github.com/smartystreets/clock"
+	"github.com/smartystreets/logging"
 )
 
 type GetRetryClient struct {
 	inner   HTTPClient
 	retries int
 	sleeper *clock.Sleeper
+	logger  *logging.Logger
 }
 
 // FUTURE: We may want to consider a ShutdownClient that sits just under
@@ -32,9 +33,9 @@ func (this *GetRetryClient) Do(request *http.Request) (*http.Response, error) {
 		} else if err == nil && response.StatusCode == http.StatusNotFound {
 			return response, nil
 		} else if err != nil {
-			log.Println("[WARN] Unexpected response from target storage:", err)
+			this.logger.Println("[WARN] Unexpected response from target storage:", err)
 		} else if response.Body != nil {
-			log.Printf("[WARN] Target host rejected request ('%s'):\n%s\n", request.URL.Path, readResponse(response))
+			this.logger.Printf("[WARN] Target host rejected request ('%s'):\n%s\n", request.URL.Path, readResponse(response))
 		}
 		this.sleeper.Sleep(time.Second * 5)
 	}

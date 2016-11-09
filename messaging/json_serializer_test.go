@@ -3,11 +3,11 @@ package messaging
 import (
 	"io/ioutil"
 	"log"
-	"os"
 	"testing"
 
 	"github.com/smartystreets/assertions/should"
 	"github.com/smartystreets/gunit"
+	"github.com/smartystreets/logging"
 )
 
 func TestJSONSerializerFixture(t *testing.T) {
@@ -23,9 +23,7 @@ type JSONSerializerFixture struct {
 func (this *JSONSerializerFixture) Setup() {
 	log.SetOutput(ioutil.Discard)
 	this.serializer = NewJSONSerializer()
-}
-func (this *JSONSerializerFixture) Teardown() {
-	log.SetOutput(os.Stdout)
+	this.serializer.logger = logging.Capture()
 }
 
 func (this *JSONSerializerFixture) TestSerializationSucceeds() {

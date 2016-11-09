@@ -2,9 +2,6 @@ package messaging
 
 import (
 	"errors"
-	"io/ioutil"
-	"log"
-	"os"
 	"testing"
 	"time"
 
@@ -26,15 +23,10 @@ type SerializationWriterFixture struct {
 }
 
 func (this *SerializationWriterFixture) Setup() {
-	log.SetOutput(ioutil.Discard)
-
 	this.inner = &FakeCommitWriter{}
 	this.serializer = &FakeSerializer{}
 	this.discovery = &FakeDiscovery{}
 	this.buildWriter()
-}
-func (this *SerializationWriterFixture) Teardown() {
-	log.SetOutput(os.Stdout)
 }
 
 func (this *SerializationWriterFixture) buildWriter() {

@@ -12,6 +12,7 @@ import (
 
 	"github.com/smartystreets/assertions/should"
 	"github.com/smartystreets/gunit"
+	"github.com/smartystreets/logging"
 )
 
 func TestDocumentReaderFixture(t *testing.T) {
@@ -31,6 +32,7 @@ func (this *DocumentReaderFixture) Setup() {
 	this.path = "/document/path"
 	this.client = &FakeHTTPGetClient{}
 	this.reader = NewDocumentReader(this.client)
+	this.reader.logger = logging.Capture()
 	this.document = &Document{}
 }
 

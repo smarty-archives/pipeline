@@ -8,13 +8,15 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 
+	"github.com/smartystreets/logging"
 	"github.com/smartystreets/pipeline/projector"
 )
 
 type DocumentWriter struct {
+	logger *logging.Logger
+
 	client HTTPClient
 }
 
@@ -36,7 +38,7 @@ func (this *DocumentWriter) serialize(document projector.Document) []byte {
 	encoder := json.NewEncoder(gzipper)
 
 	if err := encoder.Encode(document); err != nil {
-		log.Panic(err)
+		this.logger.Panic(err)
 	}
 
 	gzipper.Close()
@@ -51,7 +53,7 @@ func (this *DocumentWriter) md5Checksum(body []byte) string {
 func (this *DocumentWriter) buildRequest(path string, body []byte, checksum string) *http.Request {
 	request, err := http.NewRequest("PUT", path, nil)
 	if err != nil {
-		log.Panic(err)
+		this.logger.Panic(err)
 	}
 
 	request.Body = newNopCloser(body)
@@ -72,9 +74,9 @@ func (this *DocumentWriter) setHeaders(request *http.Request, checksum string) {
 // the software in case the behavior of the inner client changes in the future.
 func (this *DocumentWriter) handleResponse(response *http.Response, err error) {
 	if err != nil {
-		log.Panic(err)
+		this.logger.Panic(err)
 	} else if response.StatusCode != http.StatusOK {
-		log.Panic(fmt.Errorf("Non-200 HTTP Status Code: %d %s", response.StatusCode, response.Status))
+		this.logger.Panic(fmt.Errorf("Non-200 HTTP Status Code: %d %s", response.StatusCode, response.Status))
 	}
 
 	if response != nil && response.Body != nil {

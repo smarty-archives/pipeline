@@ -1,14 +1,16 @@
 package rabbit
 
 import (
-	"log"
 	"sync"
 
 	"github.com/smartystreets/clock"
+	"github.com/smartystreets/logging"
 	"github.com/smartystreets/pipeline/messaging"
 )
 
 type TransactionWriter struct {
+	logger *logging.Logger
+
 	mutex      *sync.Mutex
 	controller Controller
 	channel    Channel
@@ -44,7 +46,7 @@ func (this *TransactionWriter) Commit() error {
 		return nil
 	}
 
-	log.Println("[WARN] Transaction failed, closing channel: [", err, "]")
+	this.logger.Println("[WARN] Transaction failed, closing channel: [", err, "]")
 	this.channel.Close()
 	this.channel = nil
 	return err

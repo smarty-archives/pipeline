@@ -2,13 +2,15 @@ package transform
 
 import (
 	"encoding/gob"
-	"log"
 	"reflect"
 
+	"github.com/smartystreets/logging"
 	"github.com/smartystreets/pipeline/projector"
 )
 
 type DocumentCloner struct {
+	logger *logging.Logger
+
 	buffer  ResetReadWriter
 	encoder *gob.Encoder
 	decoder *gob.Decoder
@@ -32,12 +34,12 @@ func (this *DocumentCloner) Clone(document projector.Document) projector.Documen
 
 func (this *DocumentCloner) encode(document projector.Document) {
 	if err := this.encoder.Encode(document); err != nil {
-		log.Panic("Gob encoding error:", err)
+		this.logger.Panic("Gob encoding error:", err)
 	}
 }
 func (this *DocumentCloner) decode(clone projector.Document) {
 	if err := this.decoder.Decode(clone); err != nil {
-		log.Panic("Gob decoding error:", err)
+		this.logger.Panic("Gob decoding error:", err)
 	}
 }
 
