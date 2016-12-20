@@ -8,7 +8,6 @@ import (
 	"github.com/smartystreets/pipeline/messaging"
 )
 
-
 func TestDeserializationHandlerFixture(t *testing.T) {
 	gunit.Run(new(DeserializationHandlerFixture), t)
 }
