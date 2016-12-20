@@ -55,6 +55,11 @@ func (this *HTTPServer) WithTLS(certificatePEM string, tlsConfig *tls.Config) *H
 	return this
 }
 
+func (this *HTTPServer) DisableHTTP2() *HTTPServer {
+	this.inner.TLSNextProto = map[string]func(*http.Server, *tls.Conn, http.Handler){}
+	return this
+}
+
 func (this *HTTPServer) Listen() {
 	if this == nil {
 		return
