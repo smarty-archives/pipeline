@@ -12,6 +12,7 @@ type CompositeWriterBuilder struct {
 	discovery          messaging.TypeDiscovery
 	retrySleep         time.Duration
 	retryCallback      func(uint64)
+	maxRetries         uint64
 	template           messaging.Dispatch
 	templateRegistered bool
 	overrides          map[reflect.Type]messaging.Dispatch
@@ -41,6 +42,11 @@ func (this *CompositeWriterBuilder) PrefixTypesWith(prefix string) *CompositeWri
 	return this
 }
 
+func (this *CompositeWriterBuilder) WithMaxRetries(maxRetries uint64) *CompositeWriterBuilder {
+	this.maxRetries = maxRetries
+	return this
+}
+
 func (this *CompositeWriterBuilder) RetryAfterSleep(sleep time.Duration) *CompositeWriterBuilder {
 	this.retrySleep = sleep
 	return this
@@ -66,14 +72,14 @@ func (this *CompositeWriterBuilder) Build() messaging.CommitWriter {
 
 func (this *CompositeWriterBuilder) layerRetry(inner messaging.CommitWriter) messaging.CommitWriter {
 	if this.retryCallback != nil {
-		return messaging.NewRetryCommitWriter(inner, 0, this.retryCallback)
+		return messaging.NewRetryCommitWriter(inner, this.maxRetries, this.retryCallback)
 	}
 
 	if this.retrySleep <= 0 {
 		return inner
 	}
 
-	return messaging.NewRetryCommitWriter(inner, 0, func(uint64) {
+	return messaging.NewRetryCommitWriter(inner, this.maxRetries, func(uint64) {
 		time.Sleep(this.retrySleep)
 	})
 }
