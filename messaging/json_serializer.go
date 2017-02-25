@@ -23,9 +23,9 @@ func (this *JSONSerializer) PanicWhenSerializationFails() {
 func (this *JSONSerializer) Serialize(message interface{}) ([]byte, error) {
 	content, err := json.Marshal(message)
 	if this.panicFail && err != nil {
-		this.logger.Panic("[ERR] Could not serialize message:", err)
+		this.logger.Panic("[ERROR] Could not serialize message:", err)
 	} else if err != nil {
-		this.logger.Println("[ERR] Could not serialize message:", err)
+		this.logger.Println("[ERROR] Could not serialize message:", err)
 	}
 	return content, err
 }
