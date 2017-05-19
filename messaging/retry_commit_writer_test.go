@@ -18,19 +18,19 @@ type RetryCommitWriterFixture struct {
 	writer *RetryCommitWriter
 	inner  *FakeRetryCommitWriter
 
-	attempts     int
-	attemptInput uint64
+	successes    int
+	successInput uint64
 	sleeps       int
 	sleepInput   uint64
 }
 
 func (this *RetryCommitWriterFixture) Setup() {
 	this.inner = &FakeRetryCommitWriter{}
-	this.writer = NewRetryCommitWriter(this.inner, 42, this.attempt, this.sleep)
+	this.writer = NewRetryCommitWriter(this.inner, 42, this.success, this.sleep)
 }
-func (this *RetryCommitWriterFixture) attempt(value uint64) {
-	this.attempts++
-	this.attemptInput = value
+func (this *RetryCommitWriterFixture) success(value uint64) {
+	this.successes++
+	this.successInput = value
 }
 func (this *RetryCommitWriterFixture) sleep(value uint64) {
 	this.sleeps++
@@ -39,7 +39,7 @@ func (this *RetryCommitWriterFixture) sleep(value uint64) {
 
 ///////////////////////////////////////////////////////////////
 
-func (this *RetryCommitWriterFixture) TestNoErrorsNoRetriesSingleAttempt() {
+func (this *RetryCommitWriterFixture) TestNoErrorsNoRetries() {
 	this.inner.errorsUntil = 0
 	dispatches := []Dispatch{Dispatch{}, Dispatch{}, Dispatch{}}
 
@@ -55,8 +55,8 @@ func (this *RetryCommitWriterFixture) TestNoErrorsNoRetriesSingleAttempt() {
 	this.So(this.inner.commits, should.Equal, 1)
 	this.So(this.sleeps, should.Equal, 0)
 	this.So(this.sleepInput, should.Equal, 0)
-	this.So(this.attempts, should.Equal, 1)
-	this.So(this.attemptInput, should.Equal, 0)
+	this.So(this.successes, should.Equal, 1)
+	this.So(this.successInput, should.Equal, 0)
 }
 
 ///////////////////////////////////////////////////////////////
@@ -79,9 +79,9 @@ func (this *RetryCommitWriterFixture) TestRetryUntilNoErrors() {
 	this.So(this.inner.commits, should.Equal, 3)
 	this.So(this.sleeps, should.Equal, 2)
 	this.So(this.sleepInput, should.Equal, 1)
-	this.So(this.attempts, should.Equal, 3)
-	this.So(this.attemptInput, should.Equal, 2)
 	this.So(this.writer.buffer, should.BeEmpty)
+	this.So(this.successes, should.Equal, 1)
+	this.So(this.successInput, should.Equal, 2)
 }
 
 ///////////////////////////////////////////////////////////////
@@ -102,8 +102,8 @@ func (this *RetryCommitWriterFixture) TestRetryUntilClosed() {
 	this.So(this.inner.commits, should.Equal, 0)
 	this.So(this.sleeps, should.Equal, 0)
 	this.So(this.sleepInput, should.Equal, 0)
-	this.So(this.attempts, should.Equal, 1)
-	this.So(this.attemptInput, should.Equal, 0)
+	this.So(this.successes, should.Equal, 0)
+	this.So(this.successInput, should.Equal, 0)
 }
 
 ///////////////////////////////////////////////////////////////
