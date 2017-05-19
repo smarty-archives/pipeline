@@ -18,13 +18,19 @@ type RetryCommitWriterFixture struct {
 	writer *RetryCommitWriter
 	inner  *FakeRetryCommitWriter
 
-	sleeps     int
-	sleepInput uint64
+	attempts     int
+	attemptInput uint64
+	sleeps       int
+	sleepInput   uint64
 }
 
 func (this *RetryCommitWriterFixture) Setup() {
 	this.inner = &FakeRetryCommitWriter{}
-	this.writer = NewRetryCommitWriter(this.inner, 42, this.sleep)
+	this.writer = NewRetryCommitWriter(this.inner, 42, this.attempt, this.sleep)
+}
+func (this *RetryCommitWriterFixture) attempt(value uint64) {
+	this.attempts++
+	this.attemptInput = value
 }
 func (this *RetryCommitWriterFixture) sleep(value uint64) {
 	this.sleeps++
@@ -33,7 +39,7 @@ func (this *RetryCommitWriterFixture) sleep(value uint64) {
 
 ///////////////////////////////////////////////////////////////
 
-func (this *RetryCommitWriterFixture) TestNoErrorsNoRetries() {
+func (this *RetryCommitWriterFixture) TestNoErrorsNoRetriesSingleAttempt() {
 	this.inner.errorsUntil = 0
 	dispatches := []Dispatch{Dispatch{}, Dispatch{}, Dispatch{}}
 
@@ -47,6 +53,10 @@ func (this *RetryCommitWriterFixture) TestNoErrorsNoRetries() {
 	this.So(this.inner.written, should.Resemble, dispatches)
 	this.So(this.inner.writes, should.Equal, len(dispatches))
 	this.So(this.inner.commits, should.Equal, 1)
+	this.So(this.sleeps, should.Equal, 0)
+	this.So(this.sleepInput, should.Equal, 0)
+	this.So(this.attempts, should.Equal, 1)
+	this.So(this.attemptInput, should.Equal, 0)
 }
 
 ///////////////////////////////////////////////////////////////
@@ -69,6 +79,8 @@ func (this *RetryCommitWriterFixture) TestRetryUntilNoErrors() {
 	this.So(this.inner.commits, should.Equal, 3)
 	this.So(this.sleeps, should.Equal, 2)
 	this.So(this.sleepInput, should.Equal, 1)
+	this.So(this.attempts, should.Equal, 3)
+	this.So(this.attemptInput, should.Equal, 2)
 	this.So(this.writer.buffer, should.BeEmpty)
 }
 
@@ -90,6 +102,8 @@ func (this *RetryCommitWriterFixture) TestRetryUntilClosed() {
 	this.So(this.inner.commits, should.Equal, 0)
 	this.So(this.sleeps, should.Equal, 0)
 	this.So(this.sleepInput, should.Equal, 0)
+	this.So(this.attempts, should.Equal, 1)
+	this.So(this.attemptInput, should.Equal, 0)
 }
 
 ///////////////////////////////////////////////////////////////

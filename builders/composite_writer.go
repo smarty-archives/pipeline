@@ -72,14 +72,14 @@ func (this *CompositeWriterBuilder) Build() messaging.CommitWriter {
 
 func (this *CompositeWriterBuilder) layerRetry(inner messaging.CommitWriter) messaging.CommitWriter {
 	if this.retryCallback != nil {
-		return messaging.NewRetryCommitWriter(inner, this.maxRetries, this.retryCallback)
+		return messaging.NewRetryCommitWriter(inner, this.maxRetries, nil, this.retryCallback)
 	}
 
 	if this.retrySleep <= 0 {
 		return inner
 	}
 
-	return messaging.NewRetryCommitWriter(inner, this.maxRetries, func(uint64) {
+	return messaging.NewRetryCommitWriter(inner, this.maxRetries, nil, func(uint64) {
 		time.Sleep(this.retrySleep)
 	})
 }

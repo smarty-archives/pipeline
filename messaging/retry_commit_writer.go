@@ -1,21 +1,27 @@
 package messaging
 
 type RetryCommitWriter struct {
-	inner  CommitWriter
-	max    uint64
-	sleep  func(uint64)
-	buffer []Dispatch
+	inner   CommitWriter
+	max     uint64
+	attempt func(uint64)
+	sleep   func(uint64)
+	buffer  []Dispatch
 }
 
-func NewRetryCommitWriter(inner CommitWriter, max uint64, sleep func(uint64)) *RetryCommitWriter {
+func NewRetryCommitWriter(inner CommitWriter, max uint64, attempt func(uint64), sleep func(uint64)) *RetryCommitWriter {
 	if max == 0 {
 		max = 0xFFFFFFFFFFFFFFFF
 	}
 
+	if attempt == nil {
+		attempt = func(uint64) {}
+	}
+
 	return &RetryCommitWriter{
-		inner: inner,
-		max:   max,
-		sleep: sleep,
+		inner:   inner,
+		max:     max,
+		attempt: attempt,
+		sleep:   sleep,
 	}
 }
 
@@ -26,6 +32,7 @@ func (this *RetryCommitWriter) Write(message Dispatch) error {
 
 func (this *RetryCommitWriter) Commit() (err error) {
 	for i := uint64(0); i < this.max; i++ {
+		this.attempt(i)
 		if err = this.try(); err == nil {
 			this.buffer = this.buffer[0:0]
 			return nil
