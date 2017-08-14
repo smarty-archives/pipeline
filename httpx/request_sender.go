@@ -1,10 +1,6 @@
 package httpx
 
-import (
-	"sync"
-
-	"github.com/smartystreets/pipeline/handlers"
-)
+import "github.com/smartystreets/pipeline/handlers"
 
 type RequestSender struct {
 	output chan<- handlers.RequestMessage
@@ -15,7 +11,7 @@ func NewRequestSender(output chan<- handlers.RequestMessage) *RequestSender {
 }
 
 func (this *RequestSender) Send(message interface{}) interface{} {
-	waiter := &sync.WaitGroup{}
+	waiter := NewWaitGroup(0)
 	context := NewRequestContext(waiter)
 	this.output <- handlers.RequestMessage{
 		Message: message,
