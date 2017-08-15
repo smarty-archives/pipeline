@@ -1,6 +1,6 @@
 package handlers
 
-import "github.com/smartystreets/pipeline/messaging"
+import "github.com/smartystreets/messaging"
 
 type DispatchHandler struct {
 	input  <-chan EventMessage

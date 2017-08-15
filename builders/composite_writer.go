@@ -4,7 +4,7 @@ import (
 	"reflect"
 	"time"
 
-	"github.com/smartystreets/pipeline/messaging"
+	"github.com/smartystreets/messaging"
 )
 
 type CompositeWriterBuilder struct {

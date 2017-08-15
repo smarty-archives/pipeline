@@ -5,7 +5,7 @@ import (
 
 	"github.com/smartystreets/assertions/should"
 	"github.com/smartystreets/gunit"
-	"github.com/smartystreets/pipeline/messaging"
+	"github.com/smartystreets/messaging"
 )
 
 func TestDeserializationHandlerFixture(t *testing.T) {

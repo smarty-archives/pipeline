@@ -6,8 +6,8 @@ import (
 	"strings"
 
 	"github.com/smartystreets/pipeline/handlers"
-	"github.com/smartystreets/pipeline/listeners"
-	"github.com/smartystreets/pipeline/messaging"
+	"github.com/smartystreets/listeners"
+	"github.com/smartystreets/messaging"
 )
 
 type CompositeReaderBuilder struct {
