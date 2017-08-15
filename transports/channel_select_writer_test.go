@@ -1,10 +1,11 @@
 package transports
 
 import (
-	"github.com/smartystreets/assertions/should"
-	"github.com/smartystreets/gunit"
 	"testing"
 	"time"
+
+	"github.com/smartystreets/assertions/should"
+	"github.com/smartystreets/gunit"
 )
 
 func TestChannelSelectWriterFixture(t *testing.T) {

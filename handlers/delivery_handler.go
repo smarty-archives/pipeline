@@ -3,7 +3,7 @@ package handlers
 import (
 	"sync"
 
-	"github.com/smartystreets/pipeline/messaging"
+	"github.com/smartystreets/messaging"
 )
 
 type DeliveryHandler struct {

@@ -4,7 +4,7 @@ import (
 	"sync"
 
 	"github.com/smartystreets/pipeline/domain"
-	"github.com/smartystreets/pipeline/messaging"
+	"github.com/smartystreets/messaging"
 )
 
 type EventHandler struct {
