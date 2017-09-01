@@ -29,6 +29,10 @@ func (this *JSONDeserializer) PanicWhenDeserializationFails() {
 	this.panicUnmarshal = true
 }
 
+func (this *JSONDeserializer) Transform(delivery *messaging.Delivery) {
+	this.Deserialize(delivery)
+}
+
 func (this *JSONDeserializer) Deserialize(delivery *messaging.Delivery) {
 	messageType, found := this.types[delivery.MessageType]
 	if !found && this.panicMissingType {

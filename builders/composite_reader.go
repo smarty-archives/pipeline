@@ -5,9 +5,9 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/smartystreets/pipeline/handlers"
 	"github.com/smartystreets/listeners"
 	"github.com/smartystreets/messaging"
+	"github.com/smartystreets/pipeline/handlers"
 )
 
 type CompositeReaderBuilder struct {
@@ -86,7 +86,7 @@ func (this *CompositeReaderBuilder) Build() messaging.Reader {
 	output := make(chan messaging.Delivery, cap(input))
 
 	deserializer := handlers.NewJSONDeserializer(this.types)
-	deserialize := handlers.NewDeserializationHandler(input, output, deserializer)
+	deserialize := handlers.NewTransformationHandler(input, output, deserializer)
 	if this.panicMissing {
 		deserializer.PanicWhenMessageTypeIsUnknown()
 	}
