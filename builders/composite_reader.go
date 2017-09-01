@@ -13,6 +13,7 @@ import (
 type CompositeReaderBuilder struct {
 	sourceQueue  string
 	bindings     []string
+	transformers []handlers.Transformer
 	broker       messaging.MessageBroker
 	types        map[string]reflect.Type
 	panicMissing bool
@@ -80,13 +81,20 @@ func (this *CompositeReaderBuilder) PanicWhenDeserializationFails() *CompositeRe
 	return this
 }
 
+func (this *CompositeReaderBuilder) AppendTransformer(value handlers.Transformer) *CompositeReaderBuilder {
+	if value != nil {
+		this.transformers = append(this.transformers, value)
+	}
+
+	return this
+}
+
 func (this *CompositeReaderBuilder) Build() messaging.Reader {
 	receive := this.openReader()
 	input := receive.Deliveries()
 	output := make(chan messaging.Delivery, cap(input))
 
 	deserializer := handlers.NewJSONDeserializer(this.types)
-	deserialize := handlers.NewTransformationHandler(input, output, deserializer)
 	if this.panicMissing {
 		deserializer.PanicWhenMessageTypeIsUnknown()
 	}
@@ -94,9 +102,12 @@ func (this *CompositeReaderBuilder) Build() messaging.Reader {
 		deserializer.PanicWhenDeserializationFails()
 	}
 
+	transformers := append([]handlers.Transformer{deserializer}, this.transformers...)
+	transform := handlers.NewTransformationHandler(input, output, transformers...)
+
 	return &compositeReader{
 		receive:     receive,
-		deserialize: deserialize,
+		deserialize: transform,
 		deliveries:  output,
 	}
 }
