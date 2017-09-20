@@ -39,6 +39,8 @@ func (this *EventHandler) Listen() {
 		this.locker.Lock()
 		this.router.Apply(delivery.Message)
 
+		// TODO: if the backlog is large, this could stop other pipelines from forward progress
+		// we need to figure out how to do this gracefully
 		if len(this.input) == 0 {
 			this.locker.Unlock()
 			this.output <- delivery.Receipt
