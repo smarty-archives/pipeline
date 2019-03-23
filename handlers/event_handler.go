@@ -3,8 +3,8 @@ package handlers
 import (
 	"sync"
 
-	"github.com/smartystreets/pipeline/domain"
 	"github.com/smartystreets/messaging"
+	"github.com/smartystreets/pipeline/domain"
 )
 
 type EventHandler struct {
