@@ -69,7 +69,7 @@ func (this *DeliveryHandler) write(message interface{}) {
 	}
 }
 func (this *DeliveryHandler) dispatch(message interface{}) {
-	dispatch := messaging.Dispatch{Message: message}
+	dispatch := messaging.Dispatch{Message: message, Durable: true}
 	this.writer.Write(dispatch)
 }
 

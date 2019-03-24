@@ -82,9 +82,9 @@ func (this *DeliveryHandlerFixture) TestApplicationGeneratedMessagesAreWritten()
 	this.handler.Listen()
 
 	this.So(this.writer.written, should.Resemble, []messaging.Dispatch{
-		{Message: 1},
-		{Message: 2},
-		{Message: 3},
+		{Message: 1, Durable: true},
+		{Message: 2, Durable: true},
+		{Message: 3, Durable: true},
 	})
 
 	this.So(this.writer.commits, should.Equal, 1)
@@ -117,9 +117,9 @@ func (this *DeliveryHandlerFixture) TestMessageSlicesAreWritten() {
 	this.handler.Listen()
 
 	this.So(this.writer.written, should.Resemble, []messaging.Dispatch{
-		{Message: 1},
-		{Message: 2},
-		{Message: 3},
+		{Message: 1, Durable: true},
+		{Message: 2, Durable: true},
+		{Message: 3, Durable: true},
 	})
 	this.So(this.writer.commits, should.Equal, 1)
 	this.So(len(this.output), should.Equal, 1)
