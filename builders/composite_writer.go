@@ -66,10 +66,6 @@ func (this *CompositeWriterBuilder) layerRetry(inner messaging.CommitWriter) mes
 }
 
 func (this *CompositeWriterBuilder) layerSerialize(inner messaging.CommitWriter) messaging.CommitWriter {
-	if this.discovery == nil {
-		return inner
-	}
-
 	serializer := messaging.NewJSONSerializer()
 	if this.panicFail {
 		serializer.PanicWhenSerializationFails()
@@ -79,9 +75,5 @@ func (this *CompositeWriterBuilder) layerSerialize(inner messaging.CommitWriter)
 }
 
 func (this *CompositeWriterBuilder) layerDispatch(inner messaging.CommitWriter) messaging.CommitWriter {
-	if this.discovery == nil {
-		return inner
-	}
-
 	return messaging.NewDispatchWriter(inner, this.discovery)
 }
