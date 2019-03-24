@@ -1,40 +1,25 @@
 package builders
 
 import (
-	"reflect"
 	"time"
 
 	"github.com/smartystreets/messaging"
 )
 
 type CompositeWriterBuilder struct {
-	broker             messaging.MessageBroker
-	discovery          messaging.TypeDiscovery
-	retrySleep         time.Duration
-	retryCallback      func(uint64)
-	maxRetries         uint64
-	template           messaging.Dispatch
-	templateRegistered bool
-	overrides          map[reflect.Type]messaging.Dispatch
-	panicFail          bool
+	broker        messaging.MessageBroker
+	discovery     messaging.TypeDiscovery
+	retrySleep    time.Duration
+	retryCallback func(uint64)
+	maxRetries    uint64
+	panicFail     bool
 }
 
 func NewCompositeWriter(broker messaging.MessageBroker) *CompositeWriterBuilder {
 	return &CompositeWriterBuilder{
 		broker:     broker,
 		retrySleep: time.Second * 5,
-		overrides:  map[reflect.Type]messaging.Dispatch{},
 	}
-}
-
-func (this *CompositeWriterBuilder) RegisterDispatchTemplate(template messaging.Dispatch) *CompositeWriterBuilder {
-	this.templateRegistered = true
-	this.template = template
-	return this
-}
-func (this *CompositeWriterBuilder) RegisterDispatchOverride(instanceType reflect.Type, override messaging.Dispatch) *CompositeWriterBuilder {
-	this.overrides[instanceType] = override
-	return this
 }
 
 func (this *CompositeWriterBuilder) WithDiscovery(discovery messaging.TypeDiscovery) *CompositeWriterBuilder {
@@ -102,15 +87,5 @@ func (this *CompositeWriterBuilder) layerDispatch(inner messaging.CommitWriter) 
 		return inner
 	}
 
-	writer := messaging.NewDispatchWriter(inner, this.discovery)
-
-	if this.templateRegistered {
-		writer.RegisterTemplate(this.template)
-	}
-
-	for instanceType, override := range this.overrides {
-		writer.RegisterOverride(instanceType, override)
-	}
-
-	return writer
+	return messaging.NewDispatchWriter(inner, this.discovery)
 }
