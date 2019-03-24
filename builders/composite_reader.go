@@ -3,7 +3,6 @@ package builders
 import (
 	"log"
 	"reflect"
-	"strings"
 
 	"github.com/smartystreets/listeners"
 	"github.com/smartystreets/messaging"
@@ -28,43 +27,19 @@ func NewCompositeReader(broker messaging.MessageBroker, sourceQueue string) *Com
 	}
 }
 
-func (this *CompositeReaderBuilder) RegisterTypesAndCustomBindings(types map[string]reflect.Type, sources []string) *CompositeReaderBuilder {
+func (this *CompositeReaderBuilder) RegisterTypes(types map[string]reflect.Type) *CompositeReaderBuilder {
 	for key, value := range types {
 		this.types[key] = value
 	}
 
-	for _, source := range sources {
+	return this
+}
+
+func (this *CompositeReaderBuilder) RegisterBindings(bindings []string) *CompositeReaderBuilder {
+	for _, source := range bindings {
 		this.bindings = append(this.bindings, source)
 	}
 
-	return this
-}
-
-func (this *CompositeReaderBuilder) RegisterMap(types map[string]reflect.Type) *CompositeReaderBuilder {
-	for key, value := range types {
-		this.types[key] = value
-		this.addBinding(key)
-	}
-
-	return this
-}
-func (this *CompositeReaderBuilder) Register(typeName string, instance interface{}) *CompositeReaderBuilder {
-	this.types[typeName] = reflect.TypeOf(instance)
-	this.addBinding(typeName)
-	return this
-}
-func (this *CompositeReaderBuilder) addBinding(typeName string) {
-	if strings.Contains(typeName, " ") {
-		return // can't register .NET types
-	}
-
-	typeName = strings.Replace(typeName, ".", "-", -1)
-	typeName = strings.ToLower(typeName)
-	this.bindings = append(this.bindings, typeName)
-}
-
-func (this *CompositeReaderBuilder) RegisterType(name string, value reflect.Type) *CompositeReaderBuilder {
-	this.types[name] = value
 	return this
 }
 

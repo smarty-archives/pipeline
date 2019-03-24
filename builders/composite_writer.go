@@ -15,16 +15,12 @@ type CompositeWriterBuilder struct {
 	panicFail     bool
 }
 
-func NewCompositeWriter(broker messaging.MessageBroker) *CompositeWriterBuilder {
+func NewCompositeWriter(broker messaging.MessageBroker, discovery messaging.TypeDiscovery) *CompositeWriterBuilder {
 	return &CompositeWriterBuilder{
 		broker:     broker,
 		retrySleep: time.Second * 5,
+		discovery:  discovery,
 	}
-}
-
-func (this *CompositeWriterBuilder) WithDiscovery(discovery messaging.TypeDiscovery) *CompositeWriterBuilder {
-	this.discovery = discovery
-	return this
 }
 
 func (this *CompositeWriterBuilder) WithMaxRetries(maxRetries uint64) *CompositeWriterBuilder {
