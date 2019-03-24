@@ -75,7 +75,7 @@ func (this *CompositeWriterBuilder) layerSerialize(inner messaging.CommitWriter)
 		serializer.PanicWhenSerializationFails()
 	}
 
-	return messaging.NewSerializationWriter(inner, serializer, this.discovery)
+	return messaging.NewSerializationWriter(inner, serializer)
 }
 
 func (this *CompositeWriterBuilder) layerDispatch(inner messaging.CommitWriter) messaging.CommitWriter {
