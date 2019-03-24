@@ -28,6 +28,18 @@ func NewCompositeReader(broker messaging.MessageBroker, sourceQueue string) *Com
 	}
 }
 
+func (this *CompositeReaderBuilder) RegisterTypesAndCustomBindings(types map[string]reflect.Type, sources []string) *CompositeReaderBuilder {
+	for key, value := range types {
+		this.types[key] = value
+	}
+
+	for _, source := range sources {
+		this.bindings = append(this.bindings, source)
+	}
+
+	return this
+}
+
 func (this *CompositeReaderBuilder) RegisterMap(types map[string]reflect.Type) *CompositeReaderBuilder {
 	for key, value := range types {
 		this.types[key] = value
