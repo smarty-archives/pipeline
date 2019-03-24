@@ -37,13 +37,8 @@ func (this *CompositeWriterBuilder) RegisterDispatchOverride(instanceType reflec
 	return this
 }
 
-func (this *CompositeWriterBuilder) PrefixTypesWith(prefix string) *CompositeWriterBuilder {
-	this.discovery = messaging.NewReflectionDiscovery(prefix)
-	return this
-}
-
-func (this *CompositeWriterBuilder) WithTypes(types map[reflect.Type]string) *CompositeWriterBuilder {
-	this.discovery = messaging.NewRegistrationDiscovery(types)
+func (this *CompositeWriterBuilder) WithDiscovery(discovery messaging.TypeDiscovery) *CompositeWriterBuilder {
+	this.discovery = discovery
 	return this
 }
 

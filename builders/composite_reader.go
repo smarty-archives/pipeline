@@ -48,21 +48,6 @@ func (this *CompositeReaderBuilder) RegisterMap(types map[string]reflect.Type) *
 
 	return this
 }
-func (this *CompositeReaderBuilder) RegisterMultiple(prefix string, instances ...interface{}) *CompositeReaderBuilder {
-	discovery := messaging.NewReflectionDiscovery(prefix)
-
-	for _, instance := range instances {
-		if discovered, err := discovery.Discover(instance); err != nil {
-			log.Fatal("Unable to discover type for instance", instance)
-		} else {
-			this.types[discovered] = reflect.TypeOf(instance)
-			this.addBinding(discovered)
-		}
-	}
-
-	return this
-}
-
 func (this *CompositeReaderBuilder) Register(typeName string, instance interface{}) *CompositeReaderBuilder {
 	this.types[typeName] = reflect.TypeOf(instance)
 	this.addBinding(typeName)
