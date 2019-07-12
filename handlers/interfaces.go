@@ -23,3 +23,7 @@ type ApplicationHandler interface {
 type Transformer interface {
 	Transform(*messaging.Delivery)
 }
+
+type Sender interface {
+	Send(interface{}) interface{}
+}
