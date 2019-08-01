@@ -8,5 +8,5 @@ require (
 	github.com/smartystreets/gunit v1.0.2
 	github.com/smartystreets/listeners v1.0.2
 	github.com/smartystreets/logging v1.0.2
-	github.com/smartystreets/messaging v1.0.1
+	github.com/smartystreets/messaging v1.1.0
 )
