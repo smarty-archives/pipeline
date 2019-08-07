@@ -8,5 +8,5 @@ github.com/smartystreets/listeners v1.0.2 h1:WjoV1AyBkWnkER6gdCWvhx4E4eh59D67Yk6
 github.com/smartystreets/listeners v1.0.2/go.mod h1:Q5kblgDZvzi0CC6FpYM+SEMujayabbpmuW4TGtiRPfA=
 github.com/smartystreets/logging v1.0.2 h1:ScLtqaKBnjIyTZw218wCALtb4RMMISWsk9xz1QP7EjM=
 github.com/smartystreets/logging v1.0.2/go.mod h1:66odR4LeIkc7lNzxhS+ktkvoSUhsyTM4e0NSXI9Bmac=
-github.com/smartystreets/messaging v1.1.0 h1:wWlUhSe8qwC/3wh5f+qNCOG9Bnq0h8cT6Z4nv0AgbNg=
-github.com/smartystreets/messaging v1.1.0/go.mod h1:Kx9XiOIGjggz1WzffZrUqtOD4rqgiq0ucRGhCV180vo=
+github.com/smartystreets/messaging/v2 v2.0.0 h1:5QbsEz8fODCi3VGYYyEK4tDZ+V0We71hEMJ90jAB2jE=
+github.com/smartystreets/messaging/v2 v2.0.0/go.mod h1:UqqxzrefTBFQTKAft5St/4KitHx0LQcdus/1xqCn6H4=

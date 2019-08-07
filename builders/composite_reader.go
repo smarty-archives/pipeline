@@ -5,7 +5,7 @@ import (
 	"reflect"
 
 	"github.com/smartystreets/listeners"
-	"github.com/smartystreets/messaging"
+	"github.com/smartystreets/messaging/v2"
 	"github.com/smartystreets/pipeline/handlers"
 )
 

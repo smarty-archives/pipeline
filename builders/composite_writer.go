@@ -3,7 +3,7 @@ package builders
 import (
 	"time"
 
-	"github.com/smartystreets/messaging"
+	"github.com/smartystreets/messaging/v2"
 )
 
 type CompositeWriterBuilder struct {

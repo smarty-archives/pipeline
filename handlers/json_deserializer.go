@@ -5,7 +5,7 @@ import (
 	"reflect"
 
 	"github.com/smartystreets/logging"
-	"github.com/smartystreets/messaging"
+	"github.com/smartystreets/messaging/v2"
 )
 
 type JSONDeserializer struct {

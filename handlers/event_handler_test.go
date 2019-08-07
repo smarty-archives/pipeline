@@ -5,7 +5,7 @@ import (
 
 	"github.com/smartystreets/assertions/should"
 	"github.com/smartystreets/gunit"
-	"github.com/smartystreets/messaging"
+	"github.com/smartystreets/messaging/v2"
 )
 
 func TestEventHandlerFixture(t *testing.T) {

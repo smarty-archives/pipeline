@@ -1,6 +1,6 @@
 package handlers
 
-import "github.com/smartystreets/messaging"
+import "github.com/smartystreets/messaging/v2"
 
 type TransformationHandler struct {
 	input        <-chan messaging.Delivery
