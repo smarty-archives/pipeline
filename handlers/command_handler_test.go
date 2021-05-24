@@ -1,12 +1,11 @@
 package handlers
 
 import (
+	"errors"
 	"testing"
 	"time"
 
-	"errors"
 	"github.com/smartystreets/assertions/should"
-	"github.com/smartystreets/clock"
 	"github.com/smartystreets/gunit"
 )
 
@@ -126,7 +125,7 @@ type FakeLockerRouter struct {
 
 func (this *FakeLockerRouter) Handle(item interface{}) []interface{} {
 	this.handled = append(this.handled, item)
-	this.handles = append(this.handles, clock.UTCNow())
+	this.handles = append(this.handles, utcNow())
 
 	if len(this.results) == 0 {
 		return nil
@@ -141,10 +140,13 @@ func (this *FakeLockerRouter) Handle(item interface{}) []interface{} {
 
 func (this *FakeLockerRouter) Lock() {
 	this.locked++
-	this.locks = append(this.locks, clock.UTCNow())
+	this.locks = append(this.locks, utcNow())
 }
 
 func (this *FakeLockerRouter) Unlock() {
 	this.locked--
-	this.unlocks = append(this.unlocks, clock.UTCNow())
+	this.unlocks = append(this.unlocks, utcNow())
+}
+func utcNow() time.Time {
+	return time.Now().UTC()
 }
