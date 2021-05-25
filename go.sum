@@ -1,12 +1,8 @@
-github.com/smartystreets/assertions v1.1.0/go.mod h1:tcbTF8ujkAEcZ8TElKY+i30BzYlVhC/LOxJk7iOWnoo=
 github.com/smartystreets/assertions v1.2.0 h1:42S6lae5dvLc7BrLu/0ugRtcFVjoJNMC/N3yZFZkDFs=
 github.com/smartystreets/assertions v1.2.0/go.mod h1:tcbTF8ujkAEcZ8TElKY+i30BzYlVhC/LOxJk7iOWnoo=
-github.com/smartystreets/gunit v1.3.4/go.mod h1:ZjM1ozSIMJlAz/ay4SG8PeKF00ckUp+zMHZXV9/bvak=
 github.com/smartystreets/gunit v1.4.2 h1:tyWYZffdPhQPfK5VsMQXfauwnJkqg7Tv5DLuQVYxq3Q=
 github.com/smartystreets/gunit v1.4.2/go.mod h1:ZjM1ozSIMJlAz/ay4SG8PeKF00ckUp+zMHZXV9/bvak=
 github.com/smartystreets/listeners v1.0.6 h1:eng8/N4L74GsGygjQqpRs3rtxn0i5beTdVuRtHux1dg=
 github.com/smartystreets/listeners v1.0.6/go.mod h1:OU+uAN3rj2qJ5mfDgM1MF5k15DFpsERQus+3L4pJRdY=
-github.com/smartystreets/logging v1.1.1 h1:4UlnyYWB7LDd216NTuP3zTVvMQZREtPrDnJbsz0zftI=
-github.com/smartystreets/logging v1.1.1/go.mod h1:NwFCEPbtiTIug+UCtTbDVjgcJNfandE3brDx0x7QEY8=
-github.com/smartystreets/messaging/v2 v2.1.1 h1:MHUEqjipTunn+WAhZNS3X2NaEa8fbmblq02Nm4axtv4=
-github.com/smartystreets/messaging/v2 v2.1.1/go.mod h1:lrkr2tLUWYxZxeaoTIIUnYP66Vr3uedhdjjH9On3toY=
+github.com/smartystreets/messaging/v2 v2.1.2 h1:Q2kcOD3fBKGlL6YaFHqz4Mnh09wse3ylGrwzeAVq7yY=
+github.com/smartystreets/messaging/v2 v2.1.2/go.mod h1:vLEStxeRj7JviEt7NlYbUxcPY9MJYldXL8umbKMhWKQ=
